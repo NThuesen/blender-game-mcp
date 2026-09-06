@@ -31,7 +31,7 @@ import time
 import traceback
 from collections.abc import Callable
 
-from .mcp_to_blender_server import _encode_response
+from .mcp_to_blender_server import _encode_response, _send_buffer_nonblocking
 
 # Total wall-time in seconds allowed for a background task (e.g. rendering) to complete.
 # When exceeded, an error response is sent and the connection is closed.
@@ -53,6 +53,7 @@ class _DeferredClient:
         "stdout",
         "stderr",
         "deadline",
+        "response_buffer",
     )
 
     def __init__(
@@ -69,17 +70,14 @@ class _DeferredClient:
         self.stdout: str = stdout
         self.stderr: str = stderr
         self.deadline: float = time.monotonic() + _DEFERRED_TIMEOUT
+        self.response_buffer: bytearray | None = None
 
 
 # Connections waiting for a background job to finish, polled each timer tick.
 _deferred_clients: list[_DeferredClient] = []
 
 
-def _send_and_close(dc: _DeferredClient, response: dict[str, object]) -> None:
-    try:
-        dc.conn.sendall(_encode_response(response))
-    except OSError:
-        pass
+def _close(dc: _DeferredClient) -> None:
     try:
         dc.conn.close()
     except OSError:
@@ -88,6 +86,26 @@ def _send_and_close(dc: _DeferredClient, response: dict[str, object]) -> None:
         _deferred_clients.remove(dc)
     except ValueError:
         pass
+
+
+def _queue_response(dc: _DeferredClient, response: dict[str, object]) -> None:
+    dc.response_buffer = bytearray(_encode_response(response))
+    dc.deadline = time.monotonic() + _DEFERRED_TIMEOUT
+
+
+def _flush_response(dc: _DeferredClient) -> None:
+    response_buffer = dc.response_buffer
+    assert response_buffer is not None
+    size_before = len(response_buffer)
+    try:
+        if _send_buffer_nonblocking(dc.conn, response_buffer):
+            _close(dc)
+        elif len(response_buffer) < size_before:
+            # Bound only inactivity: a reader making progress may take as long
+            # as needed to receive a large response.
+            dc.deadline = time.monotonic() + _DEFERRED_TIMEOUT
+    except OSError:
+        _close(dc)
 
 
 def _is_disconnected(conn: socket.socket) -> bool:
@@ -115,83 +133,84 @@ def add(
     """
     Register a deferred client to be polled for completion.
     """
-    _deferred_clients.append(_DeferredClient(conn, check_fn, strict_json, stdout, stderr))
+    _deferred_clients.append(_DeferredClient(
+        conn, check_fn, strict_json, stdout, stderr))
 
 
 def poll() -> bool:
     """
     Check all deferred clients for completion.
 
-    Return ``True`` if at least one client was resolved or removed.
+    Return ``True`` if at least one client was resolved, written, or removed.
     """
     did_work = False
     for dc in _deferred_clients[:]:
-        # Check for client disconnection.
+        # Check for client disconnection before polling or writing.
         if _is_disconnected(dc.conn):
-            try:
-                dc.conn.close()
-            except OSError:
-                pass
-            try:
-                _deferred_clients.remove(dc)
-            except ValueError:
-                pass
+            _close(dc)
             did_work = True
             continue
 
-        # Check for timeout.
+        if dc.response_buffer is not None:
+            if time.monotonic() > dc.deadline:
+                # The peer stopped accepting response bytes.
+                _close(dc)
+            else:
+                _flush_response(dc)
+            did_work = True
+            continue
+
+        response: dict[str, object] | None = None
+
+        # Check for background-operation timeout.
         if time.monotonic() > dc.deadline:
-            _send_and_close(dc, {
+            response = {
                 "status": "error",
                 "message": "Deferred operation timed out after {:.0f} seconds".format(_DEFERRED_TIMEOUT),
-            })
-            did_work = True
-            continue
-
-        # Call the checker.
-        try:
-            result = dc.check_fn()
-        except Exception:  # pylint: disable=broad-exception-caught
-            _send_and_close(dc, {
-                "status": "error",
-                "message": traceback.format_exc(),
-            })
-            did_work = True
-            continue
-
-        if result is None:
-            # Still pending.
-            continue
-
-        if not isinstance(result, dict):
-            _send_and_close(dc, {
-                "status": "error",
-                "message": "check_is_finished must return None or dict, not {:s}".format(
-                    type(result).__name__,
-                ),
-            })
-            did_work = True
-            continue
-
-        # Validate JSON serializability when strict_json is set.
-        if dc.strict_json:
+            }
+        else:
+            # Call the checker.
             try:
-                json.dumps(result)
-            except (TypeError, ValueError) as ex:
-                _send_and_close(dc, {
+                result = dc.check_fn()
+            except Exception:  # pylint: disable=broad-exception-caught
+                response = {
                     "status": "error",
-                    "message": "Deferred result is not JSON-serializable: {:s}".format(str(ex)),
-                })
-                did_work = True
-                continue
+                    "message": traceback.format_exc(),
+                }
+            else:
+                if result is None:
+                    # Still pending.
+                    continue
 
-        # Build the final response with the standard envelope.
-        response: dict[str, object] = {"status": "ok", "result": result}
-        if dc.stdout:
-            response["stdout"] = dc.stdout
-        if dc.stderr:
-            response["stderr"] = dc.stderr
-        _send_and_close(dc, response)
+                if not isinstance(result, dict):
+                    response = {
+                        "status": "error",
+                        "message": "check_is_finished must return None or dict, not {:s}".format(
+                            type(result).__name__,
+                        ),
+                    }
+                else:
+                    # Validate JSON serializability when strict_json is set.
+                    if dc.strict_json:
+                        try:
+                            json.dumps(result)
+                        except (TypeError, ValueError) as ex:
+                            response = {
+                                "status": "error",
+                                "message": "Deferred result is not JSON-serializable: {:s}".format(str(ex)),
+                            }
+
+                    if response is None:
+                        # Build the final response with the standard envelope.
+                        response = {"status": "ok", "result": result}
+                        if dc.stdout:
+                            response["stdout"] = dc.stdout
+                        if dc.stderr:
+                            response["stderr"] = dc.stderr
+
+        assert response is not None
+        _queue_response(dc, response)
+        _flush_response(dc)
         did_work = True
 
     return did_work

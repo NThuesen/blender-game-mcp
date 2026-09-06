@@ -88,6 +88,7 @@ test:
 	$(PYTHON) tests/test_tool_listing.py
 	$(PYTHON) tests/test_rst_parse.py
 	$(PYTHON) tests/test_rst_search.py
+	$(PYTHON) tests/test_mcp_to_blender_server.py
 	$(PYTHON) tests/test_mcp_server.py
 	$(PYTHON) tests/test_blender_mcp_with_blender.py
 

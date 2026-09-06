@@ -146,12 +146,13 @@ timer_internal_vars_calc()
 
 class _Client:
     """
-    Per-connection state for a client (the MCP server process) that has not yet sent a complete request.
+    Per-connection state for a client (the MCP server process).
     """
 
     __slots__ = (
         "conn",
         "buffer",
+        "response_buffer",
         "timeout",
     )
 
@@ -159,6 +160,9 @@ class _Client:
         self.conn: socket.socket = conn
         # Accumulates data until the null-byte delimiter is received.
         self.buffer: bytearray = bytearray()
+        # Encoded response bytes that have not yet been accepted by the
+        # non-blocking socket. ``None`` means the request is still incoming.
+        self.response_buffer: bytearray | None = None
         # Poll ticks remaining before this client is evicted.
         self.timeout: int = _timer.client_timeout_countdown
 
@@ -204,6 +208,34 @@ def _encode_response(response: dict[str, object]) -> bytes:
     Serialize a response dict as null-byte-delimited JSON bytes.
     """
     return (json.dumps(response) + "\0").encode("utf-8")
+
+
+def _send_buffer_nonblocking(conn: socket.socket, buffer: bytearray) -> bool:
+    """
+    Send as much of *buffer* as the non-blocking socket currently accepts.
+
+    Remove bytes only after ``send`` confirms they were written. Return true
+    when the entire buffer has been sent, otherwise leave the remainder for a
+    later poll.
+    """
+    if not buffer:
+        return True
+    try:
+        size = conn.send(buffer)
+    except BlockingIOError:
+        return False
+    if size == 0:
+        raise ConnectionError("Socket closed while sending response")
+    del buffer[:size]
+    return not buffer
+
+
+def _queue_response(client: _Client, response: dict[str, object]) -> None:
+    """
+    Queue an encoded response and reset the inactivity timeout for writing it.
+    """
+    client.response_buffer = bytearray(_encode_response(response))
+    client.timeout = _timer.client_timeout_countdown
 
 
 def _execute_code(
@@ -378,18 +410,36 @@ def _service_clients() -> bool:
     did_work = False
     # Iterate over a copy since clients may be removed during the loop.
     for client in _state.clients[:]:
+        # Large responses may require multiple non-blocking writes. Keep the
+        # connection alive and retry on later timer ticks until fully sent.
+        if client.response_buffer is not None:
+            size_before = len(client.response_buffer)
+            try:
+                if _send_buffer_nonblocking(client.conn, client.response_buffer):
+                    _close_client(client)
+                elif len(client.response_buffer) < size_before:
+                    # Treat write progress as activity. This allows a large
+                    # response to take many ticks while still evicting a peer
+                    # that stops reading entirely.
+                    client.timeout = _timer.client_timeout_countdown
+                else:
+                    client.timeout -= 1
+                    if client.timeout <= 0:
+                        _close_client(client)
+            except OSError:
+                _close_client(client)
+            did_work = True
+            continue
+
         # Evict clients that have not sent a complete request in time.
         client.timeout -= 1
         if client.timeout <= 0:
-            try:
-                err: dict[str, object] = {
-                    "status": "error",
-                    "message": "Client timed out",
-                }
-                client.conn.sendall(_encode_response(err))
-            except OSError:
-                pass
-            _close_client(client)
+            err: dict[str, object] = {
+                "status": "error",
+                "message": "Client timed out",
+            }
+            _queue_response(client, err)
+            did_work = True
             continue
 
         try:
@@ -410,15 +460,12 @@ def _service_clients() -> bool:
 
         # Guard against unbounded input from a misbehaving client.
         if len(client.buffer) > _MAX_REQUEST_BYTES:
-            try:
-                err = {
-                    "status": "error",
-                    "message": "Request exceeds {:d} byte limit".format(_MAX_REQUEST_BYTES),
-                }
-                client.conn.sendall(_encode_response(err))
-            except OSError:
-                pass
-            _close_client(client)
+            err = {
+                "status": "error",
+                "message": "Request exceeds {:d} byte limit".format(_MAX_REQUEST_BYTES),
+            }
+            _queue_response(client, err)
+            did_work = True
             continue
 
         if b"\0" not in client.buffer:
@@ -449,11 +496,14 @@ def _service_clients() -> bool:
             except ValueError:
                 pass
         else:
+            _queue_response(client, exec_result.response)
+            response_buffer = client.response_buffer
+            assert response_buffer is not None
             try:
-                client.conn.sendall(_encode_response(exec_result.response))
+                if _send_buffer_nonblocking(client.conn, response_buffer):
+                    _close_client(client)
             except OSError:
-                pass
-            _close_client(client)
+                _close_client(client)
         did_work = True
 
     return did_work
