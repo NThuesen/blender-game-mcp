@@ -3,3 +3,9 @@ __pycache__/
 .venv/
 build/
 *.mcpb
+
+# Local environment overrides may contain API keys.
+/.env
+/.env.*
+!/.env.example
+!/.env.template
