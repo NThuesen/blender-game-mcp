@@ -4,9 +4,7 @@
 
 # pylint: disable=C0114  # See tool doc-string.
 
-__all__ = (
-    "register",
-)
+__all__ = ("register",)
 
 from blmcp.tools_helpers.blender_cli import run_blender_cli, synced_blend_for_cli
 from blmcp.tools_helpers.connection import send_code
@@ -50,6 +48,8 @@ def register(mcp: FastMCP) -> None:
         # LLM-generated code may return non-JSON-serializable values
         # (e.g. Blender objects), handled by `run_blender_cli` via `default=repr`.
         with synced_blend_for_cli(blend_file) as synced_path:
-            value = run_blender_cli(synced_path, code)
-            assert isinstance(value, dict), "Expected dict from `run_blender_cli`, got {!r}".format(type(value))
+            value = run_blender_cli(synced_path, code, arbitrary_code=True)
+            assert isinstance(value, dict), (
+                "Expected dict from `run_blender_cli`, got {!r}".format(type(value))
+            )
             return value
