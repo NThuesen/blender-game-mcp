@@ -17,6 +17,8 @@ import logging
 import os
 import subprocess
 from collections.abc import Generator
+from dataclasses import dataclass
+from typing import Literal
 
 from blmcp.tools_helpers.connection import send_code
 
@@ -26,10 +28,35 @@ _RESULT_PREFIX = "__BLMCP_RESULT__"
 _ERROR_PREFIX = "__BLMCP_ERROR__"
 _CLI_TIMEOUT = 120.0
 _MAX_NUMBERED_PATHS = 10000
+_CLI_BACKENDS = ("blender", "bpy")
 
 
-def _get_blender_path() -> str:
-    return os.environ.get("BLENDER_PATH", "blender")
+@dataclass(frozen=True)
+class _CLIBackendConfig:
+    backend: Literal["blender", "bpy"]
+    executable: str
+
+
+def _resolve_cli_backend() -> _CLIBackendConfig:
+    backend = os.environ.get("BLENDER_MCP_CLI_BACKEND", "blender")
+    if backend == "blender":
+        return _CLIBackendConfig(
+            backend="blender",
+            executable=os.environ.get("BLENDER_PATH", "blender"),
+        )
+    if backend == "bpy":
+        executable = os.environ.get("BLENDER_MCP_BPY_PYTHON")
+        if not executable:
+            raise ValueError(
+                "BLENDER_MCP_BPY_PYTHON is required when "
+                "BLENDER_MCP_CLI_BACKEND=bpy"
+            )
+        return _CLIBackendConfig(backend="bpy", executable=executable)
+    raise ValueError(
+        "Unknown BLENDER_MCP_CLI_BACKEND {!r}; expected one of: {:s}".format(
+            backend, ", ".join(_CLI_BACKENDS)
+        )
+    )
 
 
 def run_blender_cli(
@@ -45,7 +72,10 @@ def run_blender_cli(
 
     Returns the JSON-de-serialized ``result`` value.
     """
-    blender = _get_blender_path()
+    config = _resolve_cli_backend()
+    if config.backend != "blender":
+        raise RuntimeError("The bpy CLI backend runner is not implemented")
+    blender = config.executable
 
     wrapper = (
         "import json\n"
