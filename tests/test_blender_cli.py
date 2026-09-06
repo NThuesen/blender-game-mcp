@@ -122,6 +122,37 @@ class TestRunBlenderCLI(unittest.TestCase):
             stderr="",
         )
 
+    @staticmethod
+    def _execute_bpy_runner_with_input_transform(
+        transform: Callable[[str], str],
+    ) -> Callable[..., subprocess.CompletedProcess[str]]:
+        def execute(
+            argv: list[str], **kwargs: object
+        ) -> subprocess.CompletedProcess[str]:
+            stdout = io.StringIO()
+            stderr = io.StringIO()
+            stdin_text = kwargs["input"]
+            child_env = kwargs["env"]
+            assert isinstance(stdin_text, str)
+            assert isinstance(child_env, dict)
+            with (
+                mock.patch.dict(os.environ, child_env, clear=True),
+                mock.patch.object(sys, "stdin", io.StringIO(transform(stdin_text))),
+                contextlib.redirect_stdout(stdout),
+                contextlib.redirect_stderr(stderr),
+            ):
+                from blmcp.tools_helpers import bpy_cli_runner
+
+                returncode = bpy_cli_runner.main()
+            return subprocess.CompletedProcess(
+                args=argv,
+                returncode=returncode,
+                stdout=stdout.getvalue(),
+                stderr=stderr.getvalue(),
+            )
+
+        return execute
+
     def _run_with_completed_process(
         self,
         *,
@@ -446,6 +477,147 @@ class TestRunBlenderCLI(unittest.TestCase):
             ),
         ):
             blender_cli.run_blender_cli("scene.blend", "result = {}")
+
+    def test_bpy_backend_uses_absolute_runner_and_json_stdin(self) -> None:
+        completed = subprocess.CompletedProcess(
+            args=[],
+            returncode=0,
+            stdout=self._result_frame('{"backend": "bpy"}') + "\n",
+            stderr="",
+        )
+        env = {
+            "BLENDER_MCP_CLI_BACKEND": "bpy",
+            "BLENDER_MCP_BPY_PYTHON": "/opt/bpy/bin/python",
+        }
+        with (
+            mock.patch.dict(os.environ, env, clear=True),
+            mock.patch.object(
+                blender_cli, "_new_frame_token", return_value=self._FRAME_TOKEN
+            ),
+            mock.patch.object(subprocess, "run", return_value=completed) as run,
+        ):
+            result = blender_cli.run_blender_cli(
+                "/absolute/scene.blend",
+                "result = {'value': object()}",
+                timeout=17,
+                arbitrary_code=True,
+            )
+
+        self.assertEqual(result, {"backend": "bpy"})
+        self.assertEqual(len(run.call_args.args), 1)
+        argv = run.call_args.args[0]
+        self.assertEqual(argv[0], "/opt/bpy/bin/python")
+        self.assertEqual(len(argv), 2)
+        self.assertTrue(os.path.isabs(argv[1]))
+        self.assertEqual(os.path.basename(argv[1]), "bpy_cli_runner.py")
+        self.assertEqual(
+            json.loads(run.call_args.kwargs["input"]),
+            {
+                "blend_file": "/absolute/scene.blend",
+                "code": "result = {'value': object()}",
+                "frame_token": self._FRAME_TOKEN,
+                "arbitrary_code": True,
+            },
+        )
+        self.assertEqual(run.call_args.kwargs["timeout"], 17)
+        self.assertTrue(run.call_args.kwargs["capture_output"])
+        self.assertTrue(run.call_args.kwargs["text"])
+        self.assertFalse(run.call_args.kwargs["check"])
+        child_env = run.call_args.kwargs["env"]
+        self.assertEqual(
+            child_env[blender_cli._BPY_RUNNER_FRAME_TOKEN_ENV], self._FRAME_TOKEN
+        )
+
+    def test_bpy_runner_malformed_stdin_error_is_parsed_with_expected_token(
+        self,
+    ) -> None:
+        self._assert_bpy_runner_validation_error(
+            lambda _raw: "not json", "Invalid JSON input"
+        )
+
+    def test_bpy_runner_missing_payload_token_error_is_parsed_with_expected_token(
+        self,
+    ) -> None:
+        def remove_token(raw: str) -> str:
+            request = json.loads(raw)
+            del request["frame_token"]
+            return json.dumps(request)
+
+        self._assert_bpy_runner_validation_error(
+            remove_token, "`frame_token` must be a string"
+        )
+
+    def test_bpy_runner_corrupt_payload_token_error_is_parsed_with_expected_token(
+        self,
+    ) -> None:
+        def corrupt_token(raw: str) -> str:
+            request = json.loads(raw)
+            request["frame_token"] = "wrong-token"
+            return json.dumps(request)
+
+        self._assert_bpy_runner_validation_error(
+            corrupt_token, "does not match bootstrap token"
+        )
+
+    def _assert_bpy_runner_validation_error(
+        self, transform: Callable[[str], str], expected_error: str
+    ) -> None:
+        env = {
+            "BLENDER_MCP_CLI_BACKEND": "bpy",
+            "BLENDER_MCP_BPY_PYTHON": "/opt/bpy/bin/python",
+            "INHERITED_ASSET_PATH": "/assets",
+        }
+        with (
+            mock.patch.dict(os.environ, env, clear=True),
+            mock.patch.object(
+                blender_cli, "_new_frame_token", return_value=self._FRAME_TOKEN
+            ),
+            mock.patch.object(
+                subprocess,
+                "run",
+                side_effect=self._execute_bpy_runner_with_input_transform(transform),
+            ) as run,
+            self.assertRaisesRegex(RuntimeError, expected_error),
+        ):
+            blender_cli.run_blender_cli("/absolute/scene.blend", "result = {}")
+
+        child_env = run.call_args.kwargs["env"]
+        self.assertEqual(child_env["INHERITED_ASSET_PATH"], "/assets")
+
+    def test_bpy_backend_missing_executable_names_bpy_configuration(self) -> None:
+        env = {
+            "BLENDER_MCP_CLI_BACKEND": "bpy",
+            "BLENDER_MCP_BPY_PYTHON": "/missing/bpy-python",
+        }
+        with (
+            mock.patch.dict(os.environ, env, clear=True),
+            mock.patch.object(subprocess, "run", side_effect=FileNotFoundError),
+            self.assertRaisesRegex(
+                RuntimeError,
+                "bpy Python executable not found at '/missing/bpy-python'",
+            ),
+        ):
+            blender_cli.run_blender_cli("scene.blend", "result = {}")
+
+    def test_bpy_backend_crash_without_marker_reports_captured_output(self) -> None:
+        completed = subprocess.CompletedProcess(
+            args=[], returncode=-11, stdout="startup", stderr="native crash"
+        )
+        env = {
+            "BLENDER_MCP_CLI_BACKEND": "bpy",
+            "BLENDER_MCP_BPY_PYTHON": "/opt/bpy/bin/python",
+        }
+        with (
+            mock.patch.dict(os.environ, env, clear=True),
+            mock.patch.object(subprocess, "run", return_value=completed),
+            self.assertRaises(RuntimeError) as raised,
+        ):
+            blender_cli.run_blender_cli("scene.blend", "result = {}")
+
+        message = str(raised.exception)
+        self.assertIn("exit code -11", message)
+        self.assertIn("startup", message)
+        self.assertIn("native crash", message)
 
     def test_no_marker_reports_exit_code_and_bounded_output(self) -> None:
         limit = blender_cli._MAX_DIAGNOSTIC_STREAM_CHARS

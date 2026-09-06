@@ -2,9 +2,7 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-"""
-Run tool-code via ``blender --background``.
-"""
+"""Run tool-code in an isolated Blender or standalone ``bpy`` subprocess."""
 
 __all__ = (
     "run_blender_cli",
@@ -32,6 +30,7 @@ _MAX_DIAGNOSTIC_STREAM_CHARS = 2000
 _DIAGNOSTIC_TRUNCATION_MARKER = "\n... <truncated> ...\n"
 _MAX_NUMBERED_PATHS = 10000
 _CLI_BACKENDS = ("blender", "bpy")
+_BPY_RUNNER_FRAME_TOKEN_ENV = "BLENDER_MCP_BPY_RUNNER_FRAME_TOKEN"
 
 
 @dataclass(frozen=True)
@@ -69,6 +68,11 @@ def _new_frame_token() -> str:
 def _frame_prefix(stem: str, frame_token: str) -> str:
     """Build a token-bound frame prefix while preserving the protocol stem."""
     return "{:s}{:s}__".format(stem, frame_token)
+
+
+def _bpy_runner_path() -> str:
+    """Return the absolute standalone runner path from this installed module."""
+    return os.path.abspath(os.path.join(os.path.dirname(__file__), "bpy_cli_runner.py"))
 
 
 def _build_cli_wrapper(code: str, *, frame_token: str, arbitrary_code: bool) -> str:
@@ -134,7 +138,7 @@ def _parse_cli_output(
     error_prefix = _frame_prefix(_ERROR_PREFIX, frame_token)
     for line in reversed(stdout.splitlines()):
         if line.startswith(result_prefix):
-            payload = line[len(result_prefix) :]
+            payload = line[len(result_prefix):]
             try:
                 result = json.loads(payload)
             except json.JSONDecodeError as ex:
@@ -149,7 +153,7 @@ def _parse_cli_output(
                 )
             return result
         if line.startswith(error_prefix):
-            payload = line[len(error_prefix) :]
+            payload = line[len(error_prefix):]
             try:
                 error = json.loads(payload)
             except json.JSONDecodeError as ex:
@@ -186,7 +190,7 @@ def run_blender_cli(
     arbitrary_code: bool = False,
 ) -> dict[str, object]:
     """
-    Run Python code inside ``blender --background``.
+    Run Python code in a fresh Blender-capable subprocess.
 
     *blend_file* is the path to the ``.blend`` file to open.
     *code* is executed via ``exec()`` and should assign to ``result``.
@@ -196,23 +200,45 @@ def run_blender_cli(
     Returns the JSON-de-serialized ``result`` value.
     """
     config = _resolve_cli_backend()
-    if config.backend != "blender":
-        raise RuntimeError("The bpy CLI backend runner is not implemented")
-    blender = config.executable
 
     frame_token = _new_frame_token()
-    wrapper = _build_cli_wrapper(
-        code, frame_token=frame_token, arbitrary_code=arbitrary_code
-    )
 
     try:
-        proc = subprocess.run(
-            [blender, "--background", blend_file, "--python-expr", wrapper],
-            capture_output=True,
-            text=True,
-            timeout=timeout,
-            check=False,
-        )
+        if config.backend == "blender":
+            wrapper = _build_cli_wrapper(
+                code, frame_token=frame_token, arbitrary_code=arbitrary_code
+            )
+            proc = subprocess.run(
+                [
+                    config.executable,
+                    "--background",
+                    blend_file,
+                    "--python-expr",
+                    wrapper,
+                ],
+                capture_output=True,
+                text=True,
+                timeout=timeout,
+                check=False,
+            )
+        else:
+            request = {
+                "blend_file": blend_file,
+                "code": code,
+                "frame_token": frame_token,
+                "arbitrary_code": arbitrary_code,
+            }
+            child_env = os.environ.copy()
+            child_env[_BPY_RUNNER_FRAME_TOKEN_ENV] = frame_token
+            proc = subprocess.run(
+                [config.executable, _bpy_runner_path()],
+                input=json.dumps(request),
+                env=child_env,
+                capture_output=True,
+                text=True,
+                timeout=timeout,
+                check=False,
+            )
     except subprocess.TimeoutExpired as ex:
         message = "Blender CLI timed out after {:g}s".format(timeout)
         if ex.stdout is not None:
@@ -225,10 +251,17 @@ def run_blender_cli(
             )
         raise RuntimeError(message) from ex
     except FileNotFoundError as ex:
+        if config.backend == "bpy":
+            raise RuntimeError(
+                "bpy Python executable not found at '{:s}'. "
+                "Set BLENDER_MCP_BPY_PYTHON to the Python interpreter that provides bpy.".format(
+                    config.executable
+                )
+            ) from ex
         raise RuntimeError(
             "Blender executable not found at '{:s}'. "
             "Set the BLENDER_PATH environment variable to the correct path.".format(
-                blender
+                config.executable
             )
         ) from ex
 
