@@ -26,6 +26,7 @@ __all__ = (
     "use_log",
 )
 
+import contextlib
 import json
 import math
 import select
@@ -241,6 +242,7 @@ def _queue_response(client: _Client, response: dict[str, object]) -> None:
 def _execute_code(
         code: str,
         strict_json: bool,
+        use_weak_sandbox: bool = True,
 ) -> _ExecResult:
     """
     Execute *code* and return an ``_ExecResult``.
@@ -257,11 +259,16 @@ def _execute_code(
     from .weak_sandbox import WeakSandboxForLLM
 
     namespace: dict[str, object] = {"result": {}}
-    with CaptureOutput() as captured, WeakSandboxForLLM():
+    sandbox = (
+        WeakSandboxForLLM() if use_weak_sandbox else contextlib.nullcontext()
+    )
+    # pylint: disable-next=confusing-with-statement
+    with CaptureOutput() as captured, sandbox:
         try:
             exec(code, namespace)
         except Exception:  # pylint: disable=broad-exception-caught
-            response: dict[str, object] = {"status": "error", "message": traceback.format_exc()}
+            response: dict[str, object] = {
+                "status": "error", "message": traceback.format_exc()}
             if captured.stdout:
                 response["stdout"] = captured.stdout
             if captured.stderr:
@@ -355,9 +362,23 @@ def _execute_code_from_request(
             False,
         )
 
+    use_weak_sandbox = request.get("sandbox", True)
+    if type(use_weak_sandbox) is not bool:
+        return (
+            _ExecResult({
+                "status": "error",
+                "message": "Internal error: 'sandbox' must be a boolean",
+            }),
+            strict_json,
+        )
+
     if use_log:
         print("request:\n{:s}".format(code), file=sys.stderr)
-    exec_result = _execute_code(code, strict_json=strict_json)
+    exec_result = _execute_code(
+        code,
+        strict_json=strict_json,
+        use_weak_sandbox=use_weak_sandbox,
+    )
     if use_log:
         if exec_result.check_fn is not None:
             print("response: deferred", file=sys.stderr)

@@ -63,6 +63,14 @@ The tools exposed by the MCP server.
    Return the Blender Python API docs for *identifier*, or list modules
    matching a trailing-``*`` discovery pattern.
 
+``get_runtime_python_api_docs``
+   Return compact docs for an exact Python API *identifier* from the
+   connected Blender runtime.
+
+``get_runtime_python_api_docs_for_cli``
+   Return compact docs for an exact Python API *identifier* from a
+   background runtime.
+
 ``get_screenshot_of_area_as_image``
    Take a screenshot of a single Blender area and return it as a PNG image.
 

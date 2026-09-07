@@ -93,6 +93,107 @@ class _PartialSendSocket:
         self.closed = True
 
 
+class TestExecuteRequestSandbox(unittest.TestCase):
+    _CODE = "result = {'marker': 'unchanged'}"
+
+    @staticmethod
+    def _request(*, sandbox: object = mock.DEFAULT) -> bytes:
+        payload: dict[str, object] = {
+            "type": "execute",
+            "code": TestExecuteRequestSandbox._CODE,
+            "strict_json": True,
+        }
+        if sandbox is not mock.DEFAULT:
+            payload["sandbox"] = sandbox
+        return json.dumps(payload).encode("utf-8")
+
+    def test_explicit_sandbox_false_bypasses_weak_sandbox(self) -> None:
+        request = self._request(sandbox=False)
+        expected = server._ExecResult({"status": "ok", "result": {}})
+
+        with mock.patch.object(
+            server, "_execute_code", return_value=expected
+        ) as execute:
+            result, strict_json = server._execute_code_from_request(request)
+
+        self.assertIs(result, expected)
+        self.assertTrue(strict_json)
+        execute.assert_called_once_with(
+            self._CODE, strict_json=True, use_weak_sandbox=False
+        )
+
+    def test_omitted_sandbox_preserves_weak_sandbox_default(self) -> None:
+        request = self._request()
+        expected = server._ExecResult({"status": "ok", "result": {}})
+
+        with mock.patch.object(
+            server, "_execute_code", return_value=expected
+        ) as execute:
+            server._execute_code_from_request(request)
+
+        execute.assert_called_once_with(
+            self._CODE, strict_json=True, use_weak_sandbox=True
+        )
+
+    def test_explicit_sandbox_true_applies_weak_sandbox(self) -> None:
+        expected = server._ExecResult({"status": "ok", "result": {}})
+
+        with mock.patch.object(
+            server, "_execute_code", return_value=expected
+        ) as execute:
+            result, strict_json = server._execute_code_from_request(
+                self._request(sandbox=True)
+            )
+
+        self.assertIs(result, expected)
+        self.assertTrue(strict_json)
+        execute.assert_called_once_with(
+            self._CODE, strict_json=True, use_weak_sandbox=True
+        )
+
+    def test_sandbox_false_does_not_change_the_next_request_default(self) -> None:
+        expected = server._ExecResult({"status": "ok", "result": {}})
+
+        with mock.patch.object(
+            server, "_execute_code", return_value=expected
+        ) as execute:
+            server._execute_code_from_request(self._request(sandbox=False))
+            server._execute_code_from_request(self._request())
+
+        self.assertEqual(
+            execute.call_args_list,
+            [
+                mock.call(
+                    self._CODE, strict_json=True, use_weak_sandbox=False
+                ),
+                mock.call(
+                    self._CODE, strict_json=True, use_weak_sandbox=True
+                ),
+            ],
+        )
+
+    def test_invalid_sandbox_values_are_rejected_without_execution(self) -> None:
+        invalid_values: tuple[object, ...] = (
+            None, 0, 1, "false", [], {}, [False], {"value": True}
+        )
+        expected_response = {
+            "status": "error",
+            "message": "Internal error: 'sandbox' must be a boolean",
+        }
+
+        for value in invalid_values:
+            with self.subTest(value=value), mock.patch.object(
+                server, "_execute_code"
+            ) as execute:
+                result, strict_json = server._execute_code_from_request(
+                    self._request(sandbox=value)
+                )
+
+                self.assertEqual(result.response, expected_response)
+                self.assertTrue(strict_json)
+                execute.assert_not_called()
+
+
 class TestNonBlockingResponseWrite(unittest.TestCase):
     def test_partial_writes_are_retained_until_complete(self) -> None:
         sock = _PartialSendSocket(limit=7)

@@ -14,15 +14,19 @@ __all__ = ()
 
 import ast
 import asyncio
+import contextlib
 import functools
 import importlib
+import inspect
 import os
 import re
 import sys
+import tempfile
 import types
 import unittest
-from unittest import mock
+from collections.abc import Callable
 from typing import Any
+from unittest import mock
 
 import yaml
 from mcp import ClientSession, StdioServerParameters
@@ -31,6 +35,38 @@ from mcp.client.stdio import stdio_client
 # Root of the repository.
 _REPO_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _MCP_DIR = os.path.join(_REPO_DIR, "mcp")
+
+# Complete production roots that participate in MCP-to-Blender execution.
+# ``chat_client`` is a separate UI client and does not import or call the
+# MCP package's ``tools_helpers.connection.send_code`` function.
+_PRODUCTION_SOURCE_ROOTS = (
+    os.path.join(_REPO_DIR, "mcp", "blmcp"),
+    os.path.join(_REPO_DIR, "addon", "blender_mcp_addon"),
+)
+_NON_PRODUCTION_DIR_NAMES = frozenset(
+    {
+        ".cache",
+        ".mypy_cache",
+        ".nox",
+        ".pytest_cache",
+        ".ruff_cache",
+        ".tox",
+        ".venv",
+        "__pycache__",
+        "build",
+        "cache",
+        "data",
+        "dist",
+        "generated",
+        "site-packages",
+        "test",
+        "tests",
+        "third_party",
+        "vendor",
+        "vendored",
+        "venv",
+    }
+)
 
 
 def _import_blmcp_module() -> Any:
@@ -170,6 +206,144 @@ def _call_server_tool(name: str, arguments: dict[str, object]) -> dict[str, Any]
                 return payload
 
     return asyncio.run(_run())
+
+
+def _production_python_paths(root: str) -> list[str]:
+    """Return production Python files below *root* in deterministic order."""
+    paths: list[str] = []
+    for dirpath, dirnames, filenames in os.walk(root):
+        dirnames[:] = sorted(
+            name for name in dirnames if name not in _NON_PRODUCTION_DIR_NAMES
+        )
+        paths.extend(
+            os.path.join(dirpath, name)
+            for name in sorted(filenames)
+            if name.endswith(".py")
+        )
+    return paths
+
+
+_APPROVED_SANDBOX_FALSE_CALLSITE = (
+    "mcp/blmcp/tools/get_runtime_python_api_docs.py",
+    "register.get_runtime_python_api_docs",
+)
+
+
+def _send_code_sandbox_audit(
+    source: str, filename: str
+) -> tuple[list[tuple[str, int, str]], list[tuple[str, int, str, str]]]:
+    """Return literal-false callsites and sandbox-policy violations."""
+    tree = ast.parse(source, filename=filename)
+    send_code_names = {"send_code"}
+
+    # Account for direct import aliases and simple local aliases without
+    # broadening the guard to unrelated functions that accept ``sandbox``.
+    for node in ast.walk(tree):
+        if isinstance(node, ast.ImportFrom):
+            for imported in node.names:
+                if imported.name == "send_code":
+                    send_code_names.add(imported.asname or imported.name)
+
+    changed = True
+    while changed:
+        changed = False
+        for node in ast.walk(tree):
+            if not isinstance(node, (ast.Assign, ast.AnnAssign)):
+                continue
+            value = node.value
+            is_send_code = (
+                isinstance(value, ast.Name) and value.id in send_code_names
+            ) or (
+                isinstance(value, ast.Attribute) and value.attr == "send_code"
+            )
+            if not is_send_code:
+                continue
+            targets = node.targets if isinstance(node, ast.Assign) else [node.target]
+            for target in targets:
+                if isinstance(target, ast.Name) and target.id not in send_code_names:
+                    send_code_names.add(target.id)
+                    changed = True
+
+    false_callsites: list[tuple[str, int, str]] = []
+    violations: list[tuple[str, int, str, str]] = []
+
+    class Visitor(ast.NodeVisitor):
+        def __init__(self) -> None:
+            self.scope: list[str] = []
+
+        def _visit_scope(self, node: ast.AST, name: str) -> None:
+            self.scope.append(name)
+            self.generic_visit(node)
+            self.scope.pop()
+
+        def visit_ClassDef(self, node: ast.ClassDef) -> None:  # noqa: N802
+            self._visit_scope(node, node.name)
+
+        def visit_FunctionDef(self, node: ast.FunctionDef) -> None:  # noqa: N802
+            self._visit_scope(node, node.name)
+
+        def visit_AsyncFunctionDef(  # noqa: N802
+            self, node: ast.AsyncFunctionDef
+        ) -> None:
+            self._visit_scope(node, node.name)
+
+        def visit_Call(self, node: ast.Call) -> None:  # noqa: N802
+            is_send_code = (
+                isinstance(node.func, ast.Name)
+                and node.func.id in send_code_names
+            ) or (
+                isinstance(node.func, ast.Attribute)
+                and node.func.attr == "send_code"
+            )
+            if is_send_code:
+                scope = ".".join(self.scope) or "<module>"
+                location = (filename, node.lineno, scope)
+                unpacked_keywords = [
+                    keyword for keyword in node.keywords if keyword.arg is None
+                ]
+                sandbox_keywords = [
+                    keyword
+                    for keyword in node.keywords
+                    if keyword.arg == "sandbox"
+                ]
+
+                if unpacked_keywords:
+                    violations.append(
+                        (*location, "send_code keyword unpacking (**kwargs) is forbidden")
+                    )
+                if len(sandbox_keywords) > 1:
+                    violations.append(
+                        (*location, "duplicate send_code sandbox keywords are forbidden")
+                    )
+                elif sandbox_keywords:
+                    value = sandbox_keywords[0].value
+                    literal_bool = (
+                        value.value
+                        if isinstance(value, ast.Constant)
+                        and type(value.value) is bool
+                        else None
+                    )
+                    if literal_bool is False:
+                        false_callsites.append(location)
+                        if (filename, scope) != _APPROVED_SANDBOX_FALSE_CALLSITE:
+                            violations.append(
+                                (
+                                    *location,
+                                    "literal sandbox=False is only allowed at the "
+                                    "approved runtime-doc live wrapper",
+                                )
+                            )
+                    elif literal_bool is not True:
+                        violations.append(
+                            (
+                                *location,
+                                "send_code sandbox must be omitted or the literal bool True",
+                            )
+                        )
+            self.generic_visit(node)
+
+    Visitor().visit(tree)
+    return false_callsites, violations
 
 
 # ---------------------------------------------------------------------------
@@ -550,6 +724,293 @@ class TestMCPServer(unittest.TestCase):
             )
             checked += 1
         self.assertGreater(checked, 0, "No _for_cli tools found")
+
+    def test_runtime_docs_tools_are_paired_once_and_static_docs_remain(self) -> None:
+        """
+        Checks that runtime introspection adds one live/CLI pair without replacing
+        the existing static documentation and discovery tools.
+        """
+        names = [tool["name"] for tool in self._tools]
+        for name in (
+            "get_runtime_python_api_docs",
+            "get_runtime_python_api_docs_for_cli",
+            "get_python_api_docs",
+            "search_api_docs",
+        ):
+            self.assertEqual(names.count(name), 1, name)
+
+
+class TestGetRuntimePythonAPIDocsDispatch(unittest.TestCase):
+    """Test runtime-doc wrapper dispatch without requiring Blender."""
+
+    @staticmethod
+    def _registered_tools() -> tuple[
+        Any, dict[str, Callable[..., object]], dict[str, dict[str, object]]
+    ]:
+        _import_blmcp_module()
+        module = importlib.import_module(
+            "blmcp.tools.get_runtime_python_api_docs"
+        )
+        registered: dict[str, Callable[..., object]] = {}
+        metadata: dict[str, dict[str, object]] = {}
+
+        class FakeMCP:
+            def tool(
+                self, **kwargs: object
+            ) -> Callable[[Callable[..., object]], Callable[..., object]]:
+                def decorator(
+                    function: Callable[..., object],
+                ) -> Callable[..., object]:
+                    registered[function.__name__] = function
+                    metadata[function.__name__] = kwargs
+                    return function
+
+                return decorator
+
+        module.register(FakeMCP())
+        return module, registered, metadata
+
+    def test_live_dispatch_sends_shared_toolcode_as_strict_json(self) -> None:
+        module, registered, _metadata = self._registered_tools()
+        expected_code = module.toolcode_format_call(
+            module._TOOL_CALL, {"identifier": "bpy.types.Object.location"}
+        )
+        with mock.patch.object(
+            module,
+            "send_code",
+            return_value={"found": True, "kind": "rna_property"},
+        ) as send:
+            result = registered["get_runtime_python_api_docs"](
+                "bpy.types.Object.location"
+            )
+
+        self.assertEqual(result, {"found": True, "kind": "rna_property"})
+        send.assert_called_once_with(
+            expected_code, strict_json=True, sandbox=False
+        )
+
+    def test_cli_dispatch_uses_synced_file_shared_toolcode_and_strict_runner(self) -> None:
+        module, registered, _metadata = self._registered_tools()
+        expected_code = module.toolcode_format_call(
+            module._TOOL_CALL,
+            {"identifier": "bpy.ops.mesh.primitive_cube_add"},
+        )
+        with (
+            mock.patch.object(
+                module,
+                "synced_blend_for_cli",
+                return_value=contextlib.nullcontext("synced.blend"),
+            ) as sync,
+            mock.patch.object(
+                module,
+                "run_blender_cli",
+                return_value={"found": True, "kind": "operator"},
+            ) as run,
+        ):
+            result = registered["get_runtime_python_api_docs_for_cli"](
+                "scene.blend", "bpy.ops.mesh.primitive_cube_add"
+            )
+
+        self.assertEqual(result, {"found": True, "kind": "operator"})
+        sync.assert_called_once_with("scene.blend")
+        run.assert_called_once_with("synced.blend", expected_code)
+
+    def test_cli_wrapper_has_no_sandbox_argument(self) -> None:
+        _module, registered, _metadata = self._registered_tools()
+
+        parameters = inspect.signature(
+            registered["get_runtime_python_api_docs_for_cli"]
+        ).parameters
+
+        self.assertNotIn("sandbox", parameters)
+
+    def test_runtime_docs_live_wrapper_is_only_sandbox_false_callsite(self) -> None:
+        """Guard every MCP and add-on production package recursively."""
+        callsites: list[tuple[str, int, str]] = []
+        violations: list[tuple[str, int, str, str]] = []
+        for root in _PRODUCTION_SOURCE_ROOTS:
+            for path in _production_python_paths(root):
+                relative_path = os.path.relpath(path, _REPO_DIR)
+                with open(path, encoding="utf-8") as fh:
+                    file_callsites, file_violations = _send_code_sandbox_audit(
+                        fh.read(), relative_path
+                    )
+                callsites.extend(file_callsites)
+                violations.extend(file_violations)
+
+        self.assertEqual(violations, [], violations)
+        self.assertEqual(
+            [(path, scope) for path, _line, scope in callsites],
+            [_APPROVED_SANDBOX_FALSE_CALLSITE],
+            callsites,
+        )
+        self.assertGreater(callsites[0][1], 0)
+
+    def test_sandbox_false_scan_finds_nested_aliased_helper_callsite(self) -> None:
+        """Prove recursive helpers and direct ``send_code`` aliases cannot evade it."""
+        with tempfile.TemporaryDirectory() as root:
+            helper_dir = os.path.join(root, "nested", "helpers")
+            os.makedirs(helper_dir)
+            path = os.path.join(helper_dir, "connection_wrapper.py")
+            with open(path, "w", encoding="utf-8") as fh:
+                fh.write(
+                    "from pkg.connection import send_code as dispatch\n"
+                    "\n"
+                    "def helper():\n"
+                    "    return dispatch('code', strict_json=True, sandbox=False)\n"
+                    "\n"
+                    "def unrelated():\n"
+                    "    return other_api(sandbox=False)\n"
+                )
+
+            paths = _production_python_paths(root)
+            self.assertEqual(paths, [path])
+            with open(path, encoding="utf-8") as fh:
+                callsites, violations = _send_code_sandbox_audit(fh.read(), path)
+            self.assertEqual(callsites, [(path, 4, "helper")])
+            self.assertEqual(
+                violations,
+                [
+                    (
+                        path,
+                        4,
+                        "helper",
+                        "literal sandbox=False is only allowed at the approved "
+                        "runtime-doc live wrapper",
+                    )
+                ],
+            )
+
+    def test_send_code_sandbox_scan_rejects_indirection_and_unpacking(self) -> None:
+        source = (
+            "from pkg.connection import send_code as dispatch\n"
+            "import pkg.connection as connection\n"
+            "UNSANDBOXED = False\n"
+            "enabled = True\n"
+            "alias = connection.send_code\n"
+            "def helper():\n"
+            "    dispatch('name', sandbox=UNSANDBOXED)\n"
+            "    send_code('not', sandbox=not enabled)\n"
+            "    send_code('conditional', sandbox=False if enabled else True)\n"
+            "    connection.send_code('unpacked', **{'sandbox': False})\n"
+            "    alias('constant', sandbox=0)\n"
+            "    connection.send_code('false', sandbox=False)\n"
+            "    unrelated(sandbox=UNSANDBOXED)\n"
+        )
+
+        callsites, violations = _send_code_sandbox_audit(source, "pkg/helper.py")
+
+        self.assertEqual(callsites, [("pkg/helper.py", 12, "helper")])
+        self.assertEqual(
+            violations,
+            [
+                (
+                    "pkg/helper.py",
+                    7,
+                    "helper",
+                    "send_code sandbox must be omitted or the literal bool True",
+                ),
+                (
+                    "pkg/helper.py",
+                    8,
+                    "helper",
+                    "send_code sandbox must be omitted or the literal bool True",
+                ),
+                (
+                    "pkg/helper.py",
+                    9,
+                    "helper",
+                    "send_code sandbox must be omitted or the literal bool True",
+                ),
+                (
+                    "pkg/helper.py",
+                    10,
+                    "helper",
+                    "send_code keyword unpacking (**kwargs) is forbidden",
+                ),
+                (
+                    "pkg/helper.py",
+                    11,
+                    "helper",
+                    "send_code sandbox must be omitted or the literal bool True",
+                ),
+                (
+                    "pkg/helper.py",
+                    12,
+                    "helper",
+                    "literal sandbox=False is only allowed at the approved "
+                    "runtime-doc live wrapper",
+                ),
+            ],
+        )
+
+    def test_send_code_sandbox_scan_rejects_duplicate_keywords(self) -> None:
+        self.assertEqual(
+            _send_code_sandbox_audit(
+                "send_code('code', sandbox=True, sandbox=False)\n",
+                "pkg/helper.py",
+            ),
+            (
+                [],
+                [
+                    (
+                        "pkg/helper.py",
+                        1,
+                        "<module>",
+                        "duplicate send_code sandbox keywords are forbidden",
+                    )
+                ],
+            ),
+        )
+
+    def test_send_code_sandbox_scan_allows_default_and_literal_true(self) -> None:
+        source = (
+            "from pkg.connection import send_code as dispatch\n"
+            "import pkg.connection as connection\n"
+            "alias = connection.send_code\n"
+            "def helper():\n"
+            "    send_code('default')\n"
+            "    dispatch('true', sandbox=True)\n"
+            "    connection.send_code('attribute default')\n"
+            "    alias('alias true', sandbox=True)\n"
+            "    unrelated(sandbox=False)\n"
+        )
+
+        self.assertEqual(
+            _send_code_sandbox_audit(source, "pkg/helper.py"), ([], [])
+        )
+
+    def test_send_code_sandbox_scan_allows_only_approved_literal_false(self) -> None:
+        source = (
+            "def register():\n"
+            "    def get_runtime_python_api_docs():\n"
+            "        return send_code('code', sandbox=False)\n"
+        )
+
+        self.assertEqual(
+            _send_code_sandbox_audit(
+                source, "mcp/blmcp/tools/get_runtime_python_api_docs.py"
+            ),
+            (
+                [
+                    (
+                        "mcp/blmcp/tools/get_runtime_python_api_docs.py",
+                        3,
+                        "register.get_runtime_python_api_docs",
+                    )
+                ],
+                [],
+            ),
+        )
+
+    def test_runtime_docs_annotations_are_read_only(self) -> None:
+        _module, _registered, metadata = self._registered_tools()
+        for name in (
+            "get_runtime_python_api_docs",
+            "get_runtime_python_api_docs_for_cli",
+        ):
+            annotations: Any = metadata[name]["annotations"]
+            self.assertTrue(annotations.readOnlyHint)
 
 
 class TestMainConfiguration(unittest.TestCase):

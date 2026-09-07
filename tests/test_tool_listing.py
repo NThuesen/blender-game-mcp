@@ -316,6 +316,54 @@ EXPECTED_TOOLS = [
         }
     },
     {
+        "name": "get_runtime_python_api_docs",
+        "description": "\n"
+        "Return compact docs for an exact Python API *identifier* from the connected Blender runtime.\n"
+        "\n"
+        "Use a fully-qualified identifier such as ``bpy.ops.mesh.primitive_cube_add``\n"
+        "or ``bpy.types.Object.location``. Use ``search_api_docs`` to discover identifiers.\n",
+        "inputSchema": {
+            "properties": {
+                "identifier": {
+                    "title": "Identifier",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "identifier"
+            ],
+            "title": "get_runtime_python_api_docsArguments",
+            "type": "object"
+        }
+    },
+    {
+        "name": "get_runtime_python_api_docs_for_cli",
+        "description": "\n"
+        "Return compact docs for an exact Python API *identifier* from a background runtime.\n"
+        "\n"
+        "Opens *blend_file* with the selected Blender or ``bpy`` CLI backend. Use a\n"
+        "fully-qualified identifier such as ``bpy.ops.mesh.primitive_cube_add`` or\n"
+        "``bpy.types.Object.location``. Use ``search_api_docs`` to discover identifiers.\n",
+        "inputSchema": {
+            "properties": {
+                "blend_file": {
+                    "title": "Blend File",
+                    "type": "string"
+                },
+                "identifier": {
+                    "title": "Identifier",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "blend_file",
+                "identifier"
+            ],
+            "title": "get_runtime_python_api_docs_for_cliArguments",
+            "type": "object"
+        }
+    },
+    {
         "name": "get_screenshot_of_area_as_image",
         "description": "\n"
         "Take a screenshot of a single Blender area and return it as a PNG image.\n"
@@ -575,8 +623,12 @@ EXPECTED_TOOLS = [
                 },
                 "index": {
                     "anyOf": [
-                        {"type": "integer"},
-                        {"type": "null"}
+                        {
+                            "type": "integer"
+                        },
+                        {
+                            "type": "null"
+                        }
                     ],
                     "default": None,
                     "title": "Index"
@@ -636,8 +688,12 @@ EXPECTED_TOOLS = [
                 },
                 "index": {
                     "anyOf": [
-                        {"type": "integer"},
-                        {"type": "null"}
+                        {
+                            "type": "integer"
+                        },
+                        {
+                            "type": "null"
+                        }
                     ],
                     "default": None,
                     "title": "Index"
@@ -701,6 +757,17 @@ class TestToolListing(unittest.TestCase):
         """
         self.assertEqual(self._tools, EXPECTED_TOOLS)
 
+    def test_runtime_docs_tools_are_paired_once_and_static_docs_remain(self) -> None:
+        """Checks the runtime-doc pair and existing static docs tools are listed once."""
+        names = [str(tool["name"]) for tool in self._tools]
+        for name in (
+            "get_runtime_python_api_docs",
+            "get_runtime_python_api_docs_for_cli",
+            "get_python_api_docs",
+            "search_api_docs",
+        ):
+            self.assertEqual(names.count(name), 1, name)
+
 
 def _update_expected_tools() -> None:
     """
@@ -712,7 +779,8 @@ def _update_expected_tools() -> None:
     filepath = os.path.abspath(__file__)
     with open(filepath, "r", encoding="utf-8") as fh:
         source = fh.read()
-    begin = source.index("# BEGIN: EXPECTED_TOOLS\n") + len("# BEGIN: EXPECTED_TOOLS\n")
+    begin = source.index("# BEGIN: EXPECTED_TOOLS\n") + \
+        len("# BEGIN: EXPECTED_TOOLS\n")
     end = source.index("# END: EXPECTED_TOOLS\n")
     formatted = json.dumps(_list_tools(), indent=4)
     formatted = (

@@ -29,9 +29,14 @@ def get_connection_params() -> tuple[str, int]:
     return host, port
 
 
-def send_code(code: str, strict_json: bool) -> dict[str, object]:
+def send_code(
+    code: str, strict_json: bool, *, sandbox: bool = True
+) -> dict[str, object]:
     """
     Send Python code to the Blender add-on socket server for execution.
+
+    *sandbox* keeps the weak safeguards for LLM-generated code enabled by
+    default. Disable it only for audited repository-owned tool-code.
 
     Returns the full response dict from the add-on containing
     ``status`` (``"ok"`` or ``"error"``), ``result`` (on success),
@@ -46,6 +51,7 @@ def send_code(code: str, strict_json: bool) -> dict[str, object]:
         "type": "execute",
         "code": code,
         "strict_json": strict_json,
+        "sandbox": sandbox,
     }) + "\0"
 
     try:
