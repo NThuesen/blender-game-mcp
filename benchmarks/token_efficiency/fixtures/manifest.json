@@ -1,0 +1,119 @@
+{
+  "determinism": "Semantic oracles are reproducible. Blend byte hashes identify checked-in bytes only; Blender may change serialization bytes across saves or builds.",
+  "files": {
+    "batch_source.blend": {
+      "semantic_oracle": {
+        "object_count": 4,
+        "objects": [
+          {
+            "location": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "name": "Batch_01",
+            "polygons": 6,
+            "type": "MESH",
+            "vertices": 8
+          },
+          {
+            "location": [
+              2.0,
+              0.0,
+              0.0
+            ],
+            "name": "Batch_02",
+            "polygons": 6,
+            "type": "MESH",
+            "vertices": 8
+          },
+          {
+            "location": [
+              4.0,
+              0.0,
+              0.0
+            ],
+            "name": "Batch_03",
+            "polygons": 6,
+            "type": "MESH",
+            "vertices": 8
+          },
+          {
+            "location": [
+              6.0,
+              0.0,
+              0.0
+            ],
+            "name": "Batch_04",
+            "polygons": 6,
+            "type": "MESH",
+            "vertices": 8
+          }
+        ]
+      },
+      "semantic_sha256": "3885367b3fbc216f756c88ffe280747b2c5bb20be367af2ec86acc8ece3ebe95",
+      "sha256": "0918a376fd4e6570153c9078b37949e676f1bb60ea3eaf48ea81521ed5886a46"
+    },
+    "mutation_source.blend": {
+      "semantic_oracle": {
+        "benchmark_source": "mutation_source_v1",
+        "objects": 0
+      },
+      "semantic_sha256": "d0ab8906df09510cb0c4fef0ab81d0a24cc9ea9b8a7dfca47174d4ef8c0e1e2b",
+      "sha256": "cf120195aba504a777c277d481ce5e0e2d37c6df1b78d5f489c7b88197a44a85"
+    },
+    "render_source.blend": {
+      "semantic_oracle": {
+        "camera": "BenchmarkCamera",
+        "engine": "BLENDER_WORKBENCH",
+        "format": "PNG",
+        "resolution": [
+          64,
+          64
+        ],
+        "subject": "RenderSubject",
+        "transparent": true
+      },
+      "semantic_sha256": "9e2a1bead9c223c65cc870cfe5eb131a581f28a1da3c1204ea6d8212c3a5a223",
+      "sha256": "e970765f5b749cb419a8d377fa90f4cd2eb996ba61d0b100de73f72cc665a513"
+    },
+    "roundtrip_source.blend": {
+      "semantic_oracle": {
+        "meshes": {
+          "RoundtripCube": 8,
+          "RoundtripTriangle": 3
+        },
+        "root": "RootNode"
+      },
+      "semantic_sha256": "687c727e317f3cf7b8a4e793c52d7ec630cf3e0565faa07ea073e7c06fef1044",
+      "sha256": "7ff6b8fafa3d0af0ec6c63bc3272b9c0160d35100b580e6220eeb34248a19dae"
+    },
+    "scene.blend": {
+      "semantic_oracle": {
+        "counts": {
+          "collections": 2,
+          "images": 1,
+          "materials": 1,
+          "meshes": 3,
+          "objects": 6
+        },
+        "highest_evaluated_mesh": {
+          "object": "SubdividedCube",
+          "polygon_count": 96
+        },
+        "missing": [
+          "//missing/textures/checker.png"
+        ]
+      },
+      "semantic_sha256": "c822dbbff6a9308adbba247f8291586926d53dd63f3b8772358009d86c4e8694",
+      "sha256": "8096c80f58cc20a1487e7478e7e84585742b67286aaa4078eb267e82c937962d"
+    }
+  },
+  "generated_with": {
+    "bpy_version": "5.2.1 LTS",
+    "python_version": "3.13.13"
+  },
+  "generator": "generate_fixtures.py",
+  "generator_version": 1,
+  "schema_version": 1
+}

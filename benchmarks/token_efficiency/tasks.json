@@ -1,0 +1,527 @@
+[
+  {
+    "id": "data_block_counts",
+    "task_family": "deterministic_efficiency",
+    "evaluation_mode": "exact_oracle",
+    "fixture": "fixtures/scene.blend",
+    "prompt": "Open the saved scene at {{fixture}} without changing it. Count Blender data-blocks for objects, meshes, materials, images, and collections. Write only a JSON object with integer keys objects, meshes, materials, images, and collections to {{output}}.",
+    "max_turns": 20,
+    "requires_render": false,
+    "validator": "validate_data_block_counts",
+    "mutation": {
+      "source_must_remain_unchanged": true,
+      "scene_changes_allowed": false
+    },
+    "outputs": {
+      "kind": "answer_json",
+      "path": "data_block_counts.json"
+    },
+    "execution_variants": [
+      "live_mcp",
+      "blender_cli",
+      "bpy_cli"
+    ],
+    "runtime_docs": {
+      "purpose": "control; basic data API does not require recovery",
+      "expected_need": "none",
+      "reason": "Direct data-block access is a no-recovery control."
+    },
+    "validator_inputs": {
+      "fixture_root": "{{fixture_root}}",
+      "output_root": "{{output_root}}",
+      "answer_path": "{{output}}",
+      "answer_schema": {
+        "objects": "int",
+        "meshes": "int",
+        "materials": "int",
+        "images": "int",
+        "collections": "int"
+      }
+    },
+    "expected_answer": {
+      "objects": 6,
+      "meshes": 3,
+      "materials": 1,
+      "images": 1,
+      "collections": 2
+    },
+    "expected_output": {
+      "kind": "answer_json",
+      "path": "data_block_counts.json",
+      "oracle": {
+        "objects": 6,
+        "meshes": 3,
+        "materials": 1,
+        "images": 1,
+        "collections": 2
+      }
+    },
+    "source_safety": {
+      "must_remain_unchanged": true,
+      "output_must_be_distinct": true,
+      "output_must_be_within_explicit_root": true
+    }
+  },
+  {
+    "id": "evaluated_mesh_polygons",
+    "task_family": "deterministic_efficiency",
+    "evaluation_mode": "exact_oracle",
+    "fixture": "fixtures/scene.blend",
+    "prompt": "Open the saved scene at {{fixture}} without changing it. Find the mesh object with the highest evaluated polygon count, including modifiers. Write only a JSON object with keys object and polygon_count to {{output}}.",
+    "max_turns": 20,
+    "requires_render": false,
+    "validator": "validate_evaluated_mesh_polygons",
+    "mutation": {
+      "source_must_remain_unchanged": true,
+      "scene_changes_allowed": false
+    },
+    "outputs": {
+      "kind": "answer_json",
+      "path": "evaluated_mesh_polygons.json"
+    },
+    "execution_variants": [
+      "live_mcp",
+      "blender_cli",
+      "bpy_cli"
+    ],
+    "runtime_docs": {
+      "purpose": "compare discovery cost for evaluated depsgraph APIs",
+      "expected_need": "optional",
+      "reason": "Evaluated dependency-graph APIs may require runtime documentation discovery."
+    },
+    "validator_inputs": {
+      "fixture_root": "{{fixture_root}}",
+      "output_root": "{{output_root}}",
+      "answer_path": "{{output}}",
+      "modifiers_included": true
+    },
+    "expected_answer": {
+      "object": "SubdividedCube",
+      "polygon_count": 96
+    },
+    "expected_output": {
+      "kind": "answer_json",
+      "path": "evaluated_mesh_polygons.json",
+      "oracle": {
+        "object": "SubdividedCube",
+        "polygon_count": 96
+      }
+    },
+    "source_safety": {
+      "must_remain_unchanged": true,
+      "output_must_be_distinct": true,
+      "output_must_be_within_explicit_root": true
+    }
+  },
+  {
+    "id": "create_exact_cube",
+    "task_family": "deterministic_efficiency",
+    "evaluation_mode": "exact_oracle",
+    "fixture": "fixtures/mutation_source.blend",
+    "prompt": "Open {{fixture}}. Create one mesh cube named BenchmarkCube with dimensions (2, 3, 4), location (1, -2, 0.5), zero Euler rotation, and applied scale (1, 1, 1). Save the result as {{output}} without overwriting the source.",
+    "max_turns": 20,
+    "requires_render": false,
+    "validator": "validate_create_exact_cube",
+    "mutation": {
+      "source_must_remain_unchanged": true,
+      "scene_changes_allowed": true
+    },
+    "outputs": {
+      "kind": "blend",
+      "path": "exact_cube.blend"
+    },
+    "execution_variants": [
+      "live_mcp",
+      "blender_cli",
+      "bpy_cli"
+    ],
+    "runtime_docs": {
+      "purpose": "compare operator/property lookup overhead",
+      "expected_need": "optional",
+      "reason": "Operator and transform-property lookup may require runtime documentation discovery."
+    },
+    "validator_inputs": {
+      "fixture_root": "{{fixture_root}}",
+      "output_root": "{{output_root}}",
+      "output_path": "{{output}}",
+      "runtime_executable": "{{runtime_executable}}",
+      "float_tolerance": 1e-05
+    },
+    "expected_answer": null,
+    "expected_output": {
+      "kind": "blend",
+      "path": "exact_cube.blend",
+      "oracle": "one 8-vertex/6-polygon cube with the exact named transform and applied unit scale"
+    },
+    "source_safety": {
+      "must_remain_unchanged": true,
+      "output_must_be_distinct": true,
+      "output_must_be_within_explicit_root": true
+    }
+  },
+  {
+    "id": "assign_principled_material",
+    "task_family": "deterministic_efficiency",
+    "evaluation_mode": "exact_oracle",
+    "fixture": "fixtures/mutation_source.blend",
+    "prompt": "Open {{fixture}}. Create a cube named MaterialCube and a node material named BenchmarkPrincipled. Set the Principled BSDF Base Color to (0.12, 0.34, 0.56, 1), Metallic to 0.25, and Roughness to 0.4, then assign that material as the cube's only material. Save as {{output}} without overwriting the source.",
+    "max_turns": 20,
+    "requires_render": false,
+    "validator": "validate_assign_principled_material",
+    "mutation": {
+      "source_must_remain_unchanged": true,
+      "scene_changes_allowed": true
+    },
+    "outputs": {
+      "kind": "blend",
+      "path": "principled_material.blend"
+    },
+    "execution_variants": [
+      "live_mcp",
+      "blender_cli",
+      "bpy_cli"
+    ],
+    "runtime_docs": {
+      "purpose": "compare current shader input discovery",
+      "expected_need": "optional",
+      "reason": "Version-specific Principled input names may require runtime documentation discovery."
+    },
+    "validator_inputs": {
+      "fixture_root": "{{fixture_root}}",
+      "output_root": "{{output_root}}",
+      "output_path": "{{output}}",
+      "runtime_executable": "{{runtime_executable}}",
+      "float_tolerance": 1e-05,
+      "material_slots": 1
+    },
+    "expected_answer": null,
+    "expected_output": {
+      "kind": "blend",
+      "path": "principled_material.blend",
+      "oracle": "one cube with one named Principled material, exact inputs, and a connected material output"
+    },
+    "source_safety": {
+      "must_remain_unchanged": true,
+      "output_must_be_distinct": true,
+      "output_must_be_within_explicit_root": true
+    }
+  },
+  {
+    "id": "parent_world_transforms",
+    "task_family": "deterministic_efficiency",
+    "evaluation_mode": "exact_oracle",
+    "fixture": "fixtures/mutation_source.blend",
+    "prompt": "Open {{fixture}}. Create empties BenchmarkParent and BenchmarkChild. Put BenchmarkParent at world location (3, 1, 2), parent BenchmarkChild to it, and preserve BenchmarkChild at world location (-1, 4, 2.5). Save as {{output}} without overwriting the source.",
+    "max_turns": 20,
+    "requires_render": false,
+    "validator": "validate_parent_world_transforms",
+    "mutation": {
+      "source_must_remain_unchanged": true,
+      "scene_changes_allowed": true
+    },
+    "outputs": {
+      "kind": "blend",
+      "path": "hierarchy.blend"
+    },
+    "execution_variants": [
+      "live_mcp",
+      "blender_cli",
+      "bpy_cli"
+    ],
+    "runtime_docs": {
+      "purpose": "compare matrix parenting API lookup",
+      "expected_need": "optional",
+      "reason": "Parenting while preserving matrix_world may require runtime documentation discovery."
+    },
+    "validator_inputs": {
+      "fixture_root": "{{fixture_root}}",
+      "output_root": "{{output_root}}",
+      "output_path": "{{output}}",
+      "runtime_executable": "{{runtime_executable}}",
+      "float_tolerance": 1e-05,
+      "world_space": true
+    },
+    "expected_answer": null,
+    "expected_output": {
+      "kind": "blend",
+      "path": "hierarchy.blend",
+      "oracle": "exactly two named empty objects with the required parent and world translations"
+    },
+    "source_safety": {
+      "must_remain_unchanged": true,
+      "output_must_be_distinct": true,
+      "output_must_be_within_explicit_root": true
+    }
+  },
+  {
+    "id": "find_missing_external_files",
+    "task_family": "deterministic_efficiency",
+    "evaluation_mode": "exact_oracle",
+    "fixture": "fixtures/scene.blend",
+    "prompt": "Open the saved scene at {{fixture}} without changing it. Find every missing external file referenced by the scene. Write only a JSON object with key missing containing sorted Blender-style paths to {{output}}.",
+    "max_turns": 20,
+    "requires_render": false,
+    "validator": "validate_find_missing_external_files",
+    "mutation": {
+      "source_must_remain_unchanged": true,
+      "scene_changes_allowed": false
+    },
+    "outputs": {
+      "kind": "answer_json",
+      "path": "missing_external_files.json"
+    },
+    "execution_variants": [
+      "live_mcp",
+      "blender_cli",
+      "bpy_cli"
+    ],
+    "runtime_docs": {
+      "purpose": "compare path and packed-file API lookup",
+      "expected_need": "optional",
+      "reason": "Path resolution and packed-file APIs may require runtime documentation discovery."
+    },
+    "validator_inputs": {
+      "fixture_root": "{{fixture_root}}",
+      "output_root": "{{output_root}}",
+      "answer_path": "{{output}}",
+      "path_style": "blender_relative",
+      "sort": "lexical"
+    },
+    "expected_answer": {
+      "missing": [
+        "//missing/textures/checker.png"
+      ]
+    },
+    "expected_output": {
+      "kind": "answer_json",
+      "path": "missing_external_files.json",
+      "oracle": {
+        "missing": [
+          "//missing/textures/checker.png"
+        ]
+      }
+    },
+    "source_safety": {
+      "must_remain_unchanged": true,
+      "output_must_be_distinct": true,
+      "output_must_be_within_explicit_root": true
+    }
+  },
+  {
+    "id": "recover_stale_operator",
+    "task_family": "deterministic_efficiency",
+    "evaluation_mode": "exact_oracle",
+    "fixture": "fixtures/mutation_source.blend",
+    "prompt": "Open {{fixture}}. The stale call bpy.ops.object.lamp_add(type='POINT', location=(2, -3, 4)) is invalid in this runtime. Recover using the current runtime API, create a point light named RecoveredPointLight at that location with energy 750, and save as {{output}} without overwriting the source.",
+    "max_turns": 20,
+    "requires_render": false,
+    "validator": "validate_recover_stale_operator",
+    "mutation": {
+      "source_must_remain_unchanged": true,
+      "scene_changes_allowed": true
+    },
+    "outputs": {
+      "kind": "blend",
+      "path": "recovered_light.blend"
+    },
+    "execution_variants": [
+      "live_mcp",
+      "blender_cli",
+      "bpy_cli"
+    ],
+    "runtime_docs": {
+      "purpose": "exercise stale bpy operator recovery",
+      "expected_need": "high",
+      "invalid_call": "bpy.ops.object.lamp_add(type='POINT', location=(2, -3, 4))",
+      "current_call": "bpy.ops.object.light_add(type='POINT', location=(2, -3, 4))",
+      "behavior_scored_later": true,
+      "invalid_call_behavior": {
+        "exception": "AttributeError",
+        "message_contains": "could not be found"
+      },
+      "current_call_behavior": "creates a POINT light object at (2, -3, 4)",
+      "reason": "The supplied lamp_add operator is removed and must be recovered to light_add."
+    },
+    "validator_inputs": {
+      "fixture_root": "{{fixture_root}}",
+      "output_root": "{{output_root}}",
+      "output_path": "{{output}}",
+      "runtime_executable": "{{runtime_executable}}",
+      "artifact_not_tool_trace": true,
+      "float_tolerance": 1e-05
+    },
+    "expected_answer": null,
+    "expected_output": {
+      "kind": "blend",
+      "path": "recovered_light.blend",
+      "oracle": "one named POINT light at the exact location with energy 750"
+    },
+    "source_safety": {
+      "must_remain_unchanged": true,
+      "output_must_be_distinct": true,
+      "output_must_be_within_explicit_root": true
+    }
+  },
+  {
+    "id": "batch_edit_save_as",
+    "task_family": "deterministic_efficiency",
+    "evaluation_mode": "exact_oracle",
+    "fixture": "fixtures/batch_source.blend",
+    "prompt": "Open {{fixture}}. Set the Z locations of Batch_01, Batch_02, Batch_03, and Batch_04 to 0.5, 1.0, 1.5, and 2.0 respectively while preserving their X and Y locations. Save the edited scene as {{output}} without overwriting the source.",
+    "max_turns": 20,
+    "requires_render": false,
+    "validator": "validate_batch_edit_save_as",
+    "mutation": {
+      "source_must_remain_unchanged": true,
+      "scene_changes_allowed": true
+    },
+    "outputs": {
+      "kind": "blend",
+      "path": "batch_edit.blend"
+    },
+    "execution_variants": [
+      "live_mcp",
+      "blender_cli",
+      "bpy_cli"
+    ],
+    "runtime_docs": {
+      "purpose": "compare batch data API execution cost",
+      "expected_need": "none",
+      "reason": "Straightforward data API iteration is a no-recovery control."
+    },
+    "validator_inputs": {
+      "fixture_root": "{{fixture_root}}",
+      "output_root": "{{output_root}}",
+      "output_path": "{{output}}",
+      "runtime_executable": "{{runtime_executable}}",
+      "object_order": [
+        "Batch_01",
+        "Batch_02",
+        "Batch_03",
+        "Batch_04"
+      ],
+      "float_tolerance": 1e-05,
+      "preserve_source_objects": {
+        "object_count": 4,
+        "object_type": "MESH",
+        "vertices_each": 8,
+        "polygons_each": 6,
+        "preserve_axes": [
+          "X",
+          "Y"
+        ]
+      }
+    },
+    "expected_answer": null,
+    "expected_output": {
+      "kind": "blend",
+      "path": "batch_edit.blend",
+      "oracle": "four source objects with preserved X/Y, exact Z values, and saved filename batch_edit.blend"
+    },
+    "source_safety": {
+      "must_remain_unchanged": true,
+      "output_must_be_distinct": true,
+      "output_must_be_within_explicit_root": true
+    }
+  },
+  {
+    "id": "glb_roundtrip_structure",
+    "task_family": "deterministic_efficiency",
+    "evaluation_mode": "fresh_runtime_roundtrip",
+    "fixture": "fixtures/roundtrip_source.blend",
+    "prompt": "Open {{fixture}} and export RootNode with its two child mesh objects to binary glTF at {{output}}. Preserve object names and hierarchy. Do not overwrite or save changes to the source scene.",
+    "max_turns": 20,
+    "requires_render": false,
+    "validator": "validate_glb_roundtrip_structure",
+    "mutation": {
+      "source_must_remain_unchanged": true,
+      "scene_changes_allowed": false
+    },
+    "outputs": {
+      "kind": "glb",
+      "path": "roundtrip.glb"
+    },
+    "execution_variants": [
+      "live_mcp",
+      "blender_cli",
+      "bpy_cli"
+    ],
+    "runtime_docs": {
+      "purpose": "compare exporter option discovery",
+      "expected_need": "optional",
+      "reason": "Exporter options may require runtime documentation discovery."
+    },
+    "validator_inputs": {
+      "fixture_root": "{{fixture_root}}",
+      "output_root": "{{output_root}}",
+      "output_path": "{{output}}",
+      "runtime_executable": "{{runtime_executable}}",
+      "fresh_runtime_import": true,
+      "expected_mesh_unique_vertex_positions": {
+        "RoundtripCube": 8,
+        "RoundtripTriangle": 3
+      }
+    },
+    "expected_answer": null,
+    "expected_output": {
+      "kind": "glb",
+      "path": "roundtrip.glb",
+      "oracle": "fresh import has RootNode and two named child meshes with 8 and 3 unique vertex positions"
+    },
+    "source_safety": {
+      "must_remain_unchanged": true,
+      "output_must_be_distinct": true,
+      "output_must_be_within_explicit_root": true
+    }
+  },
+  {
+    "id": "low_resolution_render",
+    "task_family": "deterministic_efficiency",
+    "evaluation_mode": "structural_image_oracle",
+    "fixture": "fixtures/render_source.blend",
+    "prompt": "Open {{fixture}} and render the existing camera view to {{output}} as a 64 by 64 RGBA PNG at 100 percent resolution. Do not alter or overwrite the source scene.",
+    "max_turns": 20,
+    "requires_render": true,
+    "validator": "validate_low_resolution_render",
+    "mutation": {
+      "source_must_remain_unchanged": true,
+      "scene_changes_allowed": false
+    },
+    "outputs": {
+      "kind": "png",
+      "path": "verification.png"
+    },
+    "execution_variants": [
+      "live_mcp",
+      "blender_cli",
+      "bpy_cli"
+    ],
+    "runtime_docs": {
+      "purpose": "compare render setting/operator discovery",
+      "expected_need": "optional",
+      "reason": "Render settings and invocation may require runtime documentation discovery."
+    },
+    "validator_inputs": {
+      "fixture_root": "{{fixture_root}}",
+      "output_root": "{{output_root}}",
+      "output_path": "{{output}}",
+      "runtime_executable": "{{runtime_executable}}",
+      "width": 64,
+      "height": 64,
+      "format": "PNG",
+      "channels": 4,
+      "pixel_oracle": "bounded_structural"
+    },
+    "expected_answer": null,
+    "expected_output": {
+      "kind": "png",
+      "path": "verification.png",
+      "oracle": "readable 64x64 RGBA PNG with bounded subject coverage and an opaque red-dominant center"
+    },
+    "source_safety": {
+      "must_remain_unchanged": true,
+      "output_must_be_distinct": true,
+      "output_must_be_within_explicit_root": true
+    }
+  }
+]
