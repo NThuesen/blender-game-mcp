@@ -85,6 +85,7 @@ help:
 	@echo "$$HELP_TEXT"
 
 test:
+	$(PYTHON) tests/test_documentation.py
 	$(PYTHON) tests/test_tool_listing.py
 	$(PYTHON) tests/test_rst_parse.py
 	$(PYTHON) tests/test_rst_search.py
