@@ -136,6 +136,74 @@ def _prompt_data_paths(instructions: str) -> list[str]:
     return re.findall(r"`(data/[^`]+)`", instructions)
 
 
+def _normalize_prompt_text(text: str) -> str:
+    """Return case- and whitespace-normalized prompt text."""
+    return " ".join(text.casefold().split())
+
+
+def _backtick_tokens(text: str) -> set[str]:
+    """Return exact backtick-delimited tokens from *text*."""
+    return set(re.findall(r"`([^`]+)`", text))
+
+
+def _prompt_passage(instructions: str, *concepts: str, sentence: bool = False) -> str:
+    """Return a normalized prompt passage containing every requested concept."""
+    if sentence:
+        passages = re.split(r"(?<=[.!?])\s+", _normalize_prompt_text(instructions))
+        passage_kind = "sentence"
+    else:
+        passages = [
+            _normalize_prompt_text(paragraph)
+            for paragraph in re.split(r"\n\s*\n", instructions)
+        ]
+        passage_kind = "paragraph"
+    normalized_concepts = tuple(_normalize_prompt_text(item) for item in concepts)
+    for passage in passages:
+        if all(concept in passage for concept in normalized_concepts):
+            return passage
+    raise AssertionError(
+        "No prompt {:s} contains all required concepts: {!r}".format(
+            passage_kind, concepts
+        )
+    )
+
+
+# This is a practical vocabulary audit, not a claim to understand every possible
+# English contradiction. Keep the expressions table-driven as prompt vocabulary evolves.
+_DOCS_LOOKUP_TARGET = (
+    r"(?:runtime documentation|runtime docs|documentation lookup|docs lookup|"
+    r"inspect (?:the )?(?:runtime )?(?:documentation|docs)|"
+    r"look up (?:the )?(?:runtime )?(?:documentation|docs)|"
+    r"consult (?:the )?(?:runtime )?(?:documentation|docs))"
+)
+_MANDATE = r"(?:always|(?:is|are) (?:required|mandatory|needed)|must|needs? to)"
+_ROUTINE_PREFLIGHT = (
+    r"(?:before|prior to) (?:(?:each|every|all) )?(?:operation|execution)s?"
+)
+_MANDATORY_DOCS_PREFLIGHT_PATTERNS = tuple(
+    re.compile(pattern)
+    for pattern in (
+        rf"\b{_MANDATE}\b.{{0,100}}\b{_DOCS_LOOKUP_TARGET}\b.{{0,100}}"
+        rf"\b{_ROUTINE_PREFLIGHT}\b",
+        rf"\b{_DOCS_LOOKUP_TARGET}\b.{{0,100}}\b{_MANDATE}\b.{{0,100}}"
+        rf"\b{_ROUTINE_PREFLIGHT}\b",
+        rf"\b{_MANDATE}\b.{{0,100}}\b{_ROUTINE_PREFLIGHT}\b.{{0,100}}"
+        rf"\b{_DOCS_LOOKUP_TARGET}\b",
+    )
+)
+
+
+def _mandatory_docs_preflight_matches(text: str) -> list[str]:
+    """Return routine mandatory docs-preflight phrases found anywhere in *text*."""
+    sentences = re.split(r"(?<=[.!?])\s+", _normalize_prompt_text(text))
+    return [
+        match.group(0)
+        for sentence in sentences
+        for pattern in _MANDATORY_DOCS_PREFLIGHT_PATTERNS
+        for match in pattern.finditer(sentence)
+    ]
+
+
 def _server_env() -> dict[str, str]:
     """
     Return an environment dict for the MCP server subprocess.
@@ -376,6 +444,148 @@ class TestDataFiles(unittest.TestCase):
         self.assertIn("initial_instructions", self._prompts)
         self.assertIsInstance(self._prompts["initial_instructions"], str)
         self.assertTrue(len(self._prompts["initial_instructions"]) > 0)
+
+    def test_prompt_has_exact_doc_tool_tokens_and_static_routing(self) -> None:
+        """Checks exact tool names and bundled/static documentation routing."""
+        instructions = str(self._prompts["initial_instructions"])
+        tokens = _backtick_tokens(instructions)
+        self.assertTrue(
+            {
+                "search_api_docs",
+                "get_python_api_docs",
+                "get_runtime_python_api_docs",
+                "get_runtime_python_api_docs_for_cli",
+                "data/api/",
+                "data/manual/",
+            }.issubset(tokens),
+            "Prompt is missing one or more exact backtick-delimited doc tokens",
+        )
+
+        discovery = _prompt_passage(
+            instructions, "`search_api_docs`", "ranked", "full-text", sentence=True
+        )
+        self.assertRegex(discovery, r"\b(?:discovery|search)\b")
+
+        static_detail = _prompt_passage(
+            instructions,
+            "`get_python_api_docs`",
+            "static",
+            "explanation",
+            "example",
+            sentence=True,
+        )
+        self.assertIn("static", static_detail)
+
+        bundled = _prompt_passage(instructions, "reference documentation", "`data/api/`")
+        self.assertIn("when documentation is needed", bundled)
+        self.assertIn("consult as needed", bundled)
+
+    def test_prompt_lists_all_exact_runtime_detail_reasons(self) -> None:
+        """Checks the five reasons for requesting exact runtime API details."""
+        runtime_condition = _prompt_passage(
+            str(self._prompts["initial_instructions"]),
+            "`get_runtime_python_api_docs`",
+            "only when",
+            sentence=True,
+        )
+        for detail in ("signature", "property", "default", "enum", "availability"):
+            with self.subTest(detail=detail):
+                self.assertRegex(runtime_condition, rf"\b{detail}\b")
+
+    def test_prompt_routes_error_rechecks_to_live_or_cli_runtime_docs(self) -> None:
+        """Checks same-turn reuse, error precedence, and context-specific routing."""
+        instructions = str(self._prompts["initial_instructions"])
+        tokens = _backtick_tokens(instructions)
+        self.assertIn("get_runtime_python_api_docs", tokens)
+        self.assertIn("get_runtime_python_api_docs_for_cli", tokens)
+
+        precedence = _prompt_passage(
+            instructions,
+            "already established",
+            "api-related execution error",
+            "invalidates",
+            sentence=True,
+        )
+        self.assertIn("this turn", precedence)
+        self.assertRegex(precedence, r"\b(?:unless|except)\b")
+
+        error_action = _prompt_passage(instructions, "exact identifier", sentence=True)
+        self.assertIn("before retrying", error_action)
+        self.assertRegex(error_action, r"\bexception\b")
+        self.assertRegex(error_action, r"\bruntime(?:-doc| documentation| docs)\b")
+
+        routing = _prompt_passage(
+            instructions,
+            "saved-file cli context",
+            "connected live scene",
+            sentence=True,
+        )
+        self.assertRegex(
+            routing,
+            r"saved-file cli context[^.!?]{0,100}"
+            r"`get_runtime_python_api_docs_for_cli`",
+        )
+        self.assertRegex(
+            routing,
+            r"connected live scene[^.!?]{0,100}"
+            r"`get_runtime_python_api_docs`(?:[.,;:]|$)",
+        )
+
+    def test_prompt_docs_policy_is_selective_across_complete_prompt(self) -> None:
+        """Checks conditional lookup and rejects practical routine-preflight mandates."""
+        instructions = str(self._prompts["initial_instructions"])
+        policy = _prompt_passage(instructions, "documentation by default", "this turn")
+        self.assertRegex(policy, r"do not [^.!?]{0,80}documentation by default")
+        self.assertRegex(
+            policy,
+            r"\b(?:avoid|skip|do not)\b[^.!?]{0,60}"
+            r"\b(?:additional|unnecessary)\b[^.!?]{0,40}"
+            r"\b(?:lookup|documentation|docs)\b",
+        )
+        self.assertEqual(
+            _mandatory_docs_preflight_matches(instructions),
+            [],
+            "Prompt mandates routine documentation preflight",
+        )
+
+    def test_mandatory_docs_preflight_audit_examples(self) -> None:
+        """Keeps the practical negative audit broad without blocking error recovery."""
+        forbidden = (
+            "runtime documentation is required prior to operations",
+            "Always inspect runtime docs before execution",
+            "You must look up docs before each operation",
+            "Agents need to consult documentation prior to every execution",
+            "Documentation lookup is needed before every operation",
+        )
+        for example in forbidden:
+            with self.subTest(forbidden=example):
+                text = "Harmless introduction. {:s}. Harmless ending.".format(example)
+                self.assertTrue(
+                    _mandatory_docs_preflight_matches(text),
+                    "Mandatory-preflight variant was not detected",
+                )
+
+        allowed = (
+            "Use runtime documentation only when an exact detail is uncertain.",
+            "After an API-related execution error, you must inspect runtime docs "
+            "before retrying.",
+            "Do not look up documentation by default or before every operation.",
+        )
+        for example in allowed:
+            with self.subTest(allowed=example):
+                self.assertEqual(_mandatory_docs_preflight_matches(example), [])
+
+    def test_prompt_prefers_narrow_tools_and_compact_results(self) -> None:
+        """Checks economical execution and result-shaping guidance."""
+        instructions = str(self._prompts["initial_instructions"])
+        narrow = _prompt_passage(instructions, "narrow scene tools", "arbitrary code")
+        self.assertRegex(narrow, r"narrow scene tools?[^.!?]{0,100}before arbitrary code")
+
+        results = _prompt_passage(
+            instructions, "compact structured results", "scene dumps", sentence=True
+        )
+        self.assertIn("avoid scene dumps", results)
+        self.assertIn("print output", results)
 
     def test_api_directory_exists(self) -> None:
         """

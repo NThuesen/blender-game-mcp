@@ -12,19 +12,29 @@ initial_instructions: |
   # Bundled Manuals
 
   Reference documentation is bundled alongside this server as plain-text RST files.
-  Search and read them directly with standard text tools (grep, file read, etc.):
+  When documentation is needed, search and read it directly with standard text tools
+  (grep, file read, etc.):
     * `data/api/` - Blender Python API reference (RST files per module/class).
-      Consult when writing or debugging `bpy` code: operator signatures, type
-      properties, enum values, etc.
+      Consult as needed when writing or debugging `bpy` code: operator signatures,
+      type properties, enum values, etc.
     * `data/manual/` - Blender user manual (RST files mirroring the official manual structure).
       Consult for conceptual explanations, workflow guidance, and feature overviews.
+
+  Use `search_api_docs` for ranked full-text discovery and `get_python_api_docs` for static
+  explanations and examples. Use `get_runtime_python_api_docs` only when an exact
+  signature, property, default, enum, or availability is needed. Do not look up
+  documentation by default or before every operation. Do not request runtime docs again
+  this turn for API details already established, unless an API-related execution error
+  invalidates that confidence. That error is the exception: before retrying, inspect the
+  exact identifier with the context-appropriate runtime-doc tool. In saved-file CLI
+  context, use `get_runtime_python_api_docs_for_cli`; for the connected live scene, use
+  `get_runtime_python_api_docs`. Avoid an additional lookup otherwise.
 
   # Executing Code
 
   The `execute_blender_code` tool runs Python code via `bpy` in the connected Blender instance.
 
-  The `execute_blender_code` tool is a last resort, if there are other tools that provide
-  the functionality you need, use those instead.
+  Use existing narrow scene tools before arbitrary code with `execute_blender_code`.
 
   Prefer operators (`bpy.ops`) for standard actions (adding primitives, applying modifiers,
   setting origins) - they handle defaults and context. Use the data API (`bpy.data`) for
@@ -45,7 +55,8 @@ initial_instructions: |
   In edit mode, access mesh geometry through the bmesh API, not the regular mesh data API.
   Flush bmesh changes back to the mesh - forgetting this silently loses all edits.
 
-  Return structured data (dicts, lists) from executed code, not print output.
+  Return compact structured results (dicts, lists) from generated code; avoid scene dumps
+  and print output.
 
   # Scene & Data Structure
 
