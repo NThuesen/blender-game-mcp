@@ -2,7 +2,16 @@ __pycache__/
 *.egg-info/
 .venv/
 build/
+dist/
+htmlcov/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.DS_Store
 *.mcpb
+
+# Hermes/local planning and session artifacts are not publication assets.
+/.hermes/
 
 # Local environment overrides may contain API keys.
 /.env

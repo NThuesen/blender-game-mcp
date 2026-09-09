@@ -1,5 +1,23 @@
 # Blender MCP
 
+## Enhanced MCP developer preview
+
+This branch packages an enhanced Blender MCP workflow for agentic Blender work. It keeps the upstream live Blender add-on/server model and adds saved-file/headless execution, selectable command-line backends, runtime Blender Python API lookup, subprocess/capture hardening, and benchmark tooling.
+
+This is a modified distribution of Blender Lab's Blender MCP project. See [NOTICE.md](NOTICE.md) for provenance and [SECURITY.md](SECURITY.md) for the execution-risk model. Public `bpy.dev` website assets will live in a separate repository.
+
+### What is enhanced
+
+- **Saved-file tools:** `_for_cli` tools operate on `.blend` files in fresh subprocesses without requiring a live Blender UI session.
+- **Backend selection:** use a Blender executable backend or a standalone `bpy` Python backend with `BLENDER_MCP_CLI_BACKEND`.
+- **Runtime API lookup:** agents can query exact signatures, enums, defaults, and availability from the active Blender/`bpy` runtime instead of relying only on bundled docs.
+- **Process isolation:** command-line executions are bounded by explicit timeouts, output caps, compact JSON framing, and source-file overwrite checks. This is crash/process-state isolation, not an OS sandbox.
+- **Benchmark tooling:** deterministic token-efficiency tasks and exploratory creative comparison harnesses support repeatable original-vs-enhanced analysis.
+
+### Current publication status
+
+Developer-preview cleanup is in progress. Before publishing, complete [PUBLICATION_CHECKLIST.md](PUBLICATION_CHECKLIST.md), especially package naming, fresh-clone install smoke tests, and tracked-file secret scanning.
+
 ## Overview
 
 A lightweight MCP (Model Context Protocol) server for Blender.

@@ -1,0 +1,13 @@
+[project]
+name = "blenderbench-camera-control"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = ["pillow==12.3.0"]
+
+[project.optional-dependencies]
+score = ["numpy==2.4.6", "transformers==4.55.4", "huggingface-hub==0.36.2"]
+
+[tool.uv]
+package = false
+# Torch/bpy are deliberately NOT resolved here. Install a runtime build verified
+# for the target platform in a separate scoring/runtime environment. See README.

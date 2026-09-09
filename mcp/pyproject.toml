@@ -6,6 +6,8 @@ build-backend = "setuptools.build_meta"
 name = "blender-mcp"
 version = "1.0.0"
 description = "MCP server for Blender"
+readme = "README.md"
+license = "GPL-3.0-or-later"
 requires-python = ">=3.10"
 dependencies = [
     "docutils",
