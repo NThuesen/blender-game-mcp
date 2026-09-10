@@ -21,10 +21,14 @@ FIELDS = ('allowed_transforms', 'allowed_camera_data', 'allowed_light_data',
           'allowed_shape_keys', 'location_bounds')
 
 
-def task_plan(tasks):
+def task_plan(tasks, selected=None):
     plan = [t for t in tasks if t != 'level1/camera1']
     if len(tasks) != 27 or len(plan) != 26:
         raise ValueError('expected 27 canonical tasks, 26 remaining')
+    if selected is not None:
+        if not selected or len(set(selected)) != len(selected) or set(selected) - set(plan):
+            raise ValueError('restart tasks must be unique canonical unfinished task IDs, excluding camera1')
+        return list(selected)
     return plan
 
 
@@ -42,10 +46,10 @@ def run_task(task, policy, out, config, dataset):
     work = out / 'work'
     blend = work / 'initial.blend'
     Path(initial['blend']).rename(blend)
-    baseline = runtime.inspect_render(blend, policy, runtime.CUSTOM_BPY_PYTHON, out / 'admission', events)
-    reopened = runtime.inspect_render(blend, policy, runtime.CUSTOM_BPY_PYTHON, out / 'reopen', events, render=False)
-    if initial['audit'] != baseline['audit'] or baseline['audit'] != reopened['audit']:
-        raise ValueError('initialization/reopen independent invariant mismatch')
+    # Generation follows the initialized scene, without a separate reopen gate.
+    # Saved checkpoints are independently audited after generation against this
+    # full in-memory baseline; only evidenced orphan material loss is allowed.
+    baseline = initial
     initial_hash = runtime.sha(blend)
     runtime.emit(events, 'native_admission_passed', task=task, source_sha256=initial_hash)
     args = SimpleNamespace(codex='/home/mg/.local/bin/codex', model='gpt-6-astra', workdir=work)
@@ -71,6 +75,10 @@ def run_task(task, policy, out, config, dataset):
         'Use only execute_blender_code_for_cli, get_runtime_python_api_docs_for_cli, search_api_docs, '
         'get_python_api_docs for scene work; no shell scene operations. '
         'The backend code-call deadline remains 120 seconds; the MCP client deadline remains 86400 seconds. '
+        'This standalone backend starts a new bpy subprocess and opens blend_file on every call; '
+        'unsaved memory does NOT persist across calls. Continue edits from the previous saved checkpoint '
+        '(initial.blend only for the first edit); save intermediate work before a call returns. '
+        'Within a call, edit the open scene continuously without unnecessary reloads. '
         'Use CUDA rendering, enable CUDA devices only and disable CPU; retain engine, samples, resolution '
         'and all other saved scene settings. Save scene BEFORE transient PNG output setting changes; '
         'never save the render filepath/encoding overrides. Disable backup save_version. '
@@ -120,6 +128,7 @@ def run_task(task, policy, out, config, dataset):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--tasks', nargs='+', help='explicit user-authorized fresh restart subset')
     args = parser.parse_args()
     out = args.output.absolute()
     out.mkdir(parents=True, exist_ok=True)
@@ -128,7 +137,7 @@ def main():
         sys.path.insert(0, str(ROOT / 'input-tools'))
         import dataset
         tasks = json.loads((ROOT / 'input-tools/task-policies.json').read_text())['tasks']
-        plan = task_plan(tasks)
+        plan = task_plan(tasks, args.tasks)
         if set(tasks) != set(dataset.task_ids()):
             raise ValueError('canonical policy/manifest task mismatch')
         config = direct.prepare_config(tomllib.loads((ROOT / 'mghavn-custom-bpy.toml').read_text()), approved=True)

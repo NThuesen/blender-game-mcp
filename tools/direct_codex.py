@@ -58,6 +58,18 @@ def validate_edit(before, after, policy):
     import math
     left = copy.deepcopy(before.get('audit', before))
     right = copy.deepcopy(after.get('audit', after))
+    # Only disappearance of an independently evidenced, local, zero-user
+    # material is normal save/reopen cleanup. Keep present material contents,
+    # all additions and every object/slot/geometry/light/camera audit exact.
+    materials = left.get('preserve', {}).get('materials', {})
+    saved_materials = right.get('preserve', {}).get('materials', {})
+    for name in set(materials) - set(saved_materials):
+        lifecycle = before.get('material_lifecycle', {}).get(name, {})
+        if (type(lifecycle.get('users')) is int and lifecycle['users'] == 0
+                and lifecycle.get('use_fake_user') is False
+                and lifecycle.get('use_extra_user') is False
+                and 'library' in lifecycle and lifecycle['library'] is None):
+            del materials[name]
     changed = False
     if policy.get('unsupported_blocker'):
         raise ValueError('unsupported task policy')

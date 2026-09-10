@@ -139,6 +139,16 @@ class SuiteTests(unittest.TestCase):
                     process.kill()
                     process.communicate()
 
+    def test_restart_selection_is_unique_canonical_and_excludes_camera1(self):
+        import direct_suite as suite
+        tasks = {'level1/camera1': {}}
+        tasks.update({f'level2/task{i}': {} for i in range(26)})
+        selected = ['level2/task3', 'level2/task4']
+        self.assertEqual(suite.task_plan(tasks, selected), selected)
+        for invalid in [['unknown'], ['level1/camera1'], [selected[0]] * 2, []]:
+            with self.assertRaises(ValueError):
+                suite.task_plan(tasks, invalid)
+
     def test_plan_excludes_only_completed_camera1(self):
         script = TOOLS / 'direct_suite.py'
         self.assertTrue(script.exists(), 'suite dispatcher missing')

@@ -215,6 +215,13 @@ def tree(t):
     return {'properties':props(t), 'nodes':[{ 'properties':props(n),
             'inputs':[props(i) for i in n.inputs], 'outputs':[props(i) for i in n.outputs]} for n in t.nodes],
             'links':[(l.from_node.name,l.from_socket.identifier,l.to_node.name,l.to_socket.identifier) for l in t.links]}
+def material_lifecycle():
+    # Evidence for normal save cleanup, never add fake users just for auditing.
+    return {m.name: {'users':m.users, 'use_fake_user':bool(m.use_fake_user),
+                     'use_extra_user':bool(m.use_extra_user),
+                     'library':m.library.filepath if m.library else None}
+            for m in bpy.data.materials}
+
 def audit():
     objects={}
     for o in bpy.data.objects:
@@ -279,7 +286,7 @@ evidence={'compute_device_type':prefs.compute_device_type,
 if cfg.get('save'):
     bpy.context.preferences.filepaths.save_version=0
     bpy.ops.wm.save_as_mainfile(filepath=cfg['save'], relative_remap=True)
-record={'audit':audit(),'evidence':evidence,
+record={'audit':audit(),'evidence':evidence,'material_lifecycle':material_lifecycle(),
         'settings':{'engine':s.render.engine,'samples':s.cycles.samples,
                     'resolution_x':s.render.resolution_x,'resolution_y':s.render.resolution_y,
                     'resolution_percentage':s.render.resolution_percentage}}
