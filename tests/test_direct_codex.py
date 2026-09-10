@@ -138,6 +138,62 @@ class DirectCodexTests(unittest.TestCase):
             self.assertIn('incomplete checkpoint artifacts', proc.stderr)
             self.assertTrue((root / 'logs2' / 'run.jsonl').is_file())
 
+    def test_task_policy_supports_non_camera_and_rejects_forbidden(self):
+        import copy
+        m = self.load()
+        self.assertTrue(hasattr(m, 'validate_edit'), 'task policy validator missing')
+        before = {'objects': {'Cube': {'type': 'MESH', 'location': [0, 0, 0],
+                  'scale': [1, 1, 1]}}, 'preserve': {'mesh': 'fixed'}}
+        after = copy.deepcopy(before)
+        after['objects']['Cube']['location'] = [1, 0, 0]
+        policy = {'allowed_transforms': {'Cube': ['location']},
+                  'location_bounds': {'Cube': [[-2, 2]] * 3}}
+        m.validate_edit(before, after, policy)
+        for bad in (before, {**after, 'preserve': {'mesh': 'changed'}}):
+            with self.assertRaises(ValueError):
+                m.validate_edit(before, bad, policy)
+        after['objects']['Cube']['location'] = [3, 0, 0]
+        with self.assertRaises(ValueError):
+            m.validate_edit(before, after, policy)
+
+    def test_all_exact_property_families(self):
+        import copy
+        m = self.load()
+        before = {'objects': {'Cam': {'type': 'CAMERA', 'lens': 50},
+            'Lamp': {'type': 'LIGHT', 'light_data': {'energy': 20, 'color': [1, 1, 1]}}},
+            'shape_keys': {'Keys': {'Smile': 0, 'Basis': 0}}, 'preserve': {'mesh': 'fixed'}}
+        for policy, mutate in [
+            ({'allowed_camera_data': {'Cam': ['lens']}}, lambda x: x['objects']['Cam'].update(lens=60)),
+            ({'allowed_light_data': {'Lamp': ['energy', 'color']}}, lambda x: x['objects']['Lamp']['light_data'].update(energy=30, color=[1, 0, 1])),
+            ({'allowed_shape_keys': {'Keys': ['Smile']}}, lambda x: x['shape_keys']['Keys'].update(Smile=0.5))]:
+            after = copy.deepcopy(before)
+            mutate(after)
+            m.validate_edit(before, after, policy)
+            after['preserve']['mesh'] = 'changed'
+            with self.assertRaises(ValueError):
+                m.validate_edit(before, after, policy)
+        after = copy.deepcopy(before)
+        after['objects']['Cam']['lens'] = float('nan')
+        with self.assertRaises(ValueError):
+            m.validate_edit(before, after, {'allowed_camera_data': {'Cam': ['lens']}})
+        with self.assertRaises(ValueError):
+            m.validate_edit(before, before, {'allowed_camera_data': {'Cam': ['sensor_width']}})
+        with self.assertRaises(ValueError):
+            m.validate_edit(before, before, {'allowed_light_data': {'Lamp': ['shadow_soft_size']}})
+
+    def test_non_camera_ledger_needs_no_fake_pose(self):
+        import tempfile, json
+        from PIL import Image
+        m = self.load()
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            blend, png = root / 'iteration01.blend', root / 'iteration01.png'
+            blend.write_bytes(b'BLENDERfixture')
+            Image.new('RGB', (2, 2)).save(png)
+            (root / 'rounds.jsonl').write_text(json.dumps({'round': 1,
+                'blend': str(blend), 'png': str(png), 'rationale': 'move cube'}))
+            self.assertEqual(len(m.verify_checkpoints(root, 1, policy={'allowed_transforms': {'Cube': ['location']}})), 1)
+
     def test_toml_roundtrip_preserves_keys_booleans_and_paths(self):
         m = self.load()
         import tomllib
