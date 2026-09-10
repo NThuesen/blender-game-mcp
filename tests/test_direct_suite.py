@@ -8,6 +8,32 @@ TOOLS = Path(__file__).resolve().parents[1] / 'tools'
 sys.path.insert(0, str(TOOLS))
 
 class SuiteTests(unittest.TestCase):
+    def gpu_setup(self, active_engine='CYCLES'):
+        from types import SimpleNamespace as NS
+        import direct_runtime
+        active = NS(render=NS(engine=active_engine), cycles=NS(device='CPU'))
+        inactive = NS(render=NS(engine='BLENDER_EEVEE'), cycles=NS(device='CPU'))
+        devices = [NS(type='CUDA', use=False), NS(type='CPU', use=True)]
+        prefs = NS(compute_device_type='NONE', refresh_devices=lambda: None, devices=devices)
+        bpy = NS(context=NS(scene=active, preferences=NS(addons={'cycles': NS(preferences=prefs)})),
+                 data=NS(scenes=[inactive, active]))
+        # Exercise the actual worker setup without importing native bpy locally.
+        setup = direct_runtime.WORKER.split('# GPU setup', 1)[1].split("assert s.camera", 1)[0]
+        exec('# GPU setup' + setup, {'bpy': bpy})
+        return active, inactive, devices
+
+    def test_inactive_eevee_scene_is_preserved_with_active_cycles(self):
+        active, inactive, devices = self.gpu_setup()
+        self.assertEqual(active.render.engine, 'CYCLES')
+        self.assertEqual(active.cycles.device, 'GPU')
+        self.assertEqual(inactive.render.engine, 'BLENDER_EEVEE')
+        self.assertEqual(inactive.cycles.device, 'CPU')
+        self.assertEqual([d.use for d in devices], [True, False])
+
+    def test_active_eevee_still_fails_closed_without_conversion(self):
+        with self.assertRaisesRegex(AssertionError, 'unsupported non-Cycles'):
+            self.gpu_setup('BLENDER_EEVEE')
+
     def test_rna_shared_graph_is_linear_and_preserves_leaves(self):
         import ast
         from types import SimpleNamespace
@@ -55,6 +81,63 @@ class SuiteTests(unittest.TestCase):
         got = ns['collection_props'](Values([a, b] * 70), ())
         self.assertEqual(len(got), 140)
         self.assertEqual(got[1], {'type': 'NodeB'})
+
+    def test_retry_requires_finished_suite_and_same_global_lock(self):
+        import tempfile
+        import fcntl
+        import direct_camera_retry as retry
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            suite = root / 'suite'
+            suite.mkdir()
+            self.assertFalse(retry.suite_finished(suite))
+            (suite / 'events.jsonl').write_text('{"event":"dispatcher_started"}\n')
+            self.assertFalse(retry.suite_finished(suite))
+            (suite / 'events.jsonl').write_text('{"event":"dispatcher_finished"}\n')
+            self.assertTrue(retry.suite_finished(suite))
+            with (root / 'direct-suite.lock').open('a') as held:
+                fcntl.flock(held, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                with (root / 'direct-suite.lock').open('a') as other:
+                    self.assertFalse(retry.try_lock(other))
+                fcntl.flock(held, fcntl.LOCK_UN)
+            with (root / 'direct-suite.lock').open('a') as other:
+                self.assertTrue(retry.try_lock(other))
+            (suite / 'STOP').touch()
+            with self.assertRaises(InterruptedError):
+                retry.suite_finished(suite)
+
+    def test_retry_process_waits_without_work_and_honors_stop(self):
+        import json
+        import subprocess
+        import tempfile
+        import time
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            predecessor = root / 'suite'
+            predecessor.mkdir()
+            out = root / 'retry'
+            bootstrap = ('import sys; sys.path.insert(0,' + repr(str(TOOLS)) + '); '
+                         'import direct_camera_retry as r; from pathlib import Path; '
+                         'r.suite.ROOT=Path(' + repr(tmp) + '); r.main()')
+            process = subprocess.Popen([sys.executable, '-c', bootstrap, '--output', str(out),
+                                        '--after-suite', str(predecessor)],
+                                       stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            try:
+                deadline = time.monotonic() + 5
+                while not (out / 'status.json').exists() and time.monotonic() < deadline:
+                    time.sleep(0.02)
+                row = json.loads((out / 'status.json').read_text())
+                self.assertEqual(row['status'], 'waiting_for_suite')
+                self.assertFalse((out / 'level1-camera3').exists())
+                (out / 'STOP').touch()
+                process.communicate(timeout=15)
+                self.assertNotEqual(process.returncode, 0)
+                self.assertEqual(json.loads((out / 'status.json').read_text())['status'], 'failed')
+                self.assertFalse((out / 'level1-camera3').exists())
+            finally:
+                if process.poll() is None:
+                    process.kill()
+                    process.communicate()
 
     def test_plan_excludes_only_completed_camera1(self):
         script = TOOLS / 'direct_suite.py'

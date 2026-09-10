@@ -263,10 +263,11 @@ prefs.compute_device_type='CUDA'
 prefs.refresh_devices()
 assert any(d.type=='CUDA' for d in prefs.devices), 'CUDA unavailable; CPU fallback forbidden'
 for d in prefs.devices: d.use=(d.type=='CUDA')
-for scene in bpy.data.scenes:
-    assert scene.render.engine=='CYCLES', 'unsupported non-Cycles engine; not silently changed'
-    scene.cycles.device='GPU'
+# Only the active scene is rendered. Inactive scenes can use different engines;
+# leave their engine AND device settings intact, retaining them in full audits.
 s=bpy.context.scene
+assert s.render.engine=='CYCLES', 'unsupported non-Cycles engine; not silently changed'
+s.cycles.device='GPU'
 assert s.camera is not None, 'scene has no active camera'
 evidence={'compute_device_type':prefs.compute_device_type,
           'devices':[{'name':d.name,'type':d.type,'use':bool(d.use),'id':d.id} for d in prefs.devices],
