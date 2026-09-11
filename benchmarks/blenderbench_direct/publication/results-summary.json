@@ -1,0 +1,242 @@
+{
+  "task_count": 27,
+  "round_count": 270,
+  "categories": {
+    "level1": {
+      "tasks": 9,
+      "mean_best_clip_similarity": 0.9962615238295661,
+      "mean_best_nclip_x100": 0.3738476170433892,
+      "mean_best_photometric_loss": 0.003033510640105103
+    },
+    "level2": {
+      "tasks": 9,
+      "mean_best_clip_similarity": 0.983968522813585,
+      "mean_best_nclip_x100": 1.603147718641493,
+      "mean_best_photometric_loss": 0.011897660300342573
+    },
+    "level3": {
+      "tasks": 9,
+      "mean_best_clip_similarity": 0.9771796133783128,
+      "mean_best_nclip_x100": 2.2820386621687145,
+      "mean_best_photometric_loss": 0.019716895185410976
+    }
+  },
+  "rows": [
+    {
+      "task": "level1/camera1",
+      "rounds": 10,
+      "best_round": 7,
+      "clip_similarity": 0.9975831508636475,
+      "raw_nclip": 0.002416849136352539,
+      "raw_pl": 0.003328760154545307
+    },
+    {
+      "task": "level1/camera2",
+      "rounds": 10,
+      "best_round": 8,
+      "clip_similarity": 0.9955885410308838,
+      "raw_nclip": 0.004411458969116211,
+      "raw_pl": 0.0033672682475298643
+    },
+    {
+      "task": "level1/camera3",
+      "rounds": 10,
+      "best_round": 9,
+      "clip_similarity": 0.9977397918701172,
+      "raw_nclip": 0.0022602081298828125,
+      "raw_pl": 0.001466981484554708
+    },
+    {
+      "task": "level1/camera4",
+      "rounds": 10,
+      "best_round": 6,
+      "clip_similarity": 0.9912315011024475,
+      "raw_nclip": 0.00876849889755249,
+      "raw_pl": 0.007649693172425032
+    },
+    {
+      "task": "level1/camera5",
+      "rounds": 10,
+      "best_round": 7,
+      "clip_similarity": 0.9964922666549683,
+      "raw_nclip": 0.0035077333450317383,
+      "raw_pl": 0.0044174473732709885
+    },
+    {
+      "task": "level1/camera6",
+      "rounds": 10,
+      "best_round": 10,
+      "clip_similarity": 0.9997468590736389,
+      "raw_nclip": 0.000253140926361084,
+      "raw_pl": 3.515696880640462e-05
+    },
+    {
+      "task": "level1/camera7",
+      "rounds": 10,
+      "best_round": 9,
+      "clip_similarity": 0.989441454410553,
+      "raw_nclip": 0.010558545589447021,
+      "raw_pl": 0.006557795684784651
+    },
+    {
+      "task": "level1/camera8",
+      "rounds": 10,
+      "best_round": 10,
+      "clip_similarity": 0.9990020990371704,
+      "raw_nclip": 0.0009979009628295898,
+      "raw_pl": 3.855396425933577e-05
+    },
+    {
+      "task": "level1/camera9",
+      "rounds": 10,
+      "best_round": 9,
+      "clip_similarity": 0.9995280504226685,
+      "raw_nclip": 0.00047194957733154297,
+      "raw_pl": 0.0004399387107696384
+    },
+    {
+      "task": "level2/attribute1",
+      "rounds": 10,
+      "best_round": 10,
+      "clip_similarity": 0.9777544736862183,
+      "raw_nclip": 0.02224552631378174,
+      "raw_pl": 0.015119296498596668
+    },
+    {
+      "task": "level2/attribute2",
+      "rounds": 10,
+      "best_round": 5,
+      "clip_similarity": 0.9820566177368164,
+      "raw_nclip": 0.017943382263183594,
+      "raw_pl": 0.016636313870549202
+    },
+    {
+      "task": "level2/attribute3",
+      "rounds": 10,
+      "best_round": 4,
+      "clip_similarity": 0.9793153405189514,
+      "raw_nclip": 0.020684659481048584,
+      "raw_pl": 0.01562858745455742
+    },
+    {
+      "task": "level2/attribute4",
+      "rounds": 10,
+      "best_round": 1,
+      "clip_similarity": 0.9745771288871765,
+      "raw_nclip": 0.025422871112823486,
+      "raw_pl": 0.02019927091896534
+    },
+    {
+      "task": "level2/attribute5",
+      "rounds": 10,
+      "best_round": 9,
+      "clip_similarity": 0.9830480813980103,
+      "raw_nclip": 0.016951918601989746,
+      "raw_pl": 0.013992843218147755
+    },
+    {
+      "task": "level2/attribute6",
+      "rounds": 10,
+      "best_round": 9,
+      "clip_similarity": 0.9842134714126587,
+      "raw_nclip": 0.01578652858734131,
+      "raw_pl": 0.01759195886552334
+    },
+    {
+      "task": "level2/attribute7",
+      "rounds": 10,
+      "best_round": 9,
+      "clip_similarity": 0.9894779324531555,
+      "raw_nclip": 0.010522067546844482,
+      "raw_pl": 0.0033791407477110624
+    },
+    {
+      "task": "level2/attribute8",
+      "rounds": 10,
+      "best_round": 9,
+      "clip_similarity": 0.9888083934783936,
+      "raw_nclip": 0.011191606521606445,
+      "raw_pl": 0.0037378640845417976
+    },
+    {
+      "task": "level2/attribute9",
+      "rounds": 10,
+      "best_round": 10,
+      "clip_similarity": 0.996465265750885,
+      "raw_nclip": 0.0035347342491149902,
+      "raw_pl": 0.0007936670444905758
+    },
+    {
+      "task": "level3/attribute1",
+      "rounds": 10,
+      "best_round": 9,
+      "clip_similarity": 0.9810705780982971,
+      "raw_nclip": 0.01892942190170288,
+      "raw_pl": 0.02021031640470028
+    },
+    {
+      "task": "level3/attribute2",
+      "rounds": 10,
+      "best_round": 10,
+      "clip_similarity": 0.9837775230407715,
+      "raw_nclip": 0.016222476959228516,
+      "raw_pl": 0.012915946543216705
+    },
+    {
+      "task": "level3/attribute3",
+      "rounds": 10,
+      "best_round": 10,
+      "clip_similarity": 0.9846137762069702,
+      "raw_nclip": 0.015386223793029785,
+      "raw_pl": 0.014947629533708096
+    },
+    {
+      "task": "level3/attribute4",
+      "rounds": 10,
+      "best_round": 10,
+      "clip_similarity": 0.9926517009735107,
+      "raw_nclip": 0.007348299026489258,
+      "raw_pl": 0.009027284570038319
+    },
+    {
+      "task": "level3/attribute5",
+      "rounds": 10,
+      "best_round": 10,
+      "clip_similarity": 0.9755886793136597,
+      "raw_nclip": 0.024411320686340332,
+      "raw_pl": 0.027274271473288536
+    },
+    {
+      "task": "level3/attribute6",
+      "rounds": 10,
+      "best_round": 7,
+      "clip_similarity": 0.9866102933883667,
+      "raw_nclip": 0.0133897066116333,
+      "raw_pl": 0.025586744770407677
+    },
+    {
+      "task": "level3/attribute7",
+      "rounds": 10,
+      "best_round": 5,
+      "clip_similarity": 0.93320631980896,
+      "raw_nclip": 0.06679368019104004,
+      "raw_pl": 0.03137661889195442
+    },
+    {
+      "task": "level3/attribute8",
+      "rounds": 10,
+      "best_round": 4,
+      "clip_similarity": 0.9753873944282532,
+      "raw_nclip": 0.024612605571746826,
+      "raw_pl": 0.025764750316739082
+    },
+    {
+      "task": "level3/attribute9",
+      "rounds": 10,
+      "best_round": 10,
+      "clip_similarity": 0.9817102551460266,
+      "raw_nclip": 0.01828974485397339,
+      "raw_pl": 0.010348494164645672
+    }
+  ]
+}

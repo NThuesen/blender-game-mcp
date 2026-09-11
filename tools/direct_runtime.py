@@ -16,8 +16,6 @@ import signal
 import subprocess
 import time
 
-CUSTOM_BPY_PYTHON = '/home/mg/blenderbench-direct/enhanced-mcp/mcp/.venv/bin/python'
-
 
 def sha(path):
     h = hashlib.sha256()
@@ -104,12 +102,12 @@ def run_process(argv, log, event_path, policy):
     return result
 
 
-# This source is executed exclusively by CUSTOM_BPY_PYTHON. Never imports camera.rounds.
+# This source is executed exclusively by the explicitly configured bpy Python.
 WORKER = r'''
 import bpy, hashlib, json, sys, os
 from pathlib import Path
 cfg=json.loads(Path(sys.argv[1]).read_text())
-assert tuple(bpy.app.version)==(5,2,1), ('custom bpy version required', bpy.app.version_string)
+assert bpy.app.version_string.startswith(cfg['bpy_version']), ('configured bpy version required', bpy.app.version_string)
 bpy.context.preferences.filepaths.use_scripts_auto_execute=False
 bpy.ops.wm.open_mainfile(filepath=cfg['source'], use_scripts=False)
 assert not bpy.app.autoexec_fail, 'automatic script dependency rejected'
@@ -302,13 +300,13 @@ if cfg.get('png'):
 '''
 
 
-def _execute(source, policy, bpy_python, output, event_path, render, start=None):
+def _execute(source, policy, bpy_python, bpy_version, output, event_path, render, start=None):
     # Preserve the venv executable path: resolving its symlink loses venv imports.
     python = Path(bpy_python).absolute()
-    if str(python) != CUSTOM_BPY_PYTHON:
-        raise ValueError('only installed custom bpy Python is admitted: ' + CUSTOM_BPY_PYTHON)
     if not python.is_file():
         raise FileNotFoundError(python)
+    if not bpy_version:
+        raise ValueError('explicit bpy version pin required')
     source = Path(source).resolve(strict=True)
     if source.suffix != '.blend':
         raise ValueError('source must be a saved .blend')
@@ -318,7 +316,7 @@ def _execute(source, policy, bpy_python, output, event_path, render, start=None)
     original = sha(source)
     png = output / ('initial_verified.png' if start else 'verified.png') if render else None
     saved = output / 'start_initialized.blend' if start else None
-    config = {'source': str(source), 'report': str(output / 'audit.json'),
+    config = {'source': str(source), 'report': str(output / 'audit.json'), 'bpy_version': bpy_version,
               'save': str(saved) if saved else None, 'png': str(png) if png else None}
     if start:
         config['initialization'] = policy['initialization']
@@ -336,7 +334,7 @@ def _execute(source, policy, bpy_python, output, event_path, render, start=None)
             raise ValueError('source blend changed during independent verification')
     result = json.loads(Path(config['report']).read_text())
     evidence = result['evidence']
-    if (evidence['blender_version_tuple'] != [5, 2, 1] or evidence['compute_device_type'] != 'CUDA'
+    if (not evidence['blender_version'].startswith(bpy_version) or evidence['compute_device_type'] != 'CUDA'
             or evidence['scene_device'] != 'GPU' or not any(d['type']=='CUDA' and d['use'] for d in evidence['devices'])
             or any(d['use'] and d['type']!='CUDA' for d in evidence['devices'])):
         raise ValueError('custom bpy CUDA evidence failed')
@@ -363,12 +361,12 @@ def _execute(source, policy, bpy_python, output, event_path, render, start=None)
     return result
 
 
-def inspect_render(blend, task_policy, bpy_python, output, event_path, render=True):
+def inspect_render(blend, task_policy, bpy_python, bpy_version, output, event_path, render=True):
     """Independently open/audit/render an unchanged saved blend via custom bpy."""
-    return _execute(blend, task_policy, bpy_python, output, event_path, render)
+    return _execute(blend, task_policy, bpy_python, bpy_version, output, event_path, render)
 
 
-def initialize(inp, task_policy, bpy_python, output, event_path):
+def initialize(inp, task_policy, bpy_python, bpy_version, output, event_path):
     """Apply parent-reviewed literal initialization; save and render the state.
 
     inp is a directory with exactly one top-level .blend and start.py, or a mapping
@@ -376,7 +374,7 @@ def initialize(inp, task_policy, bpy_python, output, event_path):
     """
     if task_policy.get('pin_verified') is not True or not task_policy.get('start_sha256') or not isinstance(task_policy.get('initialization'), list):
         raise ValueError('initialization requires parent-verified pin/policy, start_sha256 and literal initialization')
-    if task_policy.get('unsupported_blocker') or task_policy.get('reviewed') is False:
+    if task_policy.get('reviewed') is False:
         raise ValueError('unsupported or unreviewed initialization policy')
     if isinstance(inp, dict):
         source, start = Path(inp['blend']), Path(inp['start_py'])
@@ -388,4 +386,4 @@ def initialize(inp, task_policy, bpy_python, output, event_path):
         source, start = sources[0], inp / 'start.py'
     if start.name != 'start.py' or sha(start) != task_policy['start_sha256']:
         raise ValueError('parent-verified start.py hash mismatch')
-    return _execute(source, task_policy, bpy_python, output, event_path, True, start.resolve())
+    return _execute(source, task_policy, bpy_python, bpy_version, output, event_path, True, start.resolve())

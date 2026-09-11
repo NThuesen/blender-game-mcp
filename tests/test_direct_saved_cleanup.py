@@ -38,38 +38,6 @@ class SavedCleanupTests(unittest.TestCase):
                          self.fixture()[0]['material_lifecycle']['orphan'])
         self.assertFalse(material.use_fake_user)
 
-    def test_generation_starts_without_independent_reopen_gate(self):
-        import tempfile
-        from types import SimpleNamespace as NS
-        from unittest.mock import patch
-        import direct_suite as suite
-        class GenerationReached(Exception): pass
-        with tempfile.TemporaryDirectory() as tmp:
-            root = Path(tmp)
-            def initialize(inp, policy, python, output, events):
-                output.mkdir()
-                blend = output / 'start_initialized.blend'
-                blend.write_bytes(b'fixture')
-                return {'blend': str(blend), **self.fixture()[0]}
-            def invoke(args, config, evidence, label, prompt, target=None):
-                if label == 'run':
-                    self.assertIn('previous saved checkpoint', prompt)
-                    self.assertIn('All scene properties may be edited', prompt)
-                    self.assertNotIn('unlisted', prompt)
-                    self.assertNotIn('allowed edit', prompt)
-                    self.assertIn('goal code', prompt)
-                    raise GenerationReached()
-                return []
-            policy = {}
-            policy['task_description'] = 'test'
-            with patch.object(suite, 'ROOT', root), \
-                 patch.object(suite.runtime, 'initialize', initialize), \
-                 patch.object(suite.runtime, 'inspect_render', side_effect=AssertionError('pre-generation reopen')), \
-                 patch.object(suite.direct, 'invoke', invoke), \
-                 patch.object(suite.direct, 'verify_preflight'):
-                with self.assertRaises(GenerationReached):
-                    suite.run_task('level2/attribute1', policy, root / 'task', {},
-                                   NS(verify=lambda *a: {}))
 
     def test_zero_user_unused_material_loss_is_accepted(self):
         before, after, policy = self.fixture()

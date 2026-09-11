@@ -1,0 +1,1037 @@
+{
+  "schema_version": 1,
+  "repository": "DietCoke4671/BlenderBench",
+  "revision": "203e4d325e9438ca55b29bdfc4f6a90842d74e68",
+  "tree_pages": 1,
+  "tasks": {
+    "level1/camera1": {
+      "task.txt": {
+        "path": "data/blenderbench/level1/camera1/task.txt",
+        "size": 88,
+        "sha256": "a9023cd8a8838793a24ad4d7dac5ef9face61e2702cb49fafbff271dc510f613",
+        "git_blob_oid": "9961c9617df77c716b0b8502dce2718f52fe1764",
+        "lfs": null
+      },
+      "start.py": {
+        "path": "data/blenderbench/level1/camera1/start.py",
+        "size": 146,
+        "sha256": "8680900dd5a85c2467f86a7ec0c47e3868569e387948eb7e45aab65794981c06",
+        "git_blob_oid": "01a913bc51a3cbc16124c5e967396a5c0e25fd22",
+        "lfs": null
+      },
+      "scene.blend": {
+        "path": "data/blenderbench/level1/camera1/blender_file.blend",
+        "size": 11654045,
+        "sha256": "777b62ebe45894d18fa056c6c8c4d97d8cfc36115246e5fad46a803b52200415",
+        "git_blob_oid": "29514b1060cbc66d19ec8b19478aaebfef5358ec",
+        "lfs": {
+          "oid": "777b62ebe45894d18fa056c6c8c4d97d8cfc36115246e5fad46a803b52200415",
+          "size": 11654045,
+          "pointerSize": 133
+        }
+      },
+      "target.png": {
+        "path": "data/blenderbench/level1/camera1/renders/goal/render1.png",
+        "size": 280875,
+        "sha256": "a1f17f06448cd899c5912323f9b9dd07ca6ea30dc0aebba11f28cb85afb29d2c",
+        "git_blob_oid": "a74b55578860c62d8f82a488959df660a60ff4a9",
+        "lfs": {
+          "oid": "a1f17f06448cd899c5912323f9b9dd07ca6ea30dc0aebba11f28cb85afb29d2c",
+          "size": 280875,
+          "pointerSize": 131
+        }
+      }
+    },
+    "level1/camera2": {
+      "task.txt": {
+        "path": "data/blenderbench/level1/camera2/task.txt",
+        "size": 88,
+        "sha256": "a9023cd8a8838793a24ad4d7dac5ef9face61e2702cb49fafbff271dc510f613",
+        "git_blob_oid": "9961c9617df77c716b0b8502dce2718f52fe1764",
+        "lfs": null
+      },
+      "start.py": {
+        "path": "data/blenderbench/level1/camera2/start.py",
+        "size": 146,
+        "sha256": "41cae2396027226fb32fd06a6e0a6e913bd895811bdee383416ef1bd1598d186",
+        "git_blob_oid": "ac190d95666978eb2bca17ad5f2d79dd088f8c36",
+        "lfs": null
+      },
+      "scene.blend": {
+        "path": "data/blenderbench/level1/camera2/blender_file.blend",
+        "size": 21287404,
+        "sha256": "9e53b677deab9a576b1d311f716c311def91591db41a33518a0433bc4cef8d3b",
+        "git_blob_oid": "09ff4f35c567f062437a47651d499108fea0a03a",
+        "lfs": {
+          "oid": "9e53b677deab9a576b1d311f716c311def91591db41a33518a0433bc4cef8d3b",
+          "size": 21287404,
+          "pointerSize": 133
+        }
+      },
+      "target.png": {
+        "path": "data/blenderbench/level1/camera2/renders/goal/render1.png",
+        "size": 256033,
+        "sha256": "ce58bcf86a6866d992e9d115391cf4a411b65395ffd612ccb7d28dc7ba5e5b58",
+        "git_blob_oid": "369f1d0a773fe19cb7bc5882d34d9db05bb00a61",
+        "lfs": {
+          "oid": "ce58bcf86a6866d992e9d115391cf4a411b65395ffd612ccb7d28dc7ba5e5b58",
+          "size": 256033,
+          "pointerSize": 131
+        }
+      }
+    },
+    "level1/camera3": {
+      "task.txt": {
+        "path": "data/blenderbench/level1/camera3/task.txt",
+        "size": 88,
+        "sha256": "a9023cd8a8838793a24ad4d7dac5ef9face61e2702cb49fafbff271dc510f613",
+        "git_blob_oid": "9961c9617df77c716b0b8502dce2718f52fe1764",
+        "lfs": null
+      },
+      "start.py": {
+        "path": "data/blenderbench/level1/camera3/start.py",
+        "size": 190,
+        "sha256": "f5acd7609ff23e01e3d435173d46ea45907fc2b3771dea91f5da0007e51500f2",
+        "git_blob_oid": "b1ce78b0c679749e66cc1fa7a8972695af81cce2",
+        "lfs": null
+      },
+      "scene.blend": {
+        "path": "data/blenderbench/level1/camera3/blender_file.blend",
+        "size": 19714277,
+        "sha256": "2d8bb6bc5b8614ab26d6319249c4cf915e5e8107f7859ec768dfb0e02b875403",
+        "git_blob_oid": "0f5bce886d59f7decf761e932c5f8c287dc69273",
+        "lfs": {
+          "oid": "2d8bb6bc5b8614ab26d6319249c4cf915e5e8107f7859ec768dfb0e02b875403",
+          "size": 19714277,
+          "pointerSize": 133
+        }
+      },
+      "target.png": {
+        "path": "data/blenderbench/level1/camera3/renders/goal/render1.png",
+        "size": 323359,
+        "sha256": "3cde2e268b0fb73a25bc96180bbe96818f464bbe71fc8fe9bc1dff8a3d782d18",
+        "git_blob_oid": "5df097446778f579549300ea050a818c8b35056c",
+        "lfs": {
+          "oid": "3cde2e268b0fb73a25bc96180bbe96818f464bbe71fc8fe9bc1dff8a3d782d18",
+          "size": 323359,
+          "pointerSize": 131
+        }
+      }
+    },
+    "level1/camera4": {
+      "task.txt": {
+        "path": "data/blenderbench/level1/camera4/task.txt",
+        "size": 88,
+        "sha256": "a9023cd8a8838793a24ad4d7dac5ef9face61e2702cb49fafbff271dc510f613",
+        "git_blob_oid": "9961c9617df77c716b0b8502dce2718f52fe1764",
+        "lfs": null
+      },
+      "start.py": {
+        "path": "data/blenderbench/level1/camera4/start.py",
+        "size": 145,
+        "sha256": "a994ae0f9c936a8a4a469b5245bc5cc438e7a112ec55288b7c2473998872d657",
+        "git_blob_oid": "e033c342fb7af3269574d25707e0060b06b774a6",
+        "lfs": null
+      },
+      "scene.blend": {
+        "path": "data/blenderbench/level1/camera4/blender_file.blend",
+        "size": 1092706714,
+        "sha256": "e99ccd5e43e80d8dbdd4d840ea4290f1dbc6b4e06d21be07eeed7d39fecafd0a",
+        "git_blob_oid": "b66db22091cd21021b2630ca2fc01040cf35b27f",
+        "lfs": {
+          "oid": "e99ccd5e43e80d8dbdd4d840ea4290f1dbc6b4e06d21be07eeed7d39fecafd0a",
+          "size": 1092706714,
+          "pointerSize": 135
+        }
+      },
+      "target.png": {
+        "path": "data/blenderbench/level1/camera4/renders/goal/render1.png",
+        "size": 434190,
+        "sha256": "a6cad78bdebb96be3147176d6c4c460df4782c51430fcd268dfddd87f499aa93",
+        "git_blob_oid": "2e09e3634d5c1c7cd3a0bd3d30ac333922d3570e",
+        "lfs": {
+          "oid": "a6cad78bdebb96be3147176d6c4c460df4782c51430fcd268dfddd87f499aa93",
+          "size": 434190,
+          "pointerSize": 131
+        }
+      }
+    },
+    "level1/camera5": {
+      "task.txt": {
+        "path": "data/blenderbench/level1/camera5/task.txt",
+        "size": 88,
+        "sha256": "a9023cd8a8838793a24ad4d7dac5ef9face61e2702cb49fafbff271dc510f613",
+        "git_blob_oid": "9961c9617df77c716b0b8502dce2718f52fe1764",
+        "lfs": null
+      },
+      "start.py": {
+        "path": "data/blenderbench/level1/camera5/start.py",
+        "size": 148,
+        "sha256": "2d09f0ea2b51ace93663882d86aa2fa4201f394710879c12c6774173793a8971",
+        "git_blob_oid": "5761047b75c43463abb73e2c967c5c64c9de8c51",
+        "lfs": null
+      },
+      "scene.blend": {
+        "path": "data/blenderbench/level1/camera5/blender_file.blend",
+        "size": 1092786654,
+        "sha256": "06f30a3ccd0d81be515f1892605fd575f6933052e15b9b297b7d96a48aa664d2",
+        "git_blob_oid": "f54d89e9d4c3f0d32b34e51ac2cd5d51743bb4b0",
+        "lfs": {
+          "oid": "06f30a3ccd0d81be515f1892605fd575f6933052e15b9b297b7d96a48aa664d2",
+          "size": 1092786654,
+          "pointerSize": 135
+        }
+      },
+      "target.png": {
+        "path": "data/blenderbench/level1/camera5/renders/goal/render1.png",
+        "size": 442674,
+        "sha256": "0124cf59482f3950b2c62eddf8d734e752e45e5300fbf30ce472f74b05e30f9d",
+        "git_blob_oid": "d411365abfd0112bcefbd1c253b631cd59f48e6f",
+        "lfs": {
+          "oid": "0124cf59482f3950b2c62eddf8d734e752e45e5300fbf30ce472f74b05e30f9d",
+          "size": 442674,
+          "pointerSize": 131
+        }
+      }
+    },
+    "level1/camera6": {
+      "task.txt": {
+        "path": "data/blenderbench/level1/camera6/task.txt",
+        "size": 88,
+        "sha256": "a9023cd8a8838793a24ad4d7dac5ef9face61e2702cb49fafbff271dc510f613",
+        "git_blob_oid": "9961c9617df77c716b0b8502dce2718f52fe1764",
+        "lfs": null
+      },
+      "start.py": {
+        "path": "data/blenderbench/level1/camera6/start.py",
+        "size": 146,
+        "sha256": "1539bdf69d7df4cb2da3770a59f2a33ed28d3d20aec3c3e2677351b297850f9c",
+        "git_blob_oid": "a0449cfce1acdf566251c2634b2b38469006af82",
+        "lfs": null
+      },
+      "scene.blend": {
+        "path": "data/blenderbench/level1/camera6/blender_file.blend",
+        "size": 5718592,
+        "sha256": "4e0fb03e37b9072c9ca65bab2b6594deb4254d21b3e13c08b8eeaf1fce76e45f",
+        "git_blob_oid": "2073a629bfaa3343eebd0b66a0a7475d005aadc4",
+        "lfs": {
+          "oid": "4e0fb03e37b9072c9ca65bab2b6594deb4254d21b3e13c08b8eeaf1fce76e45f",
+          "size": 5718592,
+          "pointerSize": 132
+        }
+      },
+      "target.png": {
+        "path": "data/blenderbench/level1/camera6/renders/goal/render1.png",
+        "size": 264383,
+        "sha256": "e8ef88036bdd3e417383c349da3f531e22698d765f34b60851ec132d143f99d3",
+        "git_blob_oid": "cb03a3a9e48c23b0900716f00cd510d252856940",
+        "lfs": {
+          "oid": "e8ef88036bdd3e417383c349da3f531e22698d765f34b60851ec132d143f99d3",
+          "size": 264383,
+          "pointerSize": 131
+        }
+      }
+    },
+    "level1/camera7": {
+      "task.txt": {
+        "path": "data/blenderbench/level1/camera7/task.txt",
+        "size": 88,
+        "sha256": "a9023cd8a8838793a24ad4d7dac5ef9face61e2702cb49fafbff271dc510f613",
+        "git_blob_oid": "9961c9617df77c716b0b8502dce2718f52fe1764",
+        "lfs": null
+      },
+      "start.py": {
+        "path": "data/blenderbench/level1/camera7/start.py",
+        "size": 146,
+        "sha256": "5471be8faa7f4bd3ba2963a6716298a007d8a004a11df38cb87b9f026d9f4bbc",
+        "git_blob_oid": "9c0fa4d13f79519e9950d330ececa5e5563334fa",
+        "lfs": null
+      },
+      "scene.blend": {
+        "path": "data/blenderbench/level1/camera7/blender_file.blend",
+        "size": 198756884,
+        "sha256": "6106fe112e0bfdf4e7aab26ff4e901ad8f942a9e6493839a9d795806cf97ab60",
+        "git_blob_oid": "8a09b0908159af7cb9d32370e8b7d87c58590b4f",
+        "lfs": {
+          "oid": "6106fe112e0bfdf4e7aab26ff4e901ad8f942a9e6493839a9d795806cf97ab60",
+          "size": 198756884,
+          "pointerSize": 134
+        }
+      },
+      "target.png": {
+        "path": "data/blenderbench/level1/camera7/renders/goal/render1.png",
+        "size": 527080,
+        "sha256": "7f5efeca8b9586450cbb5a019bc03f2b0616f76d29fecfc699cca0059150a8fd",
+        "git_blob_oid": "7ac2abc00d8b688de48c4278a56bc8bf3bf517fb",
+        "lfs": {
+          "oid": "7f5efeca8b9586450cbb5a019bc03f2b0616f76d29fecfc699cca0059150a8fd",
+          "size": 527080,
+          "pointerSize": 131
+        }
+      }
+    },
+    "level1/camera8": {
+      "task.txt": {
+        "path": "data/blenderbench/level1/camera8/task.txt",
+        "size": 88,
+        "sha256": "a9023cd8a8838793a24ad4d7dac5ef9face61e2702cb49fafbff271dc510f613",
+        "git_blob_oid": "9961c9617df77c716b0b8502dce2718f52fe1764",
+        "lfs": null
+      },
+      "start.py": {
+        "path": "data/blenderbench/level1/camera8/start.py",
+        "size": 146,
+        "sha256": "1dd7b06ac2d5949e0453f0e0c8ae857a417e986d9cc3b6fad748d26abf1b8151",
+        "git_blob_oid": "5b670d67b5a328d591968b16afe9be57b7735c17",
+        "lfs": null
+      },
+      "scene.blend": {
+        "path": "data/blenderbench/level1/camera8/blender_file.blend",
+        "size": 2303572,
+        "sha256": "64124da51512f689ff1c2d0a6475ccf377bb94a87a3bcc9fd14e0d38de7a4e00",
+        "git_blob_oid": "2a8b648f8eef7daf70287a587ce7a490c8ec31bb",
+        "lfs": {
+          "oid": "64124da51512f689ff1c2d0a6475ccf377bb94a87a3bcc9fd14e0d38de7a4e00",
+          "size": 2303572,
+          "pointerSize": 132
+        }
+      },
+      "target.png": {
+        "path": "data/blenderbench/level1/camera8/renders/goal/render1.png",
+        "size": 198412,
+        "sha256": "b4e026fea8211aaf7f1149cd3e20a2ac6346882484eee5804ea6e19dc43b6bc4",
+        "git_blob_oid": "2ce8adacf714c8fbc432e30ff94b3989b2ce2991",
+        "lfs": {
+          "oid": "b4e026fea8211aaf7f1149cd3e20a2ac6346882484eee5804ea6e19dc43b6bc4",
+          "size": 198412,
+          "pointerSize": 131
+        }
+      }
+    },
+    "level1/camera9": {
+      "task.txt": {
+        "path": "data/blenderbench/level1/camera9/task.txt",
+        "size": 88,
+        "sha256": "a9023cd8a8838793a24ad4d7dac5ef9face61e2702cb49fafbff271dc510f613",
+        "git_blob_oid": "9961c9617df77c716b0b8502dce2718f52fe1764",
+        "lfs": null
+      },
+      "start.py": {
+        "path": "data/blenderbench/level1/camera9/start.py",
+        "size": 136,
+        "sha256": "6c104adc69f6e714e7b51d3e834b8bd7e6836813899ea84c972c6d2208ac40b6",
+        "git_blob_oid": "786bf8646e259f12b3b2960baf3c40358fe89663",
+        "lfs": null
+      },
+      "scene.blend": {
+        "path": "data/blenderbench/level1/camera9/blender_file.blend",
+        "size": 4107448,
+        "sha256": "af9b2132fbffb66a1a4832c500c82bc00ee19ac90a40c2b1f96e95bfe74b295d",
+        "git_blob_oid": "0f1887978fb6c72a5b7c1d1fb3a51d26ca498069",
+        "lfs": {
+          "oid": "af9b2132fbffb66a1a4832c500c82bc00ee19ac90a40c2b1f96e95bfe74b295d",
+          "size": 4107448,
+          "pointerSize": 132
+        }
+      },
+      "target.png": {
+        "path": "data/blenderbench/level1/camera9/renders/goal/render1.png",
+        "size": 311165,
+        "sha256": "df51a5786e84b1d47c2df08c95d6adb3f7594dec20fa17c47424bb08b16145b6",
+        "git_blob_oid": "615154f4ffee4b912add08312db65fd507688af7",
+        "lfs": {
+          "oid": "df51a5786e84b1d47c2df08c95d6adb3f7594dec20fa17c47424bb08b16145b6",
+          "size": 311165,
+          "pointerSize": 131
+        }
+      }
+    },
+    "level2/attribute1": {
+      "task.txt": {
+        "path": "data/blenderbench/level2/attribute1/task.txt",
+        "size": 119,
+        "sha256": "e2f9834ab4a6888041e4e65c01806c816067cbd68931f49d181a938347186caa",
+        "git_blob_oid": "c55b5774e43199c6638deb8ff5990a3395a4ee3f",
+        "lfs": null
+      },
+      "start.py": {
+        "path": "data/blenderbench/level2/attribute1/start.py",
+        "size": 1240,
+        "sha256": "57448a36ff834acc820d071fc99b26285d8968d4fece18300a5c512e18ac2f18",
+        "git_blob_oid": "86c038455c8a485c251ed84a64285bf10dc6896f",
+        "lfs": null
+      },
+      "scene.blend": {
+        "path": "data/blenderbench/level2/attribute1/blender_file.blend",
+        "size": 950771988,
+        "sha256": "d5eca6c92d3cee2ce8a4ea9986a644e4d61a1d66c123c81050616026fa12f5f8",
+        "git_blob_oid": "bfbc64a723927a21ec431856ee3b0bcb17971736",
+        "lfs": {
+          "oid": "d5eca6c92d3cee2ce8a4ea9986a644e4d61a1d66c123c81050616026fa12f5f8",
+          "size": 950771988,
+          "pointerSize": 134
+        }
+      },
+      "target.png": {
+        "path": "data/blenderbench/level2/attribute1/renders/goal/render1.png",
+        "size": 435882,
+        "sha256": "a269058785099fd3f273334e70fa147de3ee3556a500ded8d9b064213fcd8981",
+        "git_blob_oid": "ec260b02febe6c7dbaea38a531f584ed828dd677",
+        "lfs": {
+          "oid": "a269058785099fd3f273334e70fa147de3ee3556a500ded8d9b064213fcd8981",
+          "size": 435882,
+          "pointerSize": 131
+        }
+      }
+    },
+    "level2/attribute2": {
+      "task.txt": {
+        "path": "data/blenderbench/level2/attribute2/task.txt",
+        "size": 119,
+        "sha256": "e2f9834ab4a6888041e4e65c01806c816067cbd68931f49d181a938347186caa",
+        "git_blob_oid": "c55b5774e43199c6638deb8ff5990a3395a4ee3f",
+        "lfs": null
+      },
+      "start.py": {
+        "path": "data/blenderbench/level2/attribute2/start.py",
+        "size": 1180,
+        "sha256": "83702d094c0fa4d6e4a29711dfa024f587339353b1f9ddd6aff5e17b3ab426a8",
+        "git_blob_oid": "1c1f9de3379324f7e099bb90596f2ff70382ce8e",
+        "lfs": null
+      },
+      "scene.blend": {
+        "path": "data/blenderbench/level2/attribute2/blender_file.blend",
+        "size": 950771988,
+        "sha256": "d5eca6c92d3cee2ce8a4ea9986a644e4d61a1d66c123c81050616026fa12f5f8",
+        "git_blob_oid": "bfbc64a723927a21ec431856ee3b0bcb17971736",
+        "lfs": {
+          "oid": "d5eca6c92d3cee2ce8a4ea9986a644e4d61a1d66c123c81050616026fa12f5f8",
+          "size": 950771988,
+          "pointerSize": 134
+        }
+      },
+      "target.png": {
+        "path": "data/blenderbench/level2/attribute2/renders/goal/render1.png",
+        "size": 435876,
+        "sha256": "0744a471d3a07fe9c4a38402f9be09310e5e26dc4abbc62f6b634d20b1f6c23f",
+        "git_blob_oid": "c40abc765e184b1851ed8ac5469bad8045e5f144",
+        "lfs": {
+          "oid": "0744a471d3a07fe9c4a38402f9be09310e5e26dc4abbc62f6b634d20b1f6c23f",
+          "size": 435876,
+          "pointerSize": 131
+        }
+      }
+    },
+    "level2/attribute3": {
+      "task.txt": {
+        "path": "data/blenderbench/level2/attribute3/task.txt",
+        "size": 119,
+        "sha256": "e2f9834ab4a6888041e4e65c01806c816067cbd68931f49d181a938347186caa",
+        "git_blob_oid": "c55b5774e43199c6638deb8ff5990a3395a4ee3f",
+        "lfs": null
+      },
+      "start.py": {
+        "path": "data/blenderbench/level2/attribute3/start.py",
+        "size": 1178,
+        "sha256": "0bd075a70511e2952ff888d6a7d72499311a82764c7ab8c7bb7ae659ba210706",
+        "git_blob_oid": "eb069eba41ab9147184bce60690f6b5355b6c959",
+        "lfs": null
+      },
+      "scene.blend": {
+        "path": "data/blenderbench/level2/attribute3/blender_file.blend",
+        "size": 950771988,
+        "sha256": "d5eca6c92d3cee2ce8a4ea9986a644e4d61a1d66c123c81050616026fa12f5f8",
+        "git_blob_oid": "bfbc64a723927a21ec431856ee3b0bcb17971736",
+        "lfs": {
+          "oid": "d5eca6c92d3cee2ce8a4ea9986a644e4d61a1d66c123c81050616026fa12f5f8",
+          "size": 950771988,
+          "pointerSize": 134
+        }
+      },
+      "target.png": {
+        "path": "data/blenderbench/level2/attribute3/renders/goal/render1.png",
+        "size": 435892,
+        "sha256": "3886f82c111b6e7dada41bcd6129e9c782f543a11e02860c693a5e3c8a336da7",
+        "git_blob_oid": "a28d2858477a08df993ec088e53805f8c16d9df6",
+        "lfs": {
+          "oid": "3886f82c111b6e7dada41bcd6129e9c782f543a11e02860c693a5e3c8a336da7",
+          "size": 435892,
+          "pointerSize": 131
+        }
+      }
+    },
+    "level2/attribute4": {
+      "task.txt": {
+        "path": "data/blenderbench/level2/attribute4/task.txt",
+        "size": 130,
+        "sha256": "fba1c19366ae11259cee9886681c0c8688f65cccc033e45ce82bd1a8cf1d7afc",
+        "git_blob_oid": "e30cdd33cdd13d3059c5e9861224baaac06af74c",
+        "lfs": null
+      },
+      "start.py": {
+        "path": "data/blenderbench/level2/attribute4/start.py",
+        "size": 703,
+        "sha256": "1991b217fd4e044f7ef0966bbb38e8e417bb1fa967effba61bbfc880f7e36543",
+        "git_blob_oid": "e2a610617d76c2c223303277742b9484f9ec1e7c",
+        "lfs": null
+      },
+      "scene.blend": {
+        "path": "data/blenderbench/level2/attribute4/blender_file.blend",
+        "size": 947346540,
+        "sha256": "0d1205f27f8f2493620645554db00c24d74d88b4ae0310fa846e30c3449aa84b",
+        "git_blob_oid": "651e1029bc10ca62d380be72c08e122720b5a7c2",
+        "lfs": {
+          "oid": "0d1205f27f8f2493620645554db00c24d74d88b4ae0310fa846e30c3449aa84b",
+          "size": 947346540,
+          "pointerSize": 134
+        }
+      },
+      "target.png": {
+        "path": "data/blenderbench/level2/attribute4/renders/goal/render1.png",
+        "size": 433064,
+        "sha256": "dd049697d61750d34d9f0587a832d7b8ad322197e63b4319b1938675b64eefcb",
+        "git_blob_oid": "1c8fb0f28aec077a44f6a96ce1a3c6e852b04378",
+        "lfs": {
+          "oid": "dd049697d61750d34d9f0587a832d7b8ad322197e63b4319b1938675b64eefcb",
+          "size": 433064,
+          "pointerSize": 131
+        }
+      }
+    },
+    "level2/attribute5": {
+      "task.txt": {
+        "path": "data/blenderbench/level2/attribute5/task.txt",
+        "size": 130,
+        "sha256": "fba1c19366ae11259cee9886681c0c8688f65cccc033e45ce82bd1a8cf1d7afc",
+        "git_blob_oid": "e30cdd33cdd13d3059c5e9861224baaac06af74c",
+        "lfs": null
+      },
+      "start.py": {
+        "path": "data/blenderbench/level2/attribute5/start.py",
+        "size": 644,
+        "sha256": "d80af70f035011ae1d6bf7001c9cad008e3cb63a6442bfbd87b23e0d4e09fb0a",
+        "git_blob_oid": "7d91d84c63e898aa443debdcf83e46bc00498586",
+        "lfs": null
+      },
+      "scene.blend": {
+        "path": "data/blenderbench/level2/attribute5/blender_file.blend",
+        "size": 947346540,
+        "sha256": "0d1205f27f8f2493620645554db00c24d74d88b4ae0310fa846e30c3449aa84b",
+        "git_blob_oid": "651e1029bc10ca62d380be72c08e122720b5a7c2",
+        "lfs": {
+          "oid": "0d1205f27f8f2493620645554db00c24d74d88b4ae0310fa846e30c3449aa84b",
+          "size": 947346540,
+          "pointerSize": 134
+        }
+      },
+      "target.png": {
+        "path": "data/blenderbench/level2/attribute5/renders/goal/render1.png",
+        "size": 433064,
+        "sha256": "0b33dfa853ce71b3e0a91ae9813e90dba0544f489251d8a811c810c1491fce55",
+        "git_blob_oid": "3824f88b86b5b559a493a42a983a78ecb68adb99",
+        "lfs": {
+          "oid": "0b33dfa853ce71b3e0a91ae9813e90dba0544f489251d8a811c810c1491fce55",
+          "size": 433064,
+          "pointerSize": 131
+        }
+      }
+    },
+    "level2/attribute6": {
+      "task.txt": {
+        "path": "data/blenderbench/level2/attribute6/task.txt",
+        "size": 130,
+        "sha256": "fba1c19366ae11259cee9886681c0c8688f65cccc033e45ce82bd1a8cf1d7afc",
+        "git_blob_oid": "e30cdd33cdd13d3059c5e9861224baaac06af74c",
+        "lfs": null
+      },
+      "start.py": {
+        "path": "data/blenderbench/level2/attribute6/start.py",
+        "size": 641,
+        "sha256": "aadf4e84cd6b0e03c47f45cc1e1b6f12a436b6273ffd7f81cd3f2d28a4c072bf",
+        "git_blob_oid": "8c4abaa13956c250a59146898251b52928d5138f",
+        "lfs": null
+      },
+      "scene.blend": {
+        "path": "data/blenderbench/level2/attribute6/blender_file.blend",
+        "size": 947346540,
+        "sha256": "0d1205f27f8f2493620645554db00c24d74d88b4ae0310fa846e30c3449aa84b",
+        "git_blob_oid": "651e1029bc10ca62d380be72c08e122720b5a7c2",
+        "lfs": {
+          "oid": "0d1205f27f8f2493620645554db00c24d74d88b4ae0310fa846e30c3449aa84b",
+          "size": 947346540,
+          "pointerSize": 134
+        }
+      },
+      "target.png": {
+        "path": "data/blenderbench/level2/attribute6/renders/goal/render1.png",
+        "size": 433064,
+        "sha256": "1eda79fb1fd8773714467694b24cbbf71f049549b0016cac79254724e5c5b5cf",
+        "git_blob_oid": "518e7143a5ee90a2bb6d8e73b972c7b5d4d1cca8",
+        "lfs": {
+          "oid": "1eda79fb1fd8773714467694b24cbbf71f049549b0016cac79254724e5c5b5cf",
+          "size": 433064,
+          "pointerSize": 131
+        }
+      }
+    },
+    "level2/attribute7": {
+      "task.txt": {
+        "path": "data/blenderbench/level2/attribute7/task.txt",
+        "size": 157,
+        "sha256": "f389ae85ca7ee5cb03d3ab75aa37722c9c5c00475e378cdc6d40a92b59fcc328",
+        "git_blob_oid": "9a3d8216657a654dc6be9b8404e878c259c5ed02",
+        "lfs": null
+      },
+      "start.py": {
+        "path": "data/blenderbench/level2/attribute7/start.py",
+        "size": 1346,
+        "sha256": "abd953c4d36252658613f4c385787dbe6baf4beedc346789ea0a6d210c49775b",
+        "git_blob_oid": "3031bcfffd0d61e2efe8d5aa43ad7b7ed79246c1",
+        "lfs": null
+      },
+      "scene.blend": {
+        "path": "data/blenderbench/level2/attribute7/blender_file.blend",
+        "size": 768637773,
+        "sha256": "f49ef4d8b76eddfe71f73646d92ab3f7e6aa791580b5c7b093335f831386863c",
+        "git_blob_oid": "05fcbfc615f12ce6600305c52710ec2d70080a5b",
+        "lfs": {
+          "oid": "f49ef4d8b76eddfe71f73646d92ab3f7e6aa791580b5c7b093335f831386863c",
+          "size": 768637773,
+          "pointerSize": 134
+        }
+      },
+      "target.png": {
+        "path": "data/blenderbench/level2/attribute7/renders/goal/render1.png",
+        "size": 496461,
+        "sha256": "4e0dcf670648bba309e19853047bb294bbf588ffb8928ed9f9a45bef729f9f32",
+        "git_blob_oid": "cfed756b5128bc758a055def9ebef92b21b0479b",
+        "lfs": {
+          "oid": "4e0dcf670648bba309e19853047bb294bbf588ffb8928ed9f9a45bef729f9f32",
+          "size": 496461,
+          "pointerSize": 131
+        }
+      }
+    },
+    "level2/attribute8": {
+      "task.txt": {
+        "path": "data/blenderbench/level2/attribute8/task.txt",
+        "size": 157,
+        "sha256": "f389ae85ca7ee5cb03d3ab75aa37722c9c5c00475e378cdc6d40a92b59fcc328",
+        "git_blob_oid": "9a3d8216657a654dc6be9b8404e878c259c5ed02",
+        "lfs": null
+      },
+      "start.py": {
+        "path": "data/blenderbench/level2/attribute8/start.py",
+        "size": 1346,
+        "sha256": "06cc98b4dae682711a3b06f82ca6cd5a967c30915722b2d3ca57a445f6ae83db",
+        "git_blob_oid": "b37dd16de190575b85f359fa99e72ce5593411ed",
+        "lfs": null
+      },
+      "scene.blend": {
+        "path": "data/blenderbench/level2/attribute8/blender_file.blend",
+        "size": 768637773,
+        "sha256": "f49ef4d8b76eddfe71f73646d92ab3f7e6aa791580b5c7b093335f831386863c",
+        "git_blob_oid": "05fcbfc615f12ce6600305c52710ec2d70080a5b",
+        "lfs": {
+          "oid": "f49ef4d8b76eddfe71f73646d92ab3f7e6aa791580b5c7b093335f831386863c",
+          "size": 768637773,
+          "pointerSize": 134
+        }
+      },
+      "target.png": {
+        "path": "data/blenderbench/level2/attribute8/renders/goal/render1.png",
+        "size": 496462,
+        "sha256": "2177e15ad99cb6559092b37de04aa778b13445c89598736ab67ab4f54cfa4ec3",
+        "git_blob_oid": "3fb1988fe9e2dbd5e711a2b9c253726fee099256",
+        "lfs": {
+          "oid": "2177e15ad99cb6559092b37de04aa778b13445c89598736ab67ab4f54cfa4ec3",
+          "size": 496462,
+          "pointerSize": 131
+        }
+      }
+    },
+    "level2/attribute9": {
+      "task.txt": {
+        "path": "data/blenderbench/level2/attribute9/task.txt",
+        "size": 157,
+        "sha256": "f389ae85ca7ee5cb03d3ab75aa37722c9c5c00475e378cdc6d40a92b59fcc328",
+        "git_blob_oid": "9a3d8216657a654dc6be9b8404e878c259c5ed02",
+        "lfs": null
+      },
+      "start.py": {
+        "path": "data/blenderbench/level2/attribute9/start.py",
+        "size": 1346,
+        "sha256": "956f2d67b54cda24edfeba5d5bfc766002efe018a4a77c0d505d4cf391410bf1",
+        "git_blob_oid": "133230ae8b18e1fb4c6be19880194deb6fadb6c2",
+        "lfs": null
+      },
+      "scene.blend": {
+        "path": "data/blenderbench/level2/attribute9/blender_file.blend",
+        "size": 768637773,
+        "sha256": "f49ef4d8b76eddfe71f73646d92ab3f7e6aa791580b5c7b093335f831386863c",
+        "git_blob_oid": "05fcbfc615f12ce6600305c52710ec2d70080a5b",
+        "lfs": {
+          "oid": "f49ef4d8b76eddfe71f73646d92ab3f7e6aa791580b5c7b093335f831386863c",
+          "size": 768637773,
+          "pointerSize": 134
+        }
+      },
+      "target.png": {
+        "path": "data/blenderbench/level2/attribute9/renders/goal/render1.png",
+        "size": 496462,
+        "sha256": "057562178eba0d2cf993227378f6f93c2689eda870a060cc836edce85f892eb0",
+        "git_blob_oid": "3448027c64be93eee308939ef1f9793ac04bd5bb",
+        "lfs": {
+          "oid": "057562178eba0d2cf993227378f6f93c2689eda870a060cc836edce85f892eb0",
+          "size": 496462,
+          "pointerSize": 131
+        }
+      }
+    },
+    "level3/attribute1": {
+      "task.txt": {
+        "path": "data/blenderbench/level3/attribute1/task.txt",
+        "size": 206,
+        "sha256": "a682f48631e343a9c378a222e0651a7f8dd6f82b39ca8d0ce26305f42bfa422d",
+        "git_blob_oid": "df0d929a1e1d9cdcc321642c98c5d60a6bc90bb9",
+        "lfs": null
+      },
+      "start.py": {
+        "path": "data/blenderbench/level3/attribute1/start.py",
+        "size": 1434,
+        "sha256": "e9d1a0d7c912f9806f5879117403938995c1155d13c33af9a0c0c25068909769",
+        "git_blob_oid": "7d5b416c2be2ddc0f55b8b96482c0536cec22496",
+        "lfs": null
+      },
+      "scene.blend": {
+        "path": "data/blenderbench/level3/attribute1/blender_file.blend",
+        "size": 1103281707,
+        "sha256": "58bd9031ded0eb4c092951573e7e16f2704b29b1a2eb239331c88b5ba74d3aea",
+        "git_blob_oid": "598a2385913f422503103677c28e70a16ba5134b",
+        "lfs": {
+          "oid": "58bd9031ded0eb4c092951573e7e16f2704b29b1a2eb239331c88b5ba74d3aea",
+          "size": 1103281707,
+          "pointerSize": 135
+        }
+      },
+      "target.png": {
+        "path": "data/blenderbench/level3/attribute1/renders/goal/render1.png",
+        "size": 424605,
+        "sha256": "203bc0d5b3cd6bff06e19baa56c56370b5a8da9155b5b0ee3e8598a0886318f0",
+        "git_blob_oid": "d9f070b573c1cfe18b9d06fd2777c97155cdb154",
+        "lfs": {
+          "oid": "203bc0d5b3cd6bff06e19baa56c56370b5a8da9155b5b0ee3e8598a0886318f0",
+          "size": 424605,
+          "pointerSize": 131
+        }
+      }
+    },
+    "level3/attribute2": {
+      "task.txt": {
+        "path": "data/blenderbench/level3/attribute2/task.txt",
+        "size": 206,
+        "sha256": "a682f48631e343a9c378a222e0651a7f8dd6f82b39ca8d0ce26305f42bfa422d",
+        "git_blob_oid": "df0d929a1e1d9cdcc321642c98c5d60a6bc90bb9",
+        "lfs": null
+      },
+      "start.py": {
+        "path": "data/blenderbench/level3/attribute2/start.py",
+        "size": 1374,
+        "sha256": "0c115cf6fdbf43f677ebb5244e6afc9d75dd9635a9f4c6de06abe28a3f68f191",
+        "git_blob_oid": "df1d330fdd5658db8875f63713eeb753bfcce23c",
+        "lfs": null
+      },
+      "scene.blend": {
+        "path": "data/blenderbench/level3/attribute2/blender_file.blend",
+        "size": 1104010951,
+        "sha256": "8dd5b6c18ae4d7f77a94370a9c0203f6ea06911e590c43d4b563c2f0195854be",
+        "git_blob_oid": "3c8b7beeb7aa513fa1c66d186039151f9d38077f",
+        "lfs": {
+          "oid": "8dd5b6c18ae4d7f77a94370a9c0203f6ea06911e590c43d4b563c2f0195854be",
+          "size": 1104010951,
+          "pointerSize": 135
+        }
+      },
+      "target.png": {
+        "path": "data/blenderbench/level3/attribute2/renders/goal/render1.png",
+        "size": 424611,
+        "sha256": "b5b1526c9fde7aecd35f842598627b63172338284d69aaa36d6a40649200ca30",
+        "git_blob_oid": "fec9d6a34397b5ab37a6e14e207f7e232da8a860",
+        "lfs": {
+          "oid": "b5b1526c9fde7aecd35f842598627b63172338284d69aaa36d6a40649200ca30",
+          "size": 424611,
+          "pointerSize": 131
+        }
+      }
+    },
+    "level3/attribute3": {
+      "task.txt": {
+        "path": "data/blenderbench/level3/attribute3/task.txt",
+        "size": 206,
+        "sha256": "a682f48631e343a9c378a222e0651a7f8dd6f82b39ca8d0ce26305f42bfa422d",
+        "git_blob_oid": "df0d929a1e1d9cdcc321642c98c5d60a6bc90bb9",
+        "lfs": null
+      },
+      "start.py": {
+        "path": "data/blenderbench/level3/attribute3/start.py",
+        "size": 1372,
+        "sha256": "de2d9d5cba1b04d58b1d698726c29968d8fbfed225c2b2b24f32f5f765a532ba",
+        "git_blob_oid": "c4d5bbd48128bb87ef8f8186a1cd68439edbfdb2",
+        "lfs": null
+      },
+      "scene.blend": {
+        "path": "data/blenderbench/level3/attribute3/blender_file.blend",
+        "size": 1104010951,
+        "sha256": "7c1a17de951be40e203fc96dde62afc0056392394897e3478de322cf84ef4272",
+        "git_blob_oid": "c0450d126230e49f06bc0afc80710ff278778e73",
+        "lfs": {
+          "oid": "7c1a17de951be40e203fc96dde62afc0056392394897e3478de322cf84ef4272",
+          "size": 1104010951,
+          "pointerSize": 135
+        }
+      },
+      "target.png": {
+        "path": "data/blenderbench/level3/attribute3/renders/goal/render1.png",
+        "size": 424612,
+        "sha256": "741983290631f850e8e7a011679328f9e6da5545a671c23d73c17beb88cae346",
+        "git_blob_oid": "70f334823a5eb76be195cadf3158929b755f9267",
+        "lfs": {
+          "oid": "741983290631f850e8e7a011679328f9e6da5545a671c23d73c17beb88cae346",
+          "size": 424612,
+          "pointerSize": 131
+        }
+      }
+    },
+    "level3/attribute4": {
+      "task.txt": {
+        "path": "data/blenderbench/level3/attribute4/task.txt",
+        "size": 217,
+        "sha256": "f614d97a13bbae1dedef105ca932a0acfdaf7162e9d19cd4ec98ce3c26e3c647",
+        "git_blob_oid": "0f4f7411e78fbfdf51b265988ee7ba26933de194",
+        "lfs": null
+      },
+      "start.py": {
+        "path": "data/blenderbench/level3/attribute4/start.py",
+        "size": 897,
+        "sha256": "bfce3b4e6919cdfa62ddb5893d42d64493d2357505ae83ece52d87a424ff0d10",
+        "git_blob_oid": "c8cf8717af01beef3fa61cc2fdb182a9132bd1ce",
+        "lfs": null
+      },
+      "scene.blend": {
+        "path": "data/blenderbench/level3/attribute4/blender_file.blend",
+        "size": 1100061468,
+        "sha256": "250865ed23f0d6dcb03c8ee9302ae5e55473fb60d35c6b487533fd3f8bd3e29d",
+        "git_blob_oid": "78c59f7e8ca4edbbb336542d964fff9b238fa96d",
+        "lfs": {
+          "oid": "250865ed23f0d6dcb03c8ee9302ae5e55473fb60d35c6b487533fd3f8bd3e29d",
+          "size": 1100061468,
+          "pointerSize": 135
+        }
+      },
+      "target.png": {
+        "path": "data/blenderbench/level3/attribute4/renders/goal/render1.png",
+        "size": 424822,
+        "sha256": "2dfaea1568f9cfb0400600c874e214dc9b15578708571d1d9897605330ffc928",
+        "git_blob_oid": "1e0bf1cecf36801c6aef9cdbd5f335f6a577897a",
+        "lfs": {
+          "oid": "2dfaea1568f9cfb0400600c874e214dc9b15578708571d1d9897605330ffc928",
+          "size": 424822,
+          "pointerSize": 131
+        }
+      }
+    },
+    "level3/attribute5": {
+      "task.txt": {
+        "path": "data/blenderbench/level3/attribute5/task.txt",
+        "size": 217,
+        "sha256": "f614d97a13bbae1dedef105ca932a0acfdaf7162e9d19cd4ec98ce3c26e3c647",
+        "git_blob_oid": "0f4f7411e78fbfdf51b265988ee7ba26933de194",
+        "lfs": null
+      },
+      "start.py": {
+        "path": "data/blenderbench/level3/attribute5/start.py",
+        "size": 838,
+        "sha256": "8fb7657a111ad845d72eaa3c1599f46f0ee1bb4c7b9b8e97b2858d7c2a71c215",
+        "git_blob_oid": "59d3e7ce0a94c4c34a243de6f0266e80084ddb04",
+        "lfs": null
+      },
+      "scene.blend": {
+        "path": "data/blenderbench/level3/attribute5/blender_file.blend",
+        "size": 947346540,
+        "sha256": "0d1205f27f8f2493620645554db00c24d74d88b4ae0310fa846e30c3449aa84b",
+        "git_blob_oid": "651e1029bc10ca62d380be72c08e122720b5a7c2",
+        "lfs": {
+          "oid": "0d1205f27f8f2493620645554db00c24d74d88b4ae0310fa846e30c3449aa84b",
+          "size": 947346540,
+          "pointerSize": 134
+        }
+      },
+      "target.png": {
+        "path": "data/blenderbench/level3/attribute5/renders/goal/render1.png",
+        "size": 432648,
+        "sha256": "08f94e6af9f1bd74f52a7302f7673da3ebfb318437d4a986780158967944635b",
+        "git_blob_oid": "e9aef85c8c070db78c4d9f85a0ae46eeef6b3b92",
+        "lfs": {
+          "oid": "08f94e6af9f1bd74f52a7302f7673da3ebfb318437d4a986780158967944635b",
+          "size": 432648,
+          "pointerSize": 131
+        }
+      }
+    },
+    "level3/attribute6": {
+      "task.txt": {
+        "path": "data/blenderbench/level3/attribute6/task.txt",
+        "size": 217,
+        "sha256": "f614d97a13bbae1dedef105ca932a0acfdaf7162e9d19cd4ec98ce3c26e3c647",
+        "git_blob_oid": "0f4f7411e78fbfdf51b265988ee7ba26933de194",
+        "lfs": null
+      },
+      "start.py": {
+        "path": "data/blenderbench/level3/attribute6/start.py",
+        "size": 835,
+        "sha256": "6e1bed8235bb346af995c6f281b05f2d482c3f36dd0432a9df9ce62674dd7dbd",
+        "git_blob_oid": "c6ebc619f78ff7952522a61c9c1d7eb3dad40bdb",
+        "lfs": null
+      },
+      "scene.blend": {
+        "path": "data/blenderbench/level3/attribute6/blender_file.blend",
+        "size": 947346540,
+        "sha256": "0d1205f27f8f2493620645554db00c24d74d88b4ae0310fa846e30c3449aa84b",
+        "git_blob_oid": "651e1029bc10ca62d380be72c08e122720b5a7c2",
+        "lfs": {
+          "oid": "0d1205f27f8f2493620645554db00c24d74d88b4ae0310fa846e30c3449aa84b",
+          "size": 947346540,
+          "pointerSize": 134
+        }
+      },
+      "target.png": {
+        "path": "data/blenderbench/level3/attribute6/renders/goal/render1.png",
+        "size": 432652,
+        "sha256": "86b764ac22fe162549f3d5a2995e0e8160e836cf6abac763c120f9de283a8089",
+        "git_blob_oid": "10d2d97575e32eeb841547b7270f74cf7fabd6ff",
+        "lfs": {
+          "oid": "86b764ac22fe162549f3d5a2995e0e8160e836cf6abac763c120f9de283a8089",
+          "size": 432652,
+          "pointerSize": 131
+        }
+      }
+    },
+    "level3/attribute7": {
+      "task.txt": {
+        "path": "data/blenderbench/level3/attribute7/task.txt",
+        "size": 244,
+        "sha256": "9f6dd788a109d7888acd415b2dec5b86441aaf2c9c31bd898657b3acd769afb1",
+        "git_blob_oid": "20dc920fca0ea87f55f7a39e4be480283ca1b6e3",
+        "lfs": null
+      },
+      "start.py": {
+        "path": "data/blenderbench/level3/attribute7/start.py",
+        "size": 1539,
+        "sha256": "88c03b7b328cb7251425acdde7959aa4cb9bea9add652c68faa5d442460fa4f9",
+        "git_blob_oid": "aeda4ddbd4422cd29ba466dd3577f9f05a9ea7e4",
+        "lfs": null
+      },
+      "scene.blend": {
+        "path": "data/blenderbench/level3/attribute7/blender_file.blend",
+        "size": 766325689,
+        "sha256": "c4efab1f4cfc624e047491836f5516a0d2bd0e4f803926bca3e94e23a0ada149",
+        "git_blob_oid": "ee8f5fb6f9a868345bb02a9cac6deee6e68e3f45",
+        "lfs": {
+          "oid": "c4efab1f4cfc624e047491836f5516a0d2bd0e4f803926bca3e94e23a0ada149",
+          "size": 766325689,
+          "pointerSize": 134
+        }
+      },
+      "target.png": {
+        "path": "data/blenderbench/level3/attribute7/renders/goal/render1.png",
+        "size": 496540,
+        "sha256": "0ada6e89b53c28b9036418def514b728dd0eeb664eb3f7a1ca9496a5e8ef93f1",
+        "git_blob_oid": "066f39046e01e72f80fb53c8606b7deaf2811ab5",
+        "lfs": {
+          "oid": "0ada6e89b53c28b9036418def514b728dd0eeb664eb3f7a1ca9496a5e8ef93f1",
+          "size": 496540,
+          "pointerSize": 131
+        }
+      }
+    },
+    "level3/attribute8": {
+      "task.txt": {
+        "path": "data/blenderbench/level3/attribute8/task.txt",
+        "size": 244,
+        "sha256": "9f6dd788a109d7888acd415b2dec5b86441aaf2c9c31bd898657b3acd769afb1",
+        "git_blob_oid": "20dc920fca0ea87f55f7a39e4be480283ca1b6e3",
+        "lfs": null
+      },
+      "start.py": {
+        "path": "data/blenderbench/level3/attribute8/start.py",
+        "size": 1539,
+        "sha256": "6fdf229c8df32bdfd1700e90cd1c135e1eba67038effd3c766753a386e523c2a",
+        "git_blob_oid": "37c534a03c87c0689ca42cedbc8cb572edace78b",
+        "lfs": null
+      },
+      "scene.blend": {
+        "path": "data/blenderbench/level3/attribute8/blender_file.blend",
+        "size": 768637773,
+        "sha256": "f49ef4d8b76eddfe71f73646d92ab3f7e6aa791580b5c7b093335f831386863c",
+        "git_blob_oid": "05fcbfc615f12ce6600305c52710ec2d70080a5b",
+        "lfs": {
+          "oid": "f49ef4d8b76eddfe71f73646d92ab3f7e6aa791580b5c7b093335f831386863c",
+          "size": 768637773,
+          "pointerSize": 134
+        }
+      },
+      "target.png": {
+        "path": "data/blenderbench/level3/attribute8/renders/goal/render1.png",
+        "size": 496540,
+        "sha256": "33e602e64c9b3f6825472277653bd168de39645a61cde8d8112efe0ae0cde1ad",
+        "git_blob_oid": "8d6dff62f9fc08e27eafe9ec5a0cd6b90c4de73f",
+        "lfs": {
+          "oid": "33e602e64c9b3f6825472277653bd168de39645a61cde8d8112efe0ae0cde1ad",
+          "size": 496540,
+          "pointerSize": 131
+        }
+      }
+    },
+    "level3/attribute9": {
+      "task.txt": {
+        "path": "data/blenderbench/level3/attribute9/task.txt",
+        "size": 244,
+        "sha256": "9f6dd788a109d7888acd415b2dec5b86441aaf2c9c31bd898657b3acd769afb1",
+        "git_blob_oid": "20dc920fca0ea87f55f7a39e4be480283ca1b6e3",
+        "lfs": null
+      },
+      "start.py": {
+        "path": "data/blenderbench/level3/attribute9/start.py",
+        "size": 1539,
+        "sha256": "bd47ca26dfd4b224a33766dcd40101cbf3f8b168773541d7444d6ea1c4039a6b",
+        "git_blob_oid": "94fe4672c7fe453266a24537cfd7e0df0556ce1f",
+        "lfs": null
+      },
+      "scene.blend": {
+        "path": "data/blenderbench/level3/attribute9/blender_file.blend",
+        "size": 768637773,
+        "sha256": "f49ef4d8b76eddfe71f73646d92ab3f7e6aa791580b5c7b093335f831386863c",
+        "git_blob_oid": "05fcbfc615f12ce6600305c52710ec2d70080a5b",
+        "lfs": {
+          "oid": "f49ef4d8b76eddfe71f73646d92ab3f7e6aa791580b5c7b093335f831386863c",
+          "size": 768637773,
+          "pointerSize": 134
+        }
+      },
+      "target.png": {
+        "path": "data/blenderbench/level3/attribute9/renders/goal/render1.png",
+        "size": 496540,
+        "sha256": "27653bfcb7c78fe51239c3905060ce112e65c8875966b2d81f3d0ae33fa322ee",
+        "git_blob_oid": "5baa5bd208c5f160405d1fa96895eddd9ea9887d",
+        "lfs": {
+          "oid": "27653bfcb7c78fe51239c3905060ce112e65c8875966b2d81f3d0ae33fa322ee",
+          "size": 496540,
+          "pointerSize": 131
+        }
+      }
+    }
+  },
+  "source_url": "https://huggingface.co/datasets/DietCoke4671/BlenderBench",
+  "attribution": "BlenderBench dataset by DietCoke4671 and contributors",
+  "license": "CC BY 4.0"
+}

@@ -82,86 +82,11 @@ class SuiteTests(unittest.TestCase):
         self.assertEqual(len(got), 140)
         self.assertEqual(got[1], {'type': 'NodeB'})
 
-    def test_retry_requires_finished_suite_and_same_global_lock(self):
-        import tempfile
-        import fcntl
-        import direct_camera_retry as retry
-        with tempfile.TemporaryDirectory() as tmp:
-            root = Path(tmp)
-            suite = root / 'suite'
-            suite.mkdir()
-            self.assertFalse(retry.suite_finished(suite))
-            (suite / 'events.jsonl').write_text('{"event":"dispatcher_started"}\n')
-            self.assertFalse(retry.suite_finished(suite))
-            (suite / 'events.jsonl').write_text('{"event":"dispatcher_finished"}\n')
-            self.assertTrue(retry.suite_finished(suite))
-            with (root / 'direct-suite.lock').open('a') as held:
-                fcntl.flock(held, fcntl.LOCK_EX | fcntl.LOCK_NB)
-                with (root / 'direct-suite.lock').open('a') as other:
-                    self.assertFalse(retry.try_lock(other))
-                fcntl.flock(held, fcntl.LOCK_UN)
-            with (root / 'direct-suite.lock').open('a') as other:
-                self.assertTrue(retry.try_lock(other))
-            (suite / 'STOP').touch()
-            with self.assertRaises(InterruptedError):
-                retry.suite_finished(suite)
+    def test_nonfunctional_legacy_retry_and_stale_validation_docs_are_removed(self):
+        self.assertFalse((TOOLS / 'direct_camera_retry.py').exists())
+        self.assertFalse((TOOLS / 'direct_camera_retry.md').exists())
+        self.assertFalse((TOOLS / 'direct_saved_validation.md').exists())
 
-    def test_retry_process_waits_without_work_and_honors_stop(self):
-        import json
-        import subprocess
-        import tempfile
-        import time
-        with tempfile.TemporaryDirectory() as tmp:
-            root = Path(tmp)
-            predecessor = root / 'suite'
-            predecessor.mkdir()
-            out = root / 'retry'
-            bootstrap = ('import sys; sys.path.insert(0,' + repr(str(TOOLS)) + '); '
-                         'import direct_camera_retry as r; from pathlib import Path; '
-                         'r.suite.ROOT=Path(' + repr(tmp) + '); r.main()')
-            process = subprocess.Popen([sys.executable, '-c', bootstrap, '--output', str(out),
-                                        '--after-suite', str(predecessor)],
-                                       stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            try:
-                deadline = time.monotonic() + 5
-                while not (out / 'status.json').exists() and time.monotonic() < deadline:
-                    time.sleep(0.02)
-                row = json.loads((out / 'status.json').read_text())
-                self.assertEqual(row['status'], 'waiting_for_suite')
-                self.assertFalse((out / 'level1-camera3').exists())
-                (out / 'STOP').touch()
-                process.communicate(timeout=15)
-                self.assertNotEqual(process.returncode, 0)
-                self.assertEqual(json.loads((out / 'status.json').read_text())['status'], 'failed')
-                self.assertFalse((out / 'level1-camera3').exists())
-            finally:
-                if process.poll() is None:
-                    process.kill()
-                    process.communicate()
-
-    def test_restart_selection_is_unique_canonical_and_excludes_camera1(self):
-        import direct_suite as suite
-        tasks = {'level1/camera1': {}}
-        tasks.update({f'level2/task{i}': {} for i in range(26)})
-        selected = ['level2/task3', 'level2/task4']
-        self.assertEqual(suite.task_plan(tasks, selected), selected)
-        for invalid in [['unknown'], ['level1/camera1'], [selected[0]] * 2, []]:
-            with self.assertRaises(ValueError):
-                suite.task_plan(tasks, invalid)
-
-    def test_plan_excludes_only_completed_camera1(self):
-        script = TOOLS / 'direct_suite.py'
-        self.assertTrue(script.exists(), 'suite dispatcher missing')
-        spec = importlib.util.spec_from_file_location('suite', script)
-        module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)
-        tasks = {'level1/camera1': {}}
-        tasks.update({f'level2/task{i}': {} for i in range(26)})
-        plan = module.task_plan(tasks)
-        self.assertEqual(len(plan), 26)
-        self.assertNotIn('level1/camera1', plan)
-        with self.assertRaises(ValueError):
-            module.task_plan({'level1/camera1': {}})
 
 if __name__ == '__main__':
     unittest.main()

@@ -1,8 +1,21 @@
 """Direct Codex launch/config preflight; no benchmark controller or scoring."""
 import copy
 
-TOOLS = ('execute_blender_code_for_cli', 'get_runtime_python_api_docs_for_cli',
-         'search_api_docs', 'get_python_api_docs')
+TOOLS = ('execute_blender_code_for_cli', 'get_render_as_image_for_cli',
+         'get_runtime_python_api_docs_for_cli', 'search_api_docs')
+CODEX_VERSION = 'codex-cli 0.154.0'
+CODEX_SOURCE_REVISION = '6b9826e3aa83b1a5947db50f4332cb9c65f1b340'
+CODEX_FEATURE_REGISTRY_URL = (
+    'https://github.com/openai/codex/blob/' + CODEX_SOURCE_REVISION
+    + '/codex-rs/features/src/lib.rs')
+DISABLED_FEATURES = (
+    'shell_tool', 'unified_exec', 'unified_exec_tty', 'shell_snapshot', 'view_image',
+    'sleep_tool', 'code_mode', 'code_mode_host', 'code_mode_prewarm',
+    'request_permissions_tool', 'multi_agent', 'multi_agent_v2', 'apps', 'enable_mcp_apps',
+    'tool_suggest', 'plugins', 'hooks', 'in_app_browser', 'in_app_local_automation',
+    'browser_use', 'browser_use_full_cdp_access', 'browser_use_external', 'computer_use',
+    'remote_plugin', 'plugin_sharing', 'image_generation', 'standalone_web_search',
+    'web_search_request', 'web_search_cached')
 
 
 def prepare_config(config, *, approved):
@@ -26,10 +39,40 @@ def prepare_config(config, *, approved):
         raise ValueError('absolute server and standalone bpy interpreter required')
     server['tools'] = {tool: {'approval_mode': 'approve'} for tool in TOOLS}
     server['required'] = True
+    # Codex 0.154 otherwise defers MCP tools through tool_search, whose dynamic
+    # calls are not represented by exec JSONL. Force the four tools direct.
+    server['omit_tools_from'] = ['deferred', 'code_mode']
     return result
 
 
-def verify_preflight(events, nonce, python):
+def verify_generation_workdir(root):
+    """Require the mounted generation root to contain only initialized runtime inputs."""
+    import hashlib
+    from pathlib import Path
+    root = Path(root).absolute()
+    allowed = {'initial.blend', 'initial_verified.png', 'audit.json', 'metadata.json',
+               'runtime.log', 'worker.py', 'worker.json'}
+    if root.is_symlink() or not root.is_dir():
+        raise ValueError('generation runtime root must be a regular directory')
+    entries = list(root.iterdir())
+    unexpected = sorted(entry.name for entry in entries if entry.name not in allowed)
+    if unexpected or any(entry.is_symlink() or not entry.is_file() for entry in entries):
+        raise ValueError(f'generation runtime root contains undeclared paths: {unexpected}')
+    initial = root / 'initial.blend'
+    if not initial.is_file():
+        raise ValueError('generation runtime root requires initial.blend')
+    worker = root / 'worker.py'
+    if worker.exists():
+        try:
+            from tools import direct_runtime
+        except ModuleNotFoundError:  # direct script invocation adds tools/ to sys.path
+            import direct_runtime
+        expected = hashlib.sha256(direct_runtime.WORKER.encode()).hexdigest()
+        if hashlib.sha256(worker.read_bytes()).hexdigest() != expected:
+            raise ValueError('generation runtime worker.py differs from canonical runtime bytes')
+
+
+def verify_preflight(events, nonce, python, bpy_version='5.2.1'):
     """Require a completed real MCP item, never trust the final assistant text."""
     import json
     for event in events:
@@ -48,9 +91,121 @@ def verify_preflight(events, nonce, python):
                 continue
         if (isinstance(payload, dict) and payload.get('preflight') == nonce
                 and payload.get('python') == python
-                and str(payload.get('version', '')).split()[:1] == ['5.2.1']):
+                and str(payload.get('version', '')).startswith(bpy_version)):
             return
-    raise ValueError('no successful standalone bpy 5.2.1 MCP preflight result')
+    raise ValueError(f'no successful standalone bpy {bpy_version} MCP preflight result')
+
+
+def verify_generation_events(events, rounds=None, workdir=None):
+    """Reject any generation operation outside the four approved MCP tools."""
+    import json
+    import re
+    forbidden = re.compile(
+        r'(?i)(goal(?:_code)?\.py|\bsolution(?:\.py)?\b|oracle|scores?\.json|scoring[/\\]|'
+        r'aggregate\.json|ref_based_eval|evaluator|clipmodel|photometric_loss)')
+    seen = {}
+    completed = set()
+    visual_checkpoints = []
+    pending_checkpoint = None
+    active_edit = None
+    turn_completed = 0
+    for index, event in enumerate(events):
+        if event.get('type') in ('error', 'turn.failed'):
+            raise ValueError('generation event stream reports failure')
+        if event.get('type') == 'turn.completed':
+            turn_completed += 1
+            if index != len(events) - 1:
+                raise ValueError('generation turn completion must terminate the event stream')
+            continue
+        if event.get('type') not in ('item.started', 'item.updated', 'item.completed'):
+            continue
+        item = event.get('item')
+        if not isinstance(item, dict) or not isinstance(item.get('id'), str):
+            raise ValueError('malformed generation item event')
+        ident, kind = item['id'], item.get('type')
+        signature = (kind, item.get('server'), item.get('tool'))
+        if ident in seen and seen[ident] != signature:
+            raise ValueError('generation item identity changed in event stream')
+        seen[ident] = signature
+        if kind in ('reasoning', 'agent_message'):
+            continue
+        if kind != 'mcp_tool_call':
+            raise ValueError(f'prohibited Codex generation operation: {kind!r}')
+        if item.get('server') != 'blender' or item.get('tool') not in TOOLS:
+            raise ValueError('generation used a tool outside the four approved Blender MCP tools')
+        arguments = json.dumps(item.get('arguments', {}), sort_keys=True, default=str)
+        if forbidden.search(arguments):
+            raise ValueError('generation MCP arguments access prohibited goal/solution or score feedback')
+        if event.get('type') == 'item.started' and item.get('tool') == 'execute_blender_code_for_cli':
+            if active_edit is not None or pending_checkpoint is not None:
+                raise ValueError('next edit dispatch preceded visual inspection of prior checkpoint')
+            active_edit = ident
+        if event.get('type') == 'item.completed':
+            if ident in completed:
+                raise ValueError('duplicate generation item completion')
+            completed.add(ident)
+            result = item.get('result') or {}
+            if (item.get('status') != 'completed' or item.get('error')
+                    or (isinstance(result, dict) and result.get('isError'))):
+                raise ValueError('generation MCP tool call failed')
+            if item.get('tool') == 'execute_blender_code_for_cli':
+                if pending_checkpoint is not None or (active_edit is not None and active_edit != ident):
+                    raise ValueError('next edit dispatch preceded visual inspection of prior checkpoint')
+                structured = result.get('structured_content') if isinstance(result, dict) else None
+                if isinstance(structured, dict) and isinstance(structured.get('_checkpoint'), dict):
+                    pending_checkpoint = structured['_checkpoint']
+                active_edit = None
+            if item.get('tool') == 'get_render_as_image_for_cli':
+                content = result.get('content', []) if isinstance(result, dict) else []
+                if not any(isinstance(value, dict) and value.get('type') == 'image'
+                           and value.get('mimeType') == 'image/png' and value.get('data')
+                           for value in content):
+                    raise ValueError('visual inspection tool did not return PNG image content')
+                arguments = item.get('arguments')
+                if not isinstance(arguments, dict) or not isinstance(arguments.get('blend_file'), str):
+                    raise ValueError('visual inspection requires a saved checkpoint path')
+                path = __import__('pathlib').Path(arguments['blend_file']).absolute()
+                metadata = next((value.get('_meta', value.get('meta')) for value in content
+                                 if isinstance(value, dict) and value.get('type') == 'image'), None)
+                if workdir is not None:
+                    expected_path = (__import__('pathlib').Path(workdir).resolve()
+                                     / f'iteration{len(visual_checkpoints)+1:02}.blend')
+                    if path != expected_path:
+                        raise ValueError('visual inspection checkpoint path or source hash is invalid')
+                    path = path.resolve(strict=True)
+                    import hashlib
+                    with path.open('rb') as stream:
+                        actual_hash = hashlib.file_digest(stream, 'sha256').hexdigest()
+                    source_path = (__import__('pathlib').Path(workdir).resolve() / 'initial.blend'
+                                   if not visual_checkpoints else
+                                   __import__('pathlib').Path(workdir).resolve()
+                                   / f'iteration{len(visual_checkpoints):02}.blend')
+                    if not isinstance(pending_checkpoint, dict):
+                        raise ValueError('visual inspection requires an attested checkpoint creation')
+                    with source_path.open('rb') as stream:
+                        source_hash = hashlib.file_digest(stream, 'sha256').hexdigest()
+                    if (not isinstance(metadata, dict)
+                            or metadata.get('source') != str(path)
+                            or metadata.get('source_sha256') != actual_hash
+                            or pending_checkpoint.get('path') != str(path)
+                            or pending_checkpoint.get('source') != str(source_path)
+                            or pending_checkpoint.get('source_sha256') != source_hash
+                            or pending_checkpoint.get('output_sha256') != actual_hash
+                            or pending_checkpoint.get('existed_before') is not False):
+                        raise ValueError('visual inspection checkpoint path or source hash is invalid')
+                visual_checkpoints.append(path.name)
+                pending_checkpoint = None
+    if any(ident not in completed and signature[0] == 'mcp_tool_call'
+           for ident, signature in seen.items()):
+        raise ValueError('generation event stream contains unfinished MCP tool call')
+    if turn_completed != 1 or not completed:
+        raise ValueError('generation event stream is empty or lacks a completed turn/tool call')
+    if rounds is not None:
+        expected = [f'iteration{number:02}.blend' for number in range(1, rounds + 1)]
+        if visual_checkpoints != expected:
+            raise ValueError(f'visual inspection checkpoint sequence must be exactly {expected}')
+        if pending_checkpoint is not None:
+            raise ValueError('generation created an uninspected checkpoint')
 
 
 def validate_edit(before, after, policy):
@@ -86,7 +241,12 @@ def verify_checkpoints(root, rounds, policy=None):
     import hashlib
     import json
     import math
+    from pathlib import Path
     from PIL import Image
+    root = Path(root).expanduser().absolute()
+    for component in (root, *root.parents):
+        if component.is_symlink():
+            raise ValueError(f'symlink forbidden in checkpoint path: {component}')
     try:
         rows = [json.loads(line) for line in (root / 'rounds.jsonl').read_text().splitlines()]
         if rounds < 1 or [r['round'] for r in rows] != list(range(1, rounds + 1)):
@@ -136,12 +296,23 @@ def toml_value(value):
 def invoke(args, config, evidence, label, prompt, target=None):
     import json
     import subprocess
-    command = [args.codex, 'exec', '--ignore-user-config', '--strict-config',
-               '--skip-git-repo-check', '--sandbox', 'workspace-write', '--model', args.model,
+    command = [args.codex]
+    for feature in DISABLED_FEATURES:
+        command += ['--disable', feature]
+    command += ['exec', '--ignore-user-config', '--strict-config',
+               '--skip-git-repo-check', '--sandbox', 'read-only', '--model', args.model,
                '--json', '-C', str(args.workdir), '-c', 'approval_policy="never"',
+               '-c', 'web_search="disabled"',
+               '-c', 'tools.experimental_request_user_input=false',
+               '-c', 'tools.update_plan=false',
                '-c', 'mcp_servers=' + toml_value(config['mcp_servers']),
                '-o', str(evidence / (label + '.final.txt'))]
     if target:
+        import hashlib
+        target = target.resolve(strict=True)
+        (evidence / (label + '.visible-input.json')).write_text(json.dumps({
+            'mechanism': 'Codex exec -i bootstrap attachment; Codex 0.154 JSONL does not emit ImageView',
+            'path': str(target), 'sha256': hashlib.sha256(target.read_bytes()).hexdigest()}))
         command += ['-i', str(target)]
     command += ['-']
     (evidence / (label + '.argv.json')).write_text(json.dumps(command, indent=2))
@@ -167,7 +338,9 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('mode', choices=['preflight', 'run'])
     parser.add_argument('--config', type=Path, required=True)
-    parser.add_argument('--codex', default='codex')
+    parser.add_argument('--codex', required=True)
+    parser.add_argument('--codex-version', required=True)
+    parser.add_argument('--bpy-version', required=True)
     parser.add_argument('--workdir', type=Path, required=True)
     parser.add_argument('--evidence', type=Path, required=True, help='fresh private evidence directory')
     parser.add_argument('--model', required=True)
@@ -184,6 +357,7 @@ def main(argv=None):
         args.evidence = args.evidence.absolute()
         if not (args.workdir / 'initial.blend').is_file():
             raise ValueError('workdir requires initial.blend')
+        verify_generation_workdir(args.workdir)
         if args.mode == 'run':
             if not args.prompt or not args.target or args.rounds < 1:
                 raise ValueError('run requires --prompt, --target, and positive --rounds')
@@ -192,8 +366,8 @@ def main(argv=None):
             if (args.workdir / 'rounds.jsonl').exists() or any(args.workdir.glob('iteration*')):
                 raise ValueError('run requires fresh checkpoint paths; resume is unsupported')
         version = subprocess.check_output([args.codex, '--version'], text=True).strip()
-        if version != 'codex-cli 0.154.0':
-            raise ValueError(f'unsupported Codex version {version!r}; review schema before updating pin')
+        if args.codex_version != CODEX_VERSION or version != CODEX_VERSION:
+            raise ValueError(f'publication protocol requires exactly {CODEX_VERSION!r}; got {version!r}')
         args.evidence.mkdir(parents=True, exist_ok=False, mode=0o700)
         (args.evidence / 'config.json').write_text(json.dumps(config, indent=2))
         (args.evidence / 'codex-version.txt').write_text(version)
@@ -204,16 +378,20 @@ def main(argv=None):
                      + str(args.workdir / 'initial.blend') + ' and code=' + code
                      + '. Do not mutate or save the scene. Do not use shell or other tools.')
         events = invoke(args, config, args.evidence, 'preflight', preflight)
-        verify_preflight(events, nonce, config['mcp_servers']['blender']['env']['BLENDER_MCP_BPY_PYTHON'])
+        verify_preflight(events, nonce, config['mcp_servers']['blender']['env']['BLENDER_MCP_BPY_PYTHON'], args.bpy_version)
         if args.mode == 'run':
             contract = ('\nUse only these MCP tools for scene operations: ' + ', '.join(TOOLS)
                         + '. No shell scene operations, benchmark controller, VLM judge, scoring, or publication. '
-                        'Use view_image for image inspection. Write rounds.jsonl via MCP with one row per '
+                        'After every saved round call get_render_as_image_for_cli on that round checkpoint and '
+                        'visually inspect its returned PNG content; built-in view_image is disabled. Write rounds.jsonl via MCP with one row per '
                         'completed round: round (integer), pose={location:[x,y,z],rotation:[x,y,z]}, '
                         'blend and png (absolute paths), rationale. Save iteration01.blend/iteration01.png '
                         f'through iteration{args.rounds:02}.blend/iteration{args.rounds:02}.png. '
+                        'For each edit set execute_blender_code_for_cli blend_file to initial.blend or the preceding '
+                        'iteration and expected_output_blend to the new iteration blend. '
                         'Inspection/no-op calls are not rounds. Never alter initial.blend.')
-            invoke(args, config, args.evidence, 'run', prompt + contract, args.target)
+            events = invoke(args, config, args.evidence, 'run', prompt + contract, args.target)
+            verify_generation_events(events, rounds=args.rounds, workdir=args.workdir)
             checkpoints = verify_checkpoints(args.workdir, args.rounds)
             (args.evidence / 'artifact-check.json').write_text(json.dumps({
                 'status': 'artifacts_complete_not_scene_audited', 'checkpoints': checkpoints}, indent=2))

@@ -458,7 +458,7 @@ def main(argv=None):
     parser.add_argument("--condition", choices=CONDITIONS, default="enhanced_bpy")
     parser.add_argument("--server-python", default="/REQUIRES_REVIEW/server-python")
     parser.add_argument("--runtime", default="/REQUIRES_REVIEW/runtime")
-    parser.add_argument("--model", default="REQUIRES_PARENT_MODEL_SELECTION")
+    parser.add_argument("--model", required=True)
     parser.add_argument("--fixture-stream")
     args = parser.parse_args(argv)
     if args.mode == "dry-run":

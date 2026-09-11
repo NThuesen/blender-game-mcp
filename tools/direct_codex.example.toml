@@ -3,7 +3,7 @@
 [mcp_servers.blender]
 command = "/absolute/server-venv/bin/blender-mcp"
 cwd = "/absolute/blender-mcp/mcp"
-enabled_tools = ["execute_blender_code_for_cli", "get_runtime_python_api_docs_for_cli", "search_api_docs", "get_python_api_docs"]
+enabled_tools = ["execute_blender_code_for_cli", "get_render_as_image_for_cli", "get_runtime_python_api_docs_for_cli", "search_api_docs"]
 required = true
 # Explicit client deadline, NOT a backend timeout override or no-deadline promise.
 tool_timeout_sec = 86400

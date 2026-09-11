@@ -1,0 +1,1944 @@
+{
+  "schema_version": 1,
+  "revision": "203e4d325e9438ca55b29bdfc4f6a90842d74e68",
+  "tasks": {
+    "level1/camera1": {
+      "reviewed": true,
+      "review_basis": "Pinned task.txt and start.py only; imports and unused helper definitions discarded; literal assignments reviewed. No upstream code execution.",
+      "start_sha256": "8680900dd5a85c2467f86a7ec0c47e3868569e387948eb7e45aab65794981c06",
+      "task_description": "Adjust the camera position so that the viewing angle is consistent with the target image",
+      "initialization": [
+        {
+          "kind": "object",
+          "object": "Camera1",
+          "property": "location",
+          "value": [
+            1.0765,
+            -1.2848,
+            1.4343
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "Camera1",
+          "property": "rotation_euler",
+          "value": [
+            1.5701,
+            0.0,
+            0.6753
+          ]
+        }
+      ]
+    },
+    "level1/camera2": {
+      "reviewed": true,
+      "review_basis": "Pinned task.txt and start.py only; imports and unused helper definitions discarded; literal assignments reviewed. No upstream code execution.",
+      "start_sha256": "41cae2396027226fb32fd06a6e0a6e913bd895811bdee383416ef1bd1598d186",
+      "task_description": "Adjust the camera position so that the viewing angle is consistent with the target image",
+      "initialization": [
+        {
+          "kind": "object",
+          "object": "Camera1",
+          "property": "location",
+          "value": [
+            -3.4813,
+            4.5001,
+            0.5115
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "Camera1",
+          "property": "rotation_euler",
+          "value": [
+            1.6678,
+            0.0,
+            3.8693
+          ]
+        }
+      ]
+    },
+    "level1/camera3": {
+      "reviewed": true,
+      "review_basis": "Pinned task.txt and start.py only; imports and unused helper definitions discarded; literal assignments reviewed. No upstream code execution.",
+      "start_sha256": "f5acd7609ff23e01e3d435173d46ea45907fc2b3771dea91f5da0007e51500f2",
+      "task_description": "Adjust the camera position so that the viewing angle is consistent with the target image",
+      "initialization": [
+        {
+          "kind": "object",
+          "object": "Camera1",
+          "property": "location",
+          "value": [
+            6.7303,
+            -4.87,
+            3.7385
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "Camera1",
+          "property": "rotation_euler",
+          "value": [
+            1.2811,
+            -0.0,
+            0.9355
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "Camera1",
+          "property": "data.lens",
+          "value": 50
+        }
+      ]
+    },
+    "level1/camera4": {
+      "reviewed": true,
+      "review_basis": "Pinned task.txt and start.py only; imports and unused helper definitions discarded; literal assignments reviewed. No upstream code execution.",
+      "start_sha256": "a994ae0f9c936a8a4a469b5245bc5cc438e7a112ec55288b7c2473998872d657",
+      "task_description": "Adjust the camera position so that the viewing angle is consistent with the target image",
+      "initialization": [
+        {
+          "kind": "object",
+          "object": "Camera1",
+          "property": "location",
+          "value": [
+            1.14,
+            0.85,
+            0.53
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "Camera1",
+          "property": "rotation_euler",
+          "value": [
+            2.4435,
+            1.117,
+            2.6354
+          ]
+        }
+      ]
+    },
+    "level1/camera5": {
+      "reviewed": true,
+      "review_basis": "Pinned task.txt and start.py only; imports and unused helper definitions discarded; literal assignments reviewed. No upstream code execution.",
+      "start_sha256": "2d09f0ea2b51ace93663882d86aa2fa4201f394710879c12c6774173793a8971",
+      "task_description": "Adjust the camera position so that the viewing angle is consistent with the target image",
+      "initialization": [
+        {
+          "kind": "object",
+          "object": "Camera1",
+          "property": "location",
+          "value": [
+            -1.225,
+            0.71,
+            -2.83
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "Camera1",
+          "property": "rotation_euler",
+          "value": [
+            -0.4363,
+            3.3161,
+            0.0349
+          ]
+        }
+      ]
+    },
+    "level1/camera6": {
+      "reviewed": true,
+      "review_basis": "Pinned task.txt and start.py only; imports and unused helper definitions discarded; literal assignments reviewed. No upstream code execution.",
+      "start_sha256": "1539bdf69d7df4cb2da3770a59f2a33ed28d3d20aec3c3e2677351b297850f9c",
+      "task_description": "Adjust the camera position so that the viewing angle is consistent with the target image",
+      "initialization": [
+        {
+          "kind": "object",
+          "object": "Camera1",
+          "property": "location",
+          "value": [
+            2.4689,
+            -2.6258,
+            1.3083
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "Camera1",
+          "property": "rotation_euler",
+          "value": [
+            1.406,
+            0.0,
+            0.7626
+          ]
+        }
+      ]
+    },
+    "level1/camera7": {
+      "reviewed": true,
+      "review_basis": "Pinned task.txt and start.py only; imports and unused helper definitions discarded; literal assignments reviewed. No upstream code execution.",
+      "start_sha256": "5471be8faa7f4bd3ba2963a6716298a007d8a004a11df38cb87b9f026d9f4bbc",
+      "task_description": "Adjust the camera position so that the viewing angle is consistent with the target image",
+      "initialization": [
+        {
+          "kind": "object",
+          "object": "Camera1",
+          "property": "location",
+          "value": [
+            1.3353,
+            1.474,
+            1.5357
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "Camera1",
+          "property": "rotation_euler",
+          "value": [
+            -0.7679,
+            0.2094,
+            0.0
+          ]
+        }
+      ]
+    },
+    "level1/camera8": {
+      "reviewed": true,
+      "review_basis": "Pinned task.txt and start.py only; imports and unused helper definitions discarded; literal assignments reviewed. No upstream code execution.",
+      "start_sha256": "1dd7b06ac2d5949e0453f0e0c8ae857a417e986d9cc3b6fad748d26abf1b8151",
+      "task_description": "Adjust the camera position so that the viewing angle is consistent with the target image",
+      "initialization": [
+        {
+          "kind": "object",
+          "object": "Camera1",
+          "property": "location",
+          "value": [
+            7.3589,
+            -6.9258,
+            4.9583
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "Camera1",
+          "property": "rotation_euler",
+          "value": [
+            1.2664,
+            0.0,
+            0.78
+          ]
+        }
+      ]
+    },
+    "level1/camera9": {
+      "reviewed": true,
+      "review_basis": "Pinned task.txt and start.py only; imports and unused helper definitions discarded; literal assignments reviewed. No upstream code execution.",
+      "start_sha256": "6c104adc69f6e714e7b51d3e834b8bd7e6836813899ea84c972c6d2208ac40b6",
+      "task_description": "Adjust the camera position so that the viewing angle is consistent with the target image",
+      "initialization": [
+        {
+          "kind": "object",
+          "object": "Camera1",
+          "property": "location",
+          "value": [
+            0.1104,
+            -2.6639,
+            9.8843
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "Camera1",
+          "property": "rotation_euler",
+          "value": [
+            0.3142,
+            0,
+            0
+          ]
+        }
+      ]
+    },
+    "level2/attribute1": {
+      "reviewed": true,
+      "review_basis": "Pinned task.txt and start.py only; imports and unused helper definitions discarded; literal assignments reviewed. No upstream code execution.",
+      "start_sha256": "57448a36ff834acc820d071fc99b26285d8968d4fece18300a5c512e18ac2f18",
+      "task_description": "First adjust the room brightness, then adjust the size of the character's belly so that it looks like the target image.",
+      "initialization": [
+        {
+          "kind": "object",
+          "object": "lamp_on_the_cupboard",
+          "property": "data.energy",
+          "value": 1.5
+        },
+        {
+          "kind": "object",
+          "object": "lamp_on_shelf",
+          "property": "data.energy",
+          "value": 1.2
+        },
+        {
+          "kind": "object",
+          "object": "light_on_ceilling",
+          "property": "data.energy",
+          "value": 0
+        },
+        {
+          "kind": "object",
+          "object": "lamp_on_the_cupboard",
+          "property": "data.color",
+          "value": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "lamp_on_shelf",
+          "property": "data.color",
+          "value": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "light_on_ceilling",
+          "property": "data.color",
+          "value": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "kind": "shape_key",
+          "datablock": "Key",
+          "key": "BellySag",
+          "property": "value",
+          "value": 5
+        },
+        {
+          "kind": "shape_key",
+          "datablock": "Key",
+          "key": "BellyShrink",
+          "property": "value",
+          "value": 0
+        },
+        {
+          "kind": "shape_key",
+          "datablock": "Key",
+          "key": "ShoulderWideness",
+          "property": "value",
+          "value": 0
+        },
+        {
+          "kind": "shape_key",
+          "datablock": "Key",
+          "key": "BackTaper",
+          "property": "value",
+          "value": 0
+        },
+        {
+          "kind": "shape_key",
+          "datablock": "Key",
+          "key": "ChestEnlarge",
+          "property": "value",
+          "value": 0
+        },
+        {
+          "kind": "shape_key",
+          "datablock": "Key",
+          "key": "ChestArea",
+          "property": "value",
+          "value": 0
+        },
+        {
+          "kind": "shape_key",
+          "datablock": "Key",
+          "key": "MoreChin",
+          "property": "value",
+          "value": 0
+        },
+        {
+          "kind": "shape_key",
+          "datablock": "Key",
+          "key": "Abs",
+          "property": "value",
+          "value": 0
+        },
+        {
+          "kind": "shape_key",
+          "datablock": "Key",
+          "key": "eyelids",
+          "property": "value",
+          "value": 0
+        },
+        {
+          "kind": "shape_key",
+          "datablock": "Key",
+          "key": "nose",
+          "property": "value",
+          "value": 0
+        }
+      ]
+    },
+    "level2/attribute2": {
+      "reviewed": true,
+      "review_basis": "Pinned task.txt and start.py only; imports and unused helper definitions discarded; literal assignments reviewed. No upstream code execution.",
+      "start_sha256": "83702d094c0fa4d6e4a29711dfa024f587339353b1f9ddd6aff5e17b3ab426a8",
+      "task_description": "First adjust the room brightness, then adjust the size of the character's belly so that it looks like the target image.",
+      "initialization": [
+        {
+          "kind": "object",
+          "object": "lamp_on_the_cupboard",
+          "property": "data.energy",
+          "value": 0.5
+        },
+        {
+          "kind": "object",
+          "object": "lamp_on_shelf",
+          "property": "data.energy",
+          "value": 2.5
+        },
+        {
+          "kind": "object",
+          "object": "light_on_ceilling",
+          "property": "data.energy",
+          "value": 400
+        },
+        {
+          "kind": "object",
+          "object": "lamp_on_the_cupboard",
+          "property": "data.color",
+          "value": [
+            0.8,
+            0.9,
+            1
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "lamp_on_shelf",
+          "property": "data.color",
+          "value": [
+            0.5,
+            0.7,
+            1
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "light_on_ceilling",
+          "property": "data.color",
+          "value": [
+            1,
+            0,
+            0
+          ]
+        },
+        {
+          "kind": "shape_key",
+          "datablock": "Key",
+          "key": "BellySag",
+          "property": "value",
+          "value": 5
+        },
+        {
+          "kind": "shape_key",
+          "datablock": "Key",
+          "key": "BellyShrink",
+          "property": "value",
+          "value": 0
+        },
+        {
+          "kind": "shape_key",
+          "datablock": "Key",
+          "key": "ShoulderWideness",
+          "property": "value",
+          "value": 0
+        },
+        {
+          "kind": "shape_key",
+          "datablock": "Key",
+          "key": "BackTaper",
+          "property": "value",
+          "value": 0
+        },
+        {
+          "kind": "shape_key",
+          "datablock": "Key",
+          "key": "ChestEnlarge",
+          "property": "value",
+          "value": 0
+        },
+        {
+          "kind": "shape_key",
+          "datablock": "Key",
+          "key": "ChestArea",
+          "property": "value",
+          "value": 0
+        },
+        {
+          "kind": "shape_key",
+          "datablock": "Key",
+          "key": "MoreChin",
+          "property": "value",
+          "value": 0
+        },
+        {
+          "kind": "shape_key",
+          "datablock": "Key",
+          "key": "Abs",
+          "property": "value",
+          "value": 0
+        },
+        {
+          "kind": "shape_key",
+          "datablock": "Key",
+          "key": "eyelids",
+          "property": "value",
+          "value": 0
+        },
+        {
+          "kind": "shape_key",
+          "datablock": "Key",
+          "key": "nose",
+          "property": "value",
+          "value": 0
+        }
+      ]
+    },
+    "level2/attribute3": {
+      "reviewed": true,
+      "review_basis": "Pinned task.txt and start.py only; imports and unused helper definitions discarded; literal assignments reviewed. No upstream code execution.",
+      "start_sha256": "0bd075a70511e2952ff888d6a7d72499311a82764c7ab8c7bb7ae659ba210706",
+      "task_description": "First adjust the room brightness, then adjust the size of the character's belly so that it looks like the target image.",
+      "initialization": [
+        {
+          "kind": "object",
+          "object": "lamp_on_the_cupboard",
+          "property": "data.energy",
+          "value": 2.5
+        },
+        {
+          "kind": "object",
+          "object": "lamp_on_shelf",
+          "property": "data.energy",
+          "value": 57
+        },
+        {
+          "kind": "object",
+          "object": "light_on_ceilling",
+          "property": "data.energy",
+          "value": 0
+        },
+        {
+          "kind": "object",
+          "object": "lamp_on_the_cupboard",
+          "property": "data.color",
+          "value": [
+            1,
+            0.85,
+            0
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "lamp_on_shelf",
+          "property": "data.color",
+          "value": [
+            0.2,
+            0.6,
+            1
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "light_on_ceilling",
+          "property": "data.color",
+          "value": [
+            1,
+            0.95,
+            0.6
+          ]
+        },
+        {
+          "kind": "shape_key",
+          "datablock": "Key",
+          "key": "BellySag",
+          "property": "value",
+          "value": 5
+        },
+        {
+          "kind": "shape_key",
+          "datablock": "Key",
+          "key": "BellyShrink",
+          "property": "value",
+          "value": 0
+        },
+        {
+          "kind": "shape_key",
+          "datablock": "Key",
+          "key": "ShoulderWideness",
+          "property": "value",
+          "value": 0
+        },
+        {
+          "kind": "shape_key",
+          "datablock": "Key",
+          "key": "BackTaper",
+          "property": "value",
+          "value": 0
+        },
+        {
+          "kind": "shape_key",
+          "datablock": "Key",
+          "key": "ChestEnlarge",
+          "property": "value",
+          "value": 0
+        },
+        {
+          "kind": "shape_key",
+          "datablock": "Key",
+          "key": "ChestArea",
+          "property": "value",
+          "value": 0
+        },
+        {
+          "kind": "shape_key",
+          "datablock": "Key",
+          "key": "MoreChin",
+          "property": "value",
+          "value": 0
+        },
+        {
+          "kind": "shape_key",
+          "datablock": "Key",
+          "key": "Abs",
+          "property": "value",
+          "value": 0
+        },
+        {
+          "kind": "shape_key",
+          "datablock": "Key",
+          "key": "eyelids",
+          "property": "value",
+          "value": 0
+        },
+        {
+          "kind": "shape_key",
+          "datablock": "Key",
+          "key": "nose",
+          "property": "value",
+          "value": 0
+        }
+      ]
+    },
+    "level2/attribute4": {
+      "reviewed": true,
+      "review_basis": "Pinned task.txt and start.py only; imports and unused helper definitions discarded; literal assignments reviewed. No upstream code execution.",
+      "start_sha256": "1991b217fd4e044f7ef0966bbb38e8e417bb1fa967effba61bbfc880f7e36543",
+      "task_description": "First adjust the brightness of the room, then adjust the position of the basketball so that it looks the same as the target image.",
+      "initialization": [
+        {
+          "kind": "object",
+          "object": "lamp_on_the_cupboard",
+          "property": "data.energy",
+          "value": 1.5
+        },
+        {
+          "kind": "object",
+          "object": "lamp_on_shelf",
+          "property": "data.energy",
+          "value": 1.2
+        },
+        {
+          "kind": "object",
+          "object": "light_on_ceilling",
+          "property": "data.energy",
+          "value": 0
+        },
+        {
+          "kind": "object",
+          "object": "lamp_on_the_cupboard",
+          "property": "data.color",
+          "value": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "lamp_on_shelf",
+          "property": "data.color",
+          "value": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "light_on_ceilling",
+          "property": "data.color",
+          "value": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "basketball",
+          "property": "location",
+          "value": [
+            13.4023,
+            3.7485,
+            0.1584
+          ]
+        }
+      ]
+    },
+    "level2/attribute5": {
+      "reviewed": true,
+      "review_basis": "Pinned task.txt and start.py only; imports and unused helper definitions discarded; literal assignments reviewed. No upstream code execution.",
+      "start_sha256": "d80af70f035011ae1d6bf7001c9cad008e3cb63a6442bfbd87b23e0d4e09fb0a",
+      "task_description": "First adjust the brightness of the room, then adjust the position of the basketball so that it looks the same as the target image.",
+      "initialization": [
+        {
+          "kind": "object",
+          "object": "lamp_on_the_cupboard",
+          "property": "data.energy",
+          "value": 0.5
+        },
+        {
+          "kind": "object",
+          "object": "lamp_on_shelf",
+          "property": "data.energy",
+          "value": 2.5
+        },
+        {
+          "kind": "object",
+          "object": "light_on_ceilling",
+          "property": "data.energy",
+          "value": 400
+        },
+        {
+          "kind": "object",
+          "object": "lamp_on_the_cupboard",
+          "property": "data.color",
+          "value": [
+            0.8,
+            0.9,
+            1
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "lamp_on_shelf",
+          "property": "data.color",
+          "value": [
+            0.5,
+            0.7,
+            1
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "light_on_ceilling",
+          "property": "data.color",
+          "value": [
+            1,
+            0,
+            0
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "basketball",
+          "property": "location",
+          "value": [
+            14.4023,
+            2.7485,
+            0.1584
+          ]
+        }
+      ]
+    },
+    "level2/attribute6": {
+      "reviewed": true,
+      "review_basis": "Pinned task.txt and start.py only; imports and unused helper definitions discarded; literal assignments reviewed. No upstream code execution.",
+      "start_sha256": "aadf4e84cd6b0e03c47f45cc1e1b6f12a436b6273ffd7f81cd3f2d28a4c072bf",
+      "task_description": "First adjust the brightness of the room, then adjust the position of the basketball so that it looks the same as the target image.",
+      "initialization": [
+        {
+          "kind": "object",
+          "object": "lamp_on_the_cupboard",
+          "property": "data.energy",
+          "value": 2.5
+        },
+        {
+          "kind": "object",
+          "object": "lamp_on_shelf",
+          "property": "data.energy",
+          "value": 57
+        },
+        {
+          "kind": "object",
+          "object": "light_on_ceilling",
+          "property": "data.energy",
+          "value": 0
+        },
+        {
+          "kind": "object",
+          "object": "lamp_on_the_cupboard",
+          "property": "data.color",
+          "value": [
+            1,
+            0.85,
+            0
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "lamp_on_shelf",
+          "property": "data.color",
+          "value": [
+            0.2,
+            0.6,
+            1
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "light_on_ceilling",
+          "property": "data.color",
+          "value": [
+            1,
+            0.95,
+            0.6
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "basketball",
+          "property": "location",
+          "value": [
+            13.9023,
+            3.0485,
+            0.1584
+          ]
+        }
+      ]
+    },
+    "level2/attribute7": {
+      "reviewed": true,
+      "review_basis": "Pinned task.txt and start.py only; imports and unused helper definitions discarded; literal assignments reviewed. No upstream code execution.",
+      "start_sha256": "abd953c4d36252658613f4c385787dbe6baf4beedc346789ea0a6d210c49775b",
+      "task_description": "First move the cabinet to the correct position, then move the plant to the correct position. You need to move the cabinet to observe the plant in the mirror.",
+      "initialization": [
+        {
+          "kind": "object",
+          "object": "Cabinet",
+          "property": "location",
+          "value": [
+            2.4661,
+            14.201,
+            0.1277
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "Plant",
+          "property": "location",
+          "value": [
+            3.2168,
+            14.327,
+            0.57311
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "Mirror",
+          "property": "location",
+          "value": [
+            0.1374,
+            13.5573,
+            1.396
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "Sink",
+          "property": "location",
+          "value": [
+            1.7123,
+            12.7161,
+            0.8306
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "Toilet",
+          "property": "location",
+          "value": [
+            1.9395,
+            12.5101,
+            0.4867
+          ]
+        }
+      ]
+    },
+    "level2/attribute8": {
+      "reviewed": true,
+      "review_basis": "Pinned task.txt and start.py only; imports and unused helper definitions discarded; literal assignments reviewed. No upstream code execution.",
+      "start_sha256": "06cc98b4dae682711a3b06f82ca6cd5a967c30915722b2d3ca57a445f6ae83db",
+      "task_description": "First move the cabinet to the correct position, then move the plant to the correct position. You need to move the cabinet to observe the plant in the mirror.",
+      "initialization": [
+        {
+          "kind": "object",
+          "object": "Cabinet",
+          "property": "location",
+          "value": [
+            2.4661,
+            14.201,
+            0.1277
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "Plant",
+          "property": "location",
+          "value": [
+            3.2168,
+            14.327,
+            0.57311
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "Mirror",
+          "property": "location",
+          "value": [
+            0.1374,
+            13.5573,
+            1.396
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "Sink",
+          "property": "location",
+          "value": [
+            1.7123,
+            12.7161,
+            0.8306
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "Toilet",
+          "property": "location",
+          "value": [
+            1.9395,
+            14.5101,
+            0.4867
+          ]
+        }
+      ]
+    },
+    "level2/attribute9": {
+      "reviewed": true,
+      "review_basis": "Pinned task.txt and start.py only; imports and unused helper definitions discarded; literal assignments reviewed. No upstream code execution.",
+      "start_sha256": "956f2d67b54cda24edfeba5d5bfc766002efe018a4a77c0d505d4cf391410bf1",
+      "task_description": "First move the cabinet to the correct position, then move the plant to the correct position. You need to move the cabinet to observe the plant in the mirror.",
+      "initialization": [
+        {
+          "kind": "object",
+          "object": "Cabinet",
+          "property": "location",
+          "value": [
+            2.4661,
+            14.201,
+            0.1277
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "Plant",
+          "property": "location",
+          "value": [
+            3.2168,
+            14.327,
+            0.57311
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "Mirror",
+          "property": "location",
+          "value": [
+            0.1374,
+            13.5573,
+            1.396
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "Sink",
+          "property": "location",
+          "value": [
+            1.7123,
+            14.7161,
+            0.8306
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "Toilet",
+          "property": "location",
+          "value": [
+            1.9395,
+            14.5101,
+            0.4867
+          ]
+        }
+      ]
+    },
+    "level3/attribute1": {
+      "reviewed": true,
+      "review_basis": "Pinned task.txt and start.py only; imports and unused helper definitions discarded; literal assignments reviewed. No upstream code execution.",
+      "start_sha256": "e9d1a0d7c912f9806f5879117403938995c1155d13c33af9a0c0c25068909769",
+      "task_description": "First adjust the room brightness, then adjust the size of the character's belly so that it looks like the target image. You need to adjust the camera angle so that you can see the object you want to modify.",
+      "initialization": [
+        {
+          "kind": "object",
+          "object": "Camera1",
+          "property": "location",
+          "value": [
+            -1.1222,
+            -0.3259,
+            4.4354
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "Camera1",
+          "property": "rotation_euler",
+          "value": [
+            -0.0873,
+            0.5934,
+            0.2094
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "lamp_on_the_cupboard",
+          "property": "data.energy",
+          "value": 1.5
+        },
+        {
+          "kind": "object",
+          "object": "lamp_on_shelf",
+          "property": "data.energy",
+          "value": 1.2
+        },
+        {
+          "kind": "object",
+          "object": "light_on_ceilling",
+          "property": "data.energy",
+          "value": 0
+        },
+        {
+          "kind": "object",
+          "object": "lamp_on_the_cupboard",
+          "property": "data.color",
+          "value": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "lamp_on_shelf",
+          "property": "data.color",
+          "value": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "light_on_ceilling",
+          "property": "data.color",
+          "value": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "kind": "shape_key",
+          "datablock": "Key",
+          "key": "BellySag",
+          "property": "value",
+          "value": 5
+        },
+        {
+          "kind": "shape_key",
+          "datablock": "Key",
+          "key": "BellyShrink",
+          "property": "value",
+          "value": 0
+        },
+        {
+          "kind": "shape_key",
+          "datablock": "Key",
+          "key": "ShoulderWideness",
+          "property": "value",
+          "value": 0
+        },
+        {
+          "kind": "shape_key",
+          "datablock": "Key",
+          "key": "BackTaper",
+          "property": "value",
+          "value": 0
+        },
+        {
+          "kind": "shape_key",
+          "datablock": "Key",
+          "key": "ChestEnlarge",
+          "property": "value",
+          "value": 0
+        },
+        {
+          "kind": "shape_key",
+          "datablock": "Key",
+          "key": "ChestArea",
+          "property": "value",
+          "value": 0
+        },
+        {
+          "kind": "shape_key",
+          "datablock": "Key",
+          "key": "MoreChin",
+          "property": "value",
+          "value": 0
+        },
+        {
+          "kind": "shape_key",
+          "datablock": "Key",
+          "key": "Abs",
+          "property": "value",
+          "value": 0
+        },
+        {
+          "kind": "shape_key",
+          "datablock": "Key",
+          "key": "eyelids",
+          "property": "value",
+          "value": 0
+        },
+        {
+          "kind": "shape_key",
+          "datablock": "Key",
+          "key": "nose",
+          "property": "value",
+          "value": 0
+        }
+      ]
+    },
+    "level3/attribute2": {
+      "reviewed": true,
+      "review_basis": "Pinned task.txt and start.py only; imports and unused helper definitions discarded; literal assignments reviewed. No upstream code execution.",
+      "start_sha256": "0c115cf6fdbf43f677ebb5244e6afc9d75dd9635a9f4c6de06abe28a3f68f191",
+      "task_description": "First adjust the room brightness, then adjust the size of the character's belly so that it looks like the target image. You need to adjust the camera angle so that you can see the object you want to modify.",
+      "initialization": [
+        {
+          "kind": "object",
+          "object": "Camera1",
+          "property": "location",
+          "value": [
+            -1.1222,
+            -0.3259,
+            4.4354
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "Camera1",
+          "property": "rotation_euler",
+          "value": [
+            -0.0873,
+            0.5934,
+            0.2094
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "lamp_on_the_cupboard",
+          "property": "data.energy",
+          "value": 0.5
+        },
+        {
+          "kind": "object",
+          "object": "lamp_on_shelf",
+          "property": "data.energy",
+          "value": 2.5
+        },
+        {
+          "kind": "object",
+          "object": "light_on_ceilling",
+          "property": "data.energy",
+          "value": 400
+        },
+        {
+          "kind": "object",
+          "object": "lamp_on_the_cupboard",
+          "property": "data.color",
+          "value": [
+            0.8,
+            0.9,
+            1
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "lamp_on_shelf",
+          "property": "data.color",
+          "value": [
+            0.5,
+            0.7,
+            1
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "light_on_ceilling",
+          "property": "data.color",
+          "value": [
+            1,
+            0,
+            0
+          ]
+        },
+        {
+          "kind": "shape_key",
+          "datablock": "Key",
+          "key": "BellySag",
+          "property": "value",
+          "value": 5
+        },
+        {
+          "kind": "shape_key",
+          "datablock": "Key",
+          "key": "BellyShrink",
+          "property": "value",
+          "value": 0
+        },
+        {
+          "kind": "shape_key",
+          "datablock": "Key",
+          "key": "ShoulderWideness",
+          "property": "value",
+          "value": 0
+        },
+        {
+          "kind": "shape_key",
+          "datablock": "Key",
+          "key": "BackTaper",
+          "property": "value",
+          "value": 0
+        },
+        {
+          "kind": "shape_key",
+          "datablock": "Key",
+          "key": "ChestEnlarge",
+          "property": "value",
+          "value": 0
+        },
+        {
+          "kind": "shape_key",
+          "datablock": "Key",
+          "key": "ChestArea",
+          "property": "value",
+          "value": 0
+        },
+        {
+          "kind": "shape_key",
+          "datablock": "Key",
+          "key": "MoreChin",
+          "property": "value",
+          "value": 0
+        },
+        {
+          "kind": "shape_key",
+          "datablock": "Key",
+          "key": "Abs",
+          "property": "value",
+          "value": 0
+        },
+        {
+          "kind": "shape_key",
+          "datablock": "Key",
+          "key": "eyelids",
+          "property": "value",
+          "value": 0
+        },
+        {
+          "kind": "shape_key",
+          "datablock": "Key",
+          "key": "nose",
+          "property": "value",
+          "value": 0
+        }
+      ]
+    },
+    "level3/attribute3": {
+      "reviewed": true,
+      "review_basis": "Pinned task.txt and start.py only; imports and unused helper definitions discarded; literal assignments reviewed. No upstream code execution.",
+      "start_sha256": "de2d9d5cba1b04d58b1d698726c29968d8fbfed225c2b2b24f32f5f765a532ba",
+      "task_description": "First adjust the room brightness, then adjust the size of the character's belly so that it looks like the target image. You need to adjust the camera angle so that you can see the object you want to modify.",
+      "initialization": [
+        {
+          "kind": "object",
+          "object": "Camera1",
+          "property": "location",
+          "value": [
+            -1.1222,
+            -0.3259,
+            4.4354
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "Camera1",
+          "property": "rotation_euler",
+          "value": [
+            -0.0873,
+            0.5934,
+            0.2094
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "lamp_on_the_cupboard",
+          "property": "data.energy",
+          "value": 2.5
+        },
+        {
+          "kind": "object",
+          "object": "lamp_on_shelf",
+          "property": "data.energy",
+          "value": 57
+        },
+        {
+          "kind": "object",
+          "object": "light_on_ceilling",
+          "property": "data.energy",
+          "value": 0
+        },
+        {
+          "kind": "object",
+          "object": "lamp_on_the_cupboard",
+          "property": "data.color",
+          "value": [
+            1,
+            0.85,
+            0
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "lamp_on_shelf",
+          "property": "data.color",
+          "value": [
+            0.2,
+            0.6,
+            1
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "light_on_ceilling",
+          "property": "data.color",
+          "value": [
+            1,
+            0.95,
+            0.6
+          ]
+        },
+        {
+          "kind": "shape_key",
+          "datablock": "Key",
+          "key": "BellySag",
+          "property": "value",
+          "value": 5
+        },
+        {
+          "kind": "shape_key",
+          "datablock": "Key",
+          "key": "BellyShrink",
+          "property": "value",
+          "value": 0
+        },
+        {
+          "kind": "shape_key",
+          "datablock": "Key",
+          "key": "ShoulderWideness",
+          "property": "value",
+          "value": 0
+        },
+        {
+          "kind": "shape_key",
+          "datablock": "Key",
+          "key": "BackTaper",
+          "property": "value",
+          "value": 0
+        },
+        {
+          "kind": "shape_key",
+          "datablock": "Key",
+          "key": "ChestEnlarge",
+          "property": "value",
+          "value": 0
+        },
+        {
+          "kind": "shape_key",
+          "datablock": "Key",
+          "key": "ChestArea",
+          "property": "value",
+          "value": 0
+        },
+        {
+          "kind": "shape_key",
+          "datablock": "Key",
+          "key": "MoreChin",
+          "property": "value",
+          "value": 0
+        },
+        {
+          "kind": "shape_key",
+          "datablock": "Key",
+          "key": "Abs",
+          "property": "value",
+          "value": 0
+        },
+        {
+          "kind": "shape_key",
+          "datablock": "Key",
+          "key": "eyelids",
+          "property": "value",
+          "value": 0
+        },
+        {
+          "kind": "shape_key",
+          "datablock": "Key",
+          "key": "nose",
+          "property": "value",
+          "value": 0
+        }
+      ]
+    },
+    "level3/attribute4": {
+      "reviewed": true,
+      "review_basis": "Pinned task.txt and start.py only; imports and unused helper definitions discarded; literal assignments reviewed. No upstream code execution.",
+      "start_sha256": "bfce3b4e6919cdfa62ddb5893d42d64493d2357505ae83ece52d87a424ff0d10",
+      "task_description": "First adjust the brightness of the room, then adjust the position of the basketball so that it looks the same as the target image. You need to adjust the camera angle so that you can see the object you want to modify.",
+      "initialization": [
+        {
+          "kind": "object",
+          "object": "Camera1",
+          "property": "location",
+          "value": [
+            -1.1222,
+            -0.3259,
+            4.4354
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "Camera1",
+          "property": "rotation_euler",
+          "value": [
+            -0.0873,
+            0.5934,
+            0.2094
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "lamp_on_the_cupboard",
+          "property": "data.energy",
+          "value": 1.5
+        },
+        {
+          "kind": "object",
+          "object": "lamp_on_shelf",
+          "property": "data.energy",
+          "value": 1.2
+        },
+        {
+          "kind": "object",
+          "object": "light_on_ceilling",
+          "property": "data.energy",
+          "value": 0
+        },
+        {
+          "kind": "object",
+          "object": "lamp_on_the_cupboard",
+          "property": "data.color",
+          "value": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "lamp_on_shelf",
+          "property": "data.color",
+          "value": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "light_on_ceilling",
+          "property": "data.color",
+          "value": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "basketball",
+          "property": "location",
+          "value": [
+            13.4023,
+            3.7485,
+            0.1584
+          ]
+        }
+      ]
+    },
+    "level3/attribute5": {
+      "reviewed": true,
+      "review_basis": "Pinned task.txt and start.py only; imports and unused helper definitions discarded; literal assignments reviewed. No upstream code execution.",
+      "start_sha256": "8fb7657a111ad845d72eaa3c1599f46f0ee1bb4c7b9b8e97b2858d7c2a71c215",
+      "task_description": "First adjust the brightness of the room, then adjust the position of the basketball so that it looks the same as the target image. You need to adjust the camera angle so that you can see the object you want to modify.",
+      "initialization": [
+        {
+          "kind": "object",
+          "object": "Camera1",
+          "property": "location",
+          "value": [
+            -1.1222,
+            -0.3259,
+            4.4354
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "Camera1",
+          "property": "rotation_euler",
+          "value": [
+            -0.0873,
+            0.5934,
+            0.2094
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "lamp_on_the_cupboard",
+          "property": "data.energy",
+          "value": 0.5
+        },
+        {
+          "kind": "object",
+          "object": "lamp_on_shelf",
+          "property": "data.energy",
+          "value": 2.5
+        },
+        {
+          "kind": "object",
+          "object": "light_on_ceilling",
+          "property": "data.energy",
+          "value": 400
+        },
+        {
+          "kind": "object",
+          "object": "lamp_on_the_cupboard",
+          "property": "data.color",
+          "value": [
+            0.8,
+            0.9,
+            1
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "lamp_on_shelf",
+          "property": "data.color",
+          "value": [
+            0.5,
+            0.7,
+            1
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "light_on_ceilling",
+          "property": "data.color",
+          "value": [
+            1,
+            0,
+            0
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "basketball",
+          "property": "location",
+          "value": [
+            14.4023,
+            2.7485,
+            0.1584
+          ]
+        }
+      ]
+    },
+    "level3/attribute6": {
+      "reviewed": true,
+      "review_basis": "Pinned task.txt and start.py only; imports and unused helper definitions discarded; literal assignments reviewed. No upstream code execution.",
+      "start_sha256": "6e1bed8235bb346af995c6f281b05f2d482c3f36dd0432a9df9ce62674dd7dbd",
+      "task_description": "First adjust the brightness of the room, then adjust the position of the basketball so that it looks the same as the target image. You need to adjust the camera angle so that you can see the object you want to modify.",
+      "initialization": [
+        {
+          "kind": "object",
+          "object": "Camera1",
+          "property": "location",
+          "value": [
+            -1.1222,
+            -0.3259,
+            4.4354
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "Camera1",
+          "property": "rotation_euler",
+          "value": [
+            -0.0873,
+            0.5934,
+            0.2094
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "lamp_on_the_cupboard",
+          "property": "data.energy",
+          "value": 2.5
+        },
+        {
+          "kind": "object",
+          "object": "lamp_on_shelf",
+          "property": "data.energy",
+          "value": 57
+        },
+        {
+          "kind": "object",
+          "object": "light_on_ceilling",
+          "property": "data.energy",
+          "value": 0
+        },
+        {
+          "kind": "object",
+          "object": "lamp_on_the_cupboard",
+          "property": "data.color",
+          "value": [
+            1,
+            0.85,
+            0
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "lamp_on_shelf",
+          "property": "data.color",
+          "value": [
+            0.2,
+            0.6,
+            1
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "light_on_ceilling",
+          "property": "data.color",
+          "value": [
+            1,
+            0.95,
+            0.6
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "basketball",
+          "property": "location",
+          "value": [
+            13.9023,
+            3.0485,
+            0.1584
+          ]
+        }
+      ]
+    },
+    "level3/attribute7": {
+      "reviewed": true,
+      "review_basis": "Pinned task.txt and start.py only; imports and unused helper definitions discarded; literal assignments reviewed. No upstream code execution.",
+      "start_sha256": "88c03b7b328cb7251425acdde7959aa4cb9bea9add652c68faa5d442460fa4f9",
+      "task_description": "First move the cabinet to the correct position, then move the plant to the correct position. You need to move the cabinet to observe the plant in the mirror. You need to adjust the camera angle so that you can see the object you want to modify.",
+      "initialization": [
+        {
+          "kind": "object",
+          "object": "Camera1",
+          "property": "location",
+          "value": [
+            0.2645,
+            0.2215,
+            -2.9188
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "Camera1",
+          "property": "rotation_euler",
+          "value": [
+            -0.0698,
+            2.426,
+            0.0
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "Cabinet",
+          "property": "location",
+          "value": [
+            2.4661,
+            14.201,
+            0.1277
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "Plant",
+          "property": "location",
+          "value": [
+            3.2168,
+            14.327,
+            0.57311
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "Mirror",
+          "property": "location",
+          "value": [
+            0.1374,
+            13.5573,
+            1.396
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "Sink",
+          "property": "location",
+          "value": [
+            1.7123,
+            12.7161,
+            0.8306
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "Toilet",
+          "property": "location",
+          "value": [
+            1.9395,
+            12.5101,
+            0.4867
+          ]
+        }
+      ]
+    },
+    "level3/attribute8": {
+      "reviewed": true,
+      "review_basis": "Pinned task.txt and start.py only; imports and unused helper definitions discarded; literal assignments reviewed. No upstream code execution.",
+      "start_sha256": "6fdf229c8df32bdfd1700e90cd1c135e1eba67038effd3c766753a386e523c2a",
+      "task_description": "First move the cabinet to the correct position, then move the plant to the correct position. You need to move the cabinet to observe the plant in the mirror. You need to adjust the camera angle so that you can see the object you want to modify.",
+      "initialization": [
+        {
+          "kind": "object",
+          "object": "Camera1",
+          "property": "location",
+          "value": [
+            0.2645,
+            0.2215,
+            -2.9188
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "Camera1",
+          "property": "rotation_euler",
+          "value": [
+            -0.0698,
+            2.426,
+            0.0
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "Cabinet",
+          "property": "location",
+          "value": [
+            2.4661,
+            14.201,
+            0.1277
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "Plant",
+          "property": "location",
+          "value": [
+            3.2168,
+            14.327,
+            0.57311
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "Mirror",
+          "property": "location",
+          "value": [
+            0.1374,
+            13.5573,
+            1.396
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "Sink",
+          "property": "location",
+          "value": [
+            1.7123,
+            12.7161,
+            0.8306
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "Toilet",
+          "property": "location",
+          "value": [
+            1.9395,
+            14.5101,
+            0.4867
+          ]
+        }
+      ]
+    },
+    "level3/attribute9": {
+      "reviewed": true,
+      "review_basis": "Pinned task.txt and start.py only; imports and unused helper definitions discarded; literal assignments reviewed. No upstream code execution.",
+      "start_sha256": "bd47ca26dfd4b224a33766dcd40101cbf3f8b168773541d7444d6ea1c4039a6b",
+      "task_description": "First move the cabinet to the correct position, then move the plant to the correct position. You need to move the cabinet to observe the plant in the mirror. You need to adjust the camera angle so that you can see the object you want to modify.",
+      "initialization": [
+        {
+          "kind": "object",
+          "object": "Camera1",
+          "property": "location",
+          "value": [
+            0.2645,
+            0.2215,
+            -2.9188
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "Camera1",
+          "property": "rotation_euler",
+          "value": [
+            -0.0698,
+            2.426,
+            0.0
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "Cabinet",
+          "property": "location",
+          "value": [
+            2.4661,
+            14.201,
+            0.1277
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "Plant",
+          "property": "location",
+          "value": [
+            3.2168,
+            14.327,
+            0.57311
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "Mirror",
+          "property": "location",
+          "value": [
+            0.1374,
+            13.5573,
+            1.396
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "Sink",
+          "property": "location",
+          "value": [
+            1.7123,
+            14.7161,
+            0.8306
+          ]
+        },
+        {
+          "kind": "object",
+          "object": "Toilet",
+          "property": "location",
+          "value": [
+            1.9395,
+            14.5101,
+            0.4867
+          ]
+        }
+      ]
+    }
+  }
+}

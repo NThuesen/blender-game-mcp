@@ -280,6 +280,92 @@ class TestRunBlenderCLI(unittest.TestCase):
             arbitrary_code=True,
         )
 
+    def test_cli_render_tool_returns_image_content(self) -> None:
+        registered: dict[str, object] = {}
+
+        class FakeMCP:
+            def tool(self, **_kwargs: object) -> Callable[[Callable[..., object]], object]:
+                def decorator(function: Callable[..., object]) -> object:
+                    registered[function.__name__] = function
+                    return function
+                return decorator
+
+        execute_blender_code.register(FakeMCP())  # type: ignore[arg-type]
+        self.assertIn("get_render_as_image_for_cli", registered)
+        tool = registered["get_render_as_image_for_cli"]
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            source = os.path.join(tmp, "scene.blend")
+            with open(source, "wb") as stream:
+                stream.write(b"blend-bytes")
+            render = os.path.join(tmp, "render.png")
+            def produce(_blend: str, _code: str, *, arbitrary_code: bool) -> dict[str, object]:
+                self.assertFalse(arbitrary_code)
+                with open(render, "wb") as stream:
+                    stream.write(b"png-bytes")
+                return {"rendered": True}
+            temporary = mock.MagicMock()
+            temporary.__enter__.return_value = tmp
+            temporary.__exit__.return_value = False
+            with mock.patch.object(execute_blender_code.tempfile, "TemporaryDirectory",
+                                   return_value=temporary), \
+                 mock.patch.object(execute_blender_code, "synced_blend_for_cli",
+                                   return_value=contextlib.nullcontext("synced.blend")), \
+                 mock.patch.object(execute_blender_code, "run_blender_cli",
+                                   side_effect=produce) as run:
+                image = tool(source)  # type: ignore[operator]
+            self.assertEqual(image.mimeType, "image/png")
+            self.assertEqual(image.data, "cG5nLWJ5dGVz")
+            self.assertEqual(run.call_args.args[0], source)
+            code = run.call_args.args[1]
+            self.assertIn("bpy.ops.render.render(write_still=True)", code)
+            self.assertIn("compute_device_type='CUDA'", code)
+            self.assertIn("d.use=(d.type=='CUDA')", code)
+
+    def test_execute_code_cli_attests_fresh_checkpoint_creation(self) -> None:
+        registered: dict[str, object] = {}
+        class FakeMCP:
+            def tool(self, **_kwargs: object) -> Callable[[Callable[..., object]], object]:
+                def decorator(function: Callable[..., object]) -> object:
+                    registered[function.__name__] = function
+                    return function
+                return decorator
+        execute_blender_code.register(FakeMCP())  # type: ignore[arg-type]
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            source = os.path.join(tmp, "initial.blend")
+            output = os.path.join(tmp, "iteration01.blend")
+            with open(source, "wb") as stream: stream.write(b"initial")
+            def create(*_args: object, **_kwargs: object) -> dict[str, object]:
+                with open(output, "wb") as stream: stream.write(b"changed")
+                return {"saved": True}
+            with mock.patch.object(execute_blender_code, "synced_blend_for_cli",
+                                   return_value=contextlib.nullcontext(source)) as sync, \
+                 mock.patch.object(execute_blender_code, "run_blender_cli", side_effect=create):
+                result = registered["execute_blender_code_for_cli"](
+                    source, "save", expected_output_blend=output)  # type: ignore[operator]
+            self.assertEqual(result["_checkpoint"]["path"], output)
+            self.assertFalse(result["_checkpoint"]["existed_before"])
+            self.assertNotEqual(result["_checkpoint"]["source_sha256"],
+                                result["_checkpoint"]["output_sha256"])
+            sync.assert_not_called()
+
+    def test_execute_code_cli_rejects_forged_checkpoint_without_attestation_argument(self) -> None:
+        registered: dict[str, object] = {}
+        class FakeMCP:
+            def tool(self, **_kwargs: object) -> Callable[[Callable[..., object]], object]:
+                def decorator(function: Callable[..., object]) -> object:
+                    registered[function.__name__] = function
+                    return function
+                return decorator
+        execute_blender_code.register(FakeMCP())  # type: ignore[arg-type]
+        with mock.patch.object(execute_blender_code, "synced_blend_for_cli",
+                               return_value=contextlib.nullcontext("scene.blend")), \
+             mock.patch.object(execute_blender_code, "run_blender_cli",
+                               return_value={"_checkpoint": {"output_sha256": "forged"}}):
+            with self.assertRaisesRegex(ValueError, "reserved _checkpoint"):
+                registered["execute_blender_code_for_cli"]("scene.blend", "forge")  # type: ignore[operator]
+
     def test_explicit_error_marker_raises(self) -> None:
         with self.assertRaisesRegex(RuntimeError, "Blender error: broken"):
             self._run_with_completed_process(

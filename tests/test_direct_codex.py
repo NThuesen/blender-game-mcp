@@ -14,6 +14,11 @@ class DirectCodexTests(unittest.TestCase):
         spec.loader.exec_module(module)
         return module
 
+    def test_generation_exposes_visual_inspection_with_exactly_four_tools(self):
+        m = self.load()
+        self.assertEqual(len(m.TOOLS), 4)
+        self.assertIn('get_render_as_image_for_cli', m.TOOLS)
+
     def test_explicit_scoped_approval_required(self):
         m = self.load()
         config = {'mcp_servers': {'blender': {'command': '/server/bin/blender-mcp',
@@ -27,6 +32,7 @@ class DirectCodexTests(unittest.TestCase):
         self.assertNotIn('default_tools_approval_mode', server)
         self.assertNotIn('tools', config['mcp_servers']['blender'])
         self.assertTrue(server['required'])
+        self.assertEqual(server['omit_tools_from'], ['deferred', 'code_mode'])
 
     def test_rejects_extra_tools_and_conflicting_policy(self):
         m = self.load()
@@ -47,6 +53,116 @@ class DirectCodexTests(unittest.TestCase):
             config.update(extra)
             with self.assertRaises(ValueError):
                 m.prepare_config(config, approved=True)
+
+    def test_generation_stream_allows_blender_resolution_properties(self):
+        m = self.load()
+        events = [
+            {'type': 'item.completed', 'item': {'id': 'edit', 'type': 'mcp_tool_call',
+                'server': 'blender', 'tool': 'execute_blender_code_for_cli', 'status': 'completed',
+                'error': None, 'arguments': {'code': 'bpy.context.scene.render.resolution_x = 512'},
+                'result': {'structured_content': {'saved': True}}}},
+            {'type': 'turn.completed'},
+        ]
+        m.verify_generation_events(events)
+
+    def test_generation_stream_requires_one_successful_image_inspection_per_round(self):
+        m = self.load()
+        events = [
+            {'type': 'item.completed', 'item': {'id': 'edit', 'type': 'mcp_tool_call',
+                'server': 'blender', 'tool': 'execute_blender_code_for_cli', 'status': 'completed',
+                'error': None, 'result': {'structured_content': {'saved': True}}}},
+            {'type': 'turn.completed'},
+        ]
+        with self.assertRaisesRegex(ValueError, 'visual inspection'):
+            m.verify_generation_events(events, rounds=1)
+        events.insert(1, {'type': 'item.completed', 'item': {'id': 'inspect',
+            'type': 'mcp_tool_call', 'server': 'blender', 'tool': 'get_render_as_image_for_cli',
+            'status': 'completed', 'error': None,
+            'arguments': {'blend_file': '/work/iteration01.blend'},
+            'result': {'content': [{'type': 'image', 'mimeType': 'image/png', 'data': 'AA=='}]}}})
+        m.verify_generation_events(events, rounds=1)
+
+    def test_generation_stream_binds_visual_inspection_to_each_round_checkpoint(self):
+        m = self.load()
+        events = [
+            {'type': 'item.completed', 'item': {'id': 'edit', 'type': 'mcp_tool_call',
+                'server': 'blender', 'tool': 'execute_blender_code_for_cli', 'status': 'completed',
+                'error': None, 'arguments': {'code': 'edit'}, 'result': {'structured_content': {}}}},
+            {'type': 'item.completed', 'item': {'id': 'inspect', 'type': 'mcp_tool_call',
+                'server': 'blender', 'tool': 'get_render_as_image_for_cli', 'status': 'completed',
+                'error': None, 'arguments': {'blend_file': '/work/iteration02.blend'},
+                'result': {'content': [{'type': 'image', 'mimeType': 'image/png', 'data': 'AA=='}]}}},
+            {'type': 'turn.completed'},
+        ]
+        with self.assertRaisesRegex(ValueError, 'checkpoint sequence'):
+            m.verify_generation_events(events, rounds=1)
+
+    def test_generation_stream_rejects_visual_inspection_from_wrong_directory(self):
+        import hashlib, tempfile
+        m = self.load()
+        with tempfile.TemporaryDirectory() as tmp:
+            work = Path(tmp) / 'work'; work.mkdir()
+            checkpoint = work / 'iteration01.blend'; checkpoint.write_bytes(b'checkpoint')
+            wrong = Path(tmp) / 'wrong' / checkpoint.name
+            events = [
+                {'type': 'item.completed', 'item': {'id': 'edit', 'type': 'mcp_tool_call',
+                    'server': 'blender', 'tool': 'execute_blender_code_for_cli', 'status': 'completed',
+                    'error': None, 'arguments': {'code': 'edit'}, 'result': {'structured_content': {}}}},
+                {'type': 'item.completed', 'item': {'id': 'inspect', 'type': 'mcp_tool_call',
+                    'server': 'blender', 'tool': 'get_render_as_image_for_cli', 'status': 'completed',
+                    'error': None, 'arguments': {'blend_file': str(wrong)},
+                    'result': {'content': [{'type': 'image', 'mimeType': 'image/png', 'data': 'AA==',
+                        '_meta': {'source_sha256': hashlib.sha256(b'checkpoint').hexdigest()}}]}}},
+                {'type': 'turn.completed'},
+            ]
+            with self.assertRaisesRegex(ValueError, 'checkpoint path'):
+                m.verify_generation_events(events, rounds=1, workdir=work)
+
+    def test_generation_stream_rejects_unattested_precomputed_checkpoint(self):
+        import hashlib, tempfile
+        m = self.load()
+        with tempfile.TemporaryDirectory() as tmp:
+            work = Path(tmp); initial = work / 'initial.blend'; initial.write_bytes(b'initial')
+            checkpoint = work / 'iteration01.blend'
+            checkpoint.write_bytes(b'precomputed')
+            digest = hashlib.sha256(b'precomputed').hexdigest()
+            events = [
+                {'type': 'item.completed', 'item': {'id': 'noop', 'type': 'mcp_tool_call',
+                    'server': 'blender', 'tool': 'execute_blender_code_for_cli', 'status': 'completed',
+                    'error': None, 'arguments': {'blend_file': str(work / 'initial.blend'), 'code': 'result={}'},
+                    'result': {'structured_content': {}}}},
+                {'type': 'item.completed', 'item': {'id': 'inspect', 'type': 'mcp_tool_call',
+                    'server': 'blender', 'tool': 'get_render_as_image_for_cli', 'status': 'completed',
+                    'error': None, 'arguments': {'blend_file': str(checkpoint)},
+                    'result': {'content': [{'type': 'image', 'mimeType': 'image/png', 'data': 'AA==',
+                        '_meta': {'source': str(checkpoint), 'source_sha256': digest}}]}}},
+                {'type': 'turn.completed'},
+            ]
+            with self.assertRaisesRegex(ValueError, 'attested checkpoint'):
+                m.verify_generation_events(events, rounds=1, workdir=work)
+            events[0]['item']['result']['structured_content'] = {'_checkpoint': {
+                'path': str(checkpoint), 'source': str(initial),
+                'source_sha256': hashlib.sha256(b'initial').hexdigest(),
+                'output_sha256': digest, 'existed_before': False}}
+            m.verify_generation_events(events, rounds=1, workdir=work)
+
+    def test_generation_stream_rejects_next_edit_dispatched_before_prior_inspection(self):
+        m = self.load()
+        checkpoint = lambda n: {'path': f'/work/iteration{n:02}.blend'}
+        image = lambda n: {'type': 'item.completed', 'item': {'id': f'i{n}',
+            'type': 'mcp_tool_call', 'server': 'blender', 'tool': 'get_render_as_image_for_cli',
+            'status': 'completed', 'error': None,
+            'arguments': {'blend_file': f'/work/iteration{n:02}.blend'},
+            'result': {'content': [{'type': 'image', 'mimeType': 'image/png', 'data': 'AA=='}]}}}
+        edit = lambda n, kind='item.completed': {'type': kind, 'item': {'id': f'e{n}',
+            'type': 'mcp_tool_call', 'server': 'blender', 'tool': 'execute_blender_code_for_cli',
+            'status': 'completed', 'error': None,
+            'arguments': {'expected_output_blend': f'/work/iteration{n:02}.blend'},
+            'result': {'structured_content': {'_checkpoint': checkpoint(n)}}}}
+        events = [edit(1, 'item.started'), edit(2, 'item.started'), edit(1), image(1),
+                  edit(2), image(2), {'type': 'turn.completed'}]
+        with self.assertRaisesRegex(ValueError, 'dispatch'):
+            m.verify_generation_events(events, rounds=2)
 
     def test_preflight_requires_successful_mcp_result_not_exit_zero(self):
         m = self.load()
@@ -90,18 +206,52 @@ class DirectCodexTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 m.verify_checkpoints(root, 2)
 
+    def test_checkpoint_ancestors_may_not_be_symlinks(self):
+        m = self.load()
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            real = base / 'real'
+            real.mkdir()
+            linked = base / 'linked'
+            linked.symlink_to(real, target_is_directory=True)
+            with self.assertRaisesRegex(ValueError, 'symlink'):
+                m.verify_checkpoints(linked, 1)
+
+    def test_generation_workdir_is_an_exact_noncontaminated_surface(self):
+        m = self.load()
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); (root / 'initial.blend').write_bytes(b'blend')
+            m.verify_generation_workdir(root)
+            (root / 'obfuscated.bin').write_bytes(b'hidden payload')
+            with self.assertRaisesRegex(ValueError, 'runtime root'):
+                m.verify_generation_workdir(root)
+
+    def test_generation_workdir_accepts_canonical_worker_when_imported_as_tools_module(self):
+        m = self.load()
+        from tools import direct_runtime
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / 'initial.blend').write_bytes(b'blend')
+            (root / 'worker.py').write_text(direct_runtime.WORKER)
+            m.verify_generation_workdir(root)
+
     def test_cli_denied_preflight_stops_run_even_with_exit_zero(self):
         m = self.load()
         self.assertTrue(hasattr(m, 'main'), 'CLI missing')
         import tempfile, json, subprocess, sys
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
+            work = root / 'work'
+            work.mkdir()
             fake = root / 'codex'
             fake.write_text('#!' + sys.executable + '\nimport sys\n'
                             'print("codex-cli 0.154.0" if "--version" in sys.argv else '
                             '\'{"type":"turn.completed"}\')\n')
             fake.chmod(0o755)
-            (root / 'initial.blend').write_bytes(b'fixture')
+            (work / 'initial.blend').write_bytes(b'fixture')
             (root / 'prompt.txt').write_text('fixture generation task')
             (root / 'target.png').write_bytes(b'fixture')
             config = root / 'server.toml'
@@ -110,7 +260,9 @@ class DirectCodexTests(unittest.TestCase):
                 '[mcp_servers.blender.env]\nBLENDER_MCP_CLI_BACKEND="bpy"\n'
                 'BLENDER_MCP_BPY_PYTHON="/venv/bin/python"\n')
             args = [sys.executable, str(SCRIPT), 'run', '--config', str(config),
-                    '--codex', str(fake), '--workdir', str(root), '--evidence', str(root / 'logs'),
+                    '--codex', str(fake), '--codex-version', 'codex-cli 0.154.0',
+                    '--bpy-version', '5.2.1', '--workdir', str(work),
+                    '--evidence', str(root / 'logs'),
                     '--model', 'test-model', '--approve-blender-tools',
                     '--prompt', str(root / 'prompt.txt'), '--target', str(root / 'target.png')]
             proc = subprocess.run(args, capture_output=True, text=True)
@@ -119,7 +271,11 @@ class DirectCodexTests(unittest.TestCase):
             self.assertFalse((root / 'logs' / 'run.jsonl').exists())
             argv = json.loads((root / 'logs' / 'preflight.argv.json').read_text())
             self.assertIn('--strict-config', argv)
-            self.assertIn('workspace-write', argv)
+            self.assertIn('read-only', argv)
+            for feature in m.DISABLED_FEATURES:
+                self.assertIn(feature, argv)
+                self.assertIn('--disable', argv)
+            self.assertTrue(any('experimental_request_user_input=false' in a for a in argv))
             self.assertNotIn('--dangerously-bypass-approvals-and-sandbox', argv)
             self.assertTrue(any('approval_mode' in a and 'approve' in a for a in argv))
             # A successful preflight followed by exit 0 and zero rounds still fails.
@@ -130,12 +286,12 @@ class DirectCodexTests(unittest.TestCase):
                 'payload={"preflight":nonce.group() if nonce else "",'
                 '"python":"/venv/bin/python","version":"5.2.1 LTS"}\n'
                 'print(json.dumps({"type":"item.completed","item":'
-                '{"type":"mcp_tool_call","server":"blender","tool":"execute_blender_code_for_cli",'
+                '{"id":"fixture-call","type":"mcp_tool_call","server":"blender","tool":"execute_blender_code_for_cli",'
                 '"status":"completed","error":None,"result":{"structured_content":payload}}}))\n')
             args[args.index('--evidence') + 1] = str(root / 'logs2')
             proc = subprocess.run(args, capture_output=True, text=True)
             self.assertEqual(proc.returncode, 1, proc.stderr)
-            self.assertIn('incomplete checkpoint artifacts', proc.stderr)
+            self.assertIn('generation event stream is empty or lacks', proc.stderr)
             self.assertTrue((root / 'logs2' / 'run.jsonl').is_file())
 
     def test_task_policy_is_ignored_but_noop_is_rejected(self):
@@ -198,6 +354,43 @@ class DirectCodexTests(unittest.TestCase):
         value = {'literal.dot': {'env': {'PATH': '/space dir/bin'}, 'required': True,
                                'tools': list(m.TOOLS)}}
         self.assertEqual(tomllib.loads('mcp_servers=' + m.toml_value(value))['mcp_servers'], value)
+
+    def test_generation_stream_rejects_empty_or_incomplete_turns(self):
+        m = self.load()
+        for events in ([], [
+            {'type': 'item.completed', 'item': {'id': 'call', 'type': 'mcp_tool_call',
+                'server': 'blender', 'tool': m.TOOLS[0], 'status': 'completed',
+                'arguments': {}, 'result': {'structured_content': {'ok': True}}}},
+        ], [{'type': 'turn.completed'}]):
+            with self.subTest(events=events), self.assertRaises(ValueError):
+                m.verify_generation_events(events)
+
+    def test_generation_stream_fails_closed_on_nonapproved_operations_and_feedback(self):
+        m = self.load()
+        allowed = [
+            {'type': 'item.completed', 'item': {'id': 'reason', 'type': 'reasoning'}},
+            {'type': 'item.completed', 'item': {'id': 'call', 'type': 'mcp_tool_call',
+                'server': 'blender', 'tool': m.TOOLS[0], 'status': 'completed',
+                'arguments': {'code': "import bpy; bpy.context.scene.render.filepath='iteration01.png'"},
+                'result': {'structured_content': {'ok': True}}}},
+            {'type': 'turn.completed'},
+        ]
+        m.verify_generation_events(allowed)
+        prohibited = [
+            {'type': 'item.completed', 'item': {'id': 'shell', 'type': 'command_execution',
+                                                'command': 'python edit_scene.py'}},
+            {'type': 'item.completed', 'item': {'id': 'write', 'type': 'file_change',
+                                                'path': 'scene.blend'}},
+            {'type': 'item.completed', 'item': {'id': 'goal', 'type': 'mcp_tool_call',
+                'server': 'blender', 'tool': m.TOOLS[0], 'status': 'completed',
+                'arguments': {'code': "open('../goal.py').read()"}}},
+            {'type': 'item.completed', 'item': {'id': 'score', 'type': 'mcp_tool_call',
+                'server': 'blender', 'tool': m.TOOLS[0], 'status': 'completed',
+                'arguments': {'code': "json.load(open('scoring/aggregate.json'))"}}},
+        ]
+        for event in prohibited:
+            with self.subTest(item=event['item']['id']), self.assertRaises(ValueError):
+                m.verify_generation_events([event])
 
 
 if __name__ == '__main__':
