@@ -1,0 +1,5 @@
+# Minimal CPU-only dependencies for publication fixture tests.
+# uv pip compile --python-version 3.11 --python-platform x86_64-manylinux_2_28 \
+#   --index-url https://pypi.org/simple --generate-hashes \
+#   -o requirements-fixture.lock requirements-fixture.in
+pillow==12.3.0

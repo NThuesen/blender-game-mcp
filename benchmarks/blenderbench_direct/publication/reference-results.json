@@ -1,0 +1,347 @@
+{
+  "categories": {
+    "level1": {
+      "mean_best_clip_similarity": 0.9962615238295661,
+      "mean_best_nclip_x100": 0.3738476170433892,
+      "mean_best_photometric_loss": 0.003033510640105103,
+      "tasks": 9
+    },
+    "level2": {
+      "mean_best_clip_similarity": 0.983968522813585,
+      "mean_best_nclip_x100": 1.603147718641493,
+      "mean_best_photometric_loss": 0.011897660300342573,
+      "tasks": 9
+    },
+    "level3": {
+      "mean_best_clip_similarity": 0.9771796133783128,
+      "mean_best_nclip_x100": 2.2820386621687145,
+      "mean_best_photometric_loss": 0.019716895185410976,
+      "tasks": 9
+    }
+  },
+  "dataset": {
+    "attribution": "DietCoke4671 and contributors",
+    "license": "CC BY 4.0",
+    "repository": "DietCoke4671/BlenderBench",
+    "revision": "203e4d325e9438ca55b29bdfc4f6a90842d74e68"
+  },
+  "evaluator": {
+    "best_round_rule": "minimum N-CLIP; paired photometric loss from same round; earliest tie",
+    "clip_model": "openai/clip-vit-base-patch32",
+    "clip_model_revision": "3d74acf9a28c67741b2f4f2ea7635f0aaf6f0268",
+    "metric": "CLIP image-embedding cosine similarity; N-CLIP = 1 - similarity; not literal task accuracy",
+    "repository": "Fugtemypt123/VIGA-release",
+    "revision": "69cb8ef0651bf68124815682df4a0f8e8b57c141",
+    "source_sha256": "9ee08818aa858dccfff3efbb36cb9a98e8887f14e6168ad1a23731351cdeb3b5"
+  },
+  "experiment": {
+    "codex_cli": "0.154.0",
+    "generation_model": "gpt-6-astra",
+    "generation_model_revision": null,
+    "implementation_commit": "4a9f5cc6e616080185252bb919fa3d1e730760b7",
+    "rounds_per_task": 10,
+    "scored_rounds": 270,
+    "tasks": 27,
+    "trajectory_policy": "one sequential ten-round trajectory per task; no CLIP or evaluator feedback to generation"
+  },
+  "limitations": [
+    "Public dataset; contamination risk is not measurable.",
+    "No hidden test set, hosted submission endpoint, or official leaderboard verification.",
+    "Model and inference budget differ from VIGA paper conditions.",
+    "One trajectory per task; no variance estimate.",
+    "No VLM judge by design."
+  ],
+  "results_source": {
+    "bytes": 6447,
+    "sha256": "073be2c44f1a763b66dea5138eda1b8959e8553fef6ce288f1d78ee92807d6e8"
+  },
+  "rows": [
+    {
+      "best_round": 7,
+      "clip_similarity": 0.9975831508636475,
+      "raw_nclip": 0.002416849136352539,
+      "raw_pl": 0.003328760154545307,
+      "rounds": 10,
+      "task": "level1/camera1"
+    },
+    {
+      "best_round": 8,
+      "clip_similarity": 0.9955885410308838,
+      "raw_nclip": 0.004411458969116211,
+      "raw_pl": 0.0033672682475298643,
+      "rounds": 10,
+      "task": "level1/camera2"
+    },
+    {
+      "best_round": 9,
+      "clip_similarity": 0.9977397918701172,
+      "raw_nclip": 0.0022602081298828125,
+      "raw_pl": 0.001466981484554708,
+      "rounds": 10,
+      "task": "level1/camera3"
+    },
+    {
+      "best_round": 6,
+      "clip_similarity": 0.9912315011024475,
+      "raw_nclip": 0.00876849889755249,
+      "raw_pl": 0.007649693172425032,
+      "rounds": 10,
+      "task": "level1/camera4"
+    },
+    {
+      "best_round": 7,
+      "clip_similarity": 0.9964922666549683,
+      "raw_nclip": 0.0035077333450317383,
+      "raw_pl": 0.0044174473732709885,
+      "rounds": 10,
+      "task": "level1/camera5"
+    },
+    {
+      "best_round": 10,
+      "clip_similarity": 0.9997468590736389,
+      "raw_nclip": 0.000253140926361084,
+      "raw_pl": 3.515696880640462e-05,
+      "rounds": 10,
+      "task": "level1/camera6"
+    },
+    {
+      "best_round": 9,
+      "clip_similarity": 0.989441454410553,
+      "raw_nclip": 0.010558545589447021,
+      "raw_pl": 0.006557795684784651,
+      "rounds": 10,
+      "task": "level1/camera7"
+    },
+    {
+      "best_round": 10,
+      "clip_similarity": 0.9990020990371704,
+      "raw_nclip": 0.0009979009628295898,
+      "raw_pl": 3.855396425933577e-05,
+      "rounds": 10,
+      "task": "level1/camera8"
+    },
+    {
+      "best_round": 9,
+      "clip_similarity": 0.9995280504226685,
+      "raw_nclip": 0.00047194957733154297,
+      "raw_pl": 0.0004399387107696384,
+      "rounds": 10,
+      "task": "level1/camera9"
+    },
+    {
+      "best_round": 10,
+      "clip_similarity": 0.9777544736862183,
+      "raw_nclip": 0.02224552631378174,
+      "raw_pl": 0.015119296498596668,
+      "rounds": 10,
+      "task": "level2/attribute1"
+    },
+    {
+      "best_round": 5,
+      "clip_similarity": 0.9820566177368164,
+      "raw_nclip": 0.017943382263183594,
+      "raw_pl": 0.016636313870549202,
+      "rounds": 10,
+      "task": "level2/attribute2"
+    },
+    {
+      "best_round": 4,
+      "clip_similarity": 0.9793153405189514,
+      "raw_nclip": 0.020684659481048584,
+      "raw_pl": 0.01562858745455742,
+      "rounds": 10,
+      "task": "level2/attribute3"
+    },
+    {
+      "best_round": 1,
+      "clip_similarity": 0.9745771288871765,
+      "raw_nclip": 0.025422871112823486,
+      "raw_pl": 0.02019927091896534,
+      "rounds": 10,
+      "task": "level2/attribute4"
+    },
+    {
+      "best_round": 9,
+      "clip_similarity": 0.9830480813980103,
+      "raw_nclip": 0.016951918601989746,
+      "raw_pl": 0.013992843218147755,
+      "rounds": 10,
+      "task": "level2/attribute5"
+    },
+    {
+      "best_round": 9,
+      "clip_similarity": 0.9842134714126587,
+      "raw_nclip": 0.01578652858734131,
+      "raw_pl": 0.01759195886552334,
+      "rounds": 10,
+      "task": "level2/attribute6"
+    },
+    {
+      "best_round": 9,
+      "clip_similarity": 0.9894779324531555,
+      "raw_nclip": 0.010522067546844482,
+      "raw_pl": 0.0033791407477110624,
+      "rounds": 10,
+      "task": "level2/attribute7"
+    },
+    {
+      "best_round": 9,
+      "clip_similarity": 0.9888083934783936,
+      "raw_nclip": 0.011191606521606445,
+      "raw_pl": 0.0037378640845417976,
+      "rounds": 10,
+      "task": "level2/attribute8"
+    },
+    {
+      "best_round": 10,
+      "clip_similarity": 0.996465265750885,
+      "raw_nclip": 0.0035347342491149902,
+      "raw_pl": 0.0007936670444905758,
+      "rounds": 10,
+      "task": "level2/attribute9"
+    },
+    {
+      "best_round": 9,
+      "clip_similarity": 0.9810705780982971,
+      "raw_nclip": 0.01892942190170288,
+      "raw_pl": 0.02021031640470028,
+      "rounds": 10,
+      "task": "level3/attribute1"
+    },
+    {
+      "best_round": 10,
+      "clip_similarity": 0.9837775230407715,
+      "raw_nclip": 0.016222476959228516,
+      "raw_pl": 0.012915946543216705,
+      "rounds": 10,
+      "task": "level3/attribute2"
+    },
+    {
+      "best_round": 10,
+      "clip_similarity": 0.9846137762069702,
+      "raw_nclip": 0.015386223793029785,
+      "raw_pl": 0.014947629533708096,
+      "rounds": 10,
+      "task": "level3/attribute3"
+    },
+    {
+      "best_round": 10,
+      "clip_similarity": 0.9926517009735107,
+      "raw_nclip": 0.007348299026489258,
+      "raw_pl": 0.009027284570038319,
+      "rounds": 10,
+      "task": "level3/attribute4"
+    },
+    {
+      "best_round": 10,
+      "clip_similarity": 0.9755886793136597,
+      "raw_nclip": 0.024411320686340332,
+      "raw_pl": 0.027274271473288536,
+      "rounds": 10,
+      "task": "level3/attribute5"
+    },
+    {
+      "best_round": 7,
+      "clip_similarity": 0.9866102933883667,
+      "raw_nclip": 0.0133897066116333,
+      "raw_pl": 0.025586744770407677,
+      "rounds": 10,
+      "task": "level3/attribute6"
+    },
+    {
+      "best_round": 5,
+      "clip_similarity": 0.93320631980896,
+      "raw_nclip": 0.06679368019104004,
+      "raw_pl": 0.03137661889195442,
+      "rounds": 10,
+      "task": "level3/attribute7"
+    },
+    {
+      "best_round": 4,
+      "clip_similarity": 0.9753873944282532,
+      "raw_nclip": 0.024612605571746826,
+      "raw_pl": 0.025764750316739082,
+      "rounds": 10,
+      "task": "level3/attribute8"
+    },
+    {
+      "best_round": 10,
+      "clip_similarity": 0.9817102551460266,
+      "raw_nclip": 0.01828974485397339,
+      "raw_pl": 0.010348494164645672,
+      "rounds": 10,
+      "task": "level3/attribute9"
+    }
+  ],
+  "schema_version": 1,
+  "scoring_runtime": {
+    "gpu": "NVIDIA GeForce RTX 5090",
+    "packages": {
+      "certifi": "2026.7.22",
+      "charset-normalizer": "3.5.1",
+      "filelock": "3.32.3",
+      "fsspec": "2026.7.0",
+      "hf-xet": "1.6.0",
+      "huggingface-hub": "0.36.2",
+      "idna": "3.19",
+      "jinja2": "3.1.6",
+      "markupsafe": "3.0.3",
+      "mpmath": "1.3.0",
+      "networkx": "3.6.1",
+      "numpy": "2.4.6",
+      "nvidia-cublas-cu12": "12.8.4.1",
+      "nvidia-cuda-cupti-cu12": "12.8.90",
+      "nvidia-cuda-nvrtc-cu12": "12.8.93",
+      "nvidia-cuda-runtime-cu12": "12.8.90",
+      "nvidia-cudnn-cu12": "9.10.2.21",
+      "nvidia-cufft-cu12": "11.3.3.83",
+      "nvidia-cufile-cu12": "1.13.1.3",
+      "nvidia-curand-cu12": "10.3.9.90",
+      "nvidia-cusolver-cu12": "11.7.3.90",
+      "nvidia-cusparse-cu12": "12.5.8.93",
+      "nvidia-cusparselt-cu12": "0.7.1",
+      "nvidia-nccl-cu12": "2.27.3",
+      "nvidia-nvjitlink-cu12": "12.8.93",
+      "nvidia-nvtx-cu12": "12.8.90",
+      "packaging": "26.3",
+      "pillow": "12.3.0",
+      "pyyaml": "6.0.3",
+      "regex": "2026.9.10",
+      "requests": "2.34.2",
+      "safetensors": "0.8.0",
+      "setuptools": "78.1.0",
+      "sympy": "1.14.0",
+      "tokenizers": "0.21.4",
+      "torch": "2.8.0+cu128",
+      "tqdm": "4.70.0",
+      "transformers": "4.55.4",
+      "triton": "3.4.0",
+      "typing-extensions": "4.16.0",
+      "urllib3": "2.7.0"
+    },
+    "python": {
+      "architecture": "x86_64",
+      "bits": 64,
+      "cache_tag": "cpython-313",
+      "compiler": "Clang 22.1.3",
+      "executable_sha256": "93a93f4c8af5ae6f127fb0310f923d5fab89eb7257a0b801eec2e44b3f199840",
+      "implementation": "CPython",
+      "note": "Executable digest is historical provenance, not remote or hostile-host attestation.",
+      "soabi": "cpython-313-x86_64-linux-gnu",
+      "version": "3.13.15"
+    },
+    "torch_cuda": "12.8"
+  },
+  "status": "unofficial_public-dataset_evaluation; not an official BlenderBench leaderboard submission",
+  "video": {
+    "bytes": 10161884,
+    "codec": "h264",
+    "duration_seconds": 134.9,
+    "height": 464,
+    "publication_status": "published",
+    "sample_aspect_ratio": "1:1",
+    "sha256": "04966320de680203baed6c01c3e211059350454139dc8a802c557cce24815c17",
+    "url": "https://huggingface.co/datasets/michaelgold/blenderbench-direct-results/resolve/main/video/blenderbench-complete-compilation.mp4",
+    "width": 848
+  }
+}

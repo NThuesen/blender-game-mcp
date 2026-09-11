@@ -6,13 +6,22 @@ This branch packages an enhanced Blender MCP workflow for agentic Blender work. 
 
 This is a modified distribution of Blender Lab's Blender MCP project. See [NOTICE.md](NOTICE.md) for provenance and [SECURITY.md](SECURITY.md) for the execution-risk model. Public `bpy.dev` website assets will live in a separate repository.
 
+### BlenderBench result
+
+[![BlenderBench result](https://bpy.dev/assets/blenderbench-result.webp)](https://huggingface.co/datasets/michaelgold/blenderbench-direct-results/resolve/7c2c43be4517aee4d76d2b445578988de186970c/video/blenderbench-complete-compilation.mp4)
+
+The compilation covers **27 tasks / 270 rounds**. Its on-video “CLIP accuracy” label means
+**CLIP image-embedding cosine similarity, not literal accuracy**. The linked immutable
+H.264 video is 848×464, 134.9 seconds, and 10,161,884 bytes; SHA-256:
+`04966320de680203baed6c01c3e211059350454139dc8a802c557cce24815c17`.
+
 ### What is enhanced
 
 - **Saved-file tools:** `_for_cli` tools operate on `.blend` files in fresh subprocesses without requiring a live Blender UI session.
 - **Backend selection:** use a Blender executable backend or a standalone `bpy` Python backend with `BLENDER_MCP_CLI_BACKEND`.
 - **Runtime API lookup:** agents can query exact signatures, enums, defaults, and availability from the active Blender/`bpy` runtime instead of relying only on bundled docs.
 - **Process isolation:** command-line executions are bounded by explicit timeouts, output caps, compact JSON framing, and source-file overwrite checks. This is crash/process-state isolation, not an OS sandbox.
-- **Benchmark tooling:** deterministic token-efficiency tasks and exploratory creative comparison harnesses support repeatable original-vs-enhanced analysis.
+- **Benchmark tooling:** deterministic token-efficiency tasks, exploratory creative comparison harnesses, and a [portable model-neutral full-27 BlenderBench runner](benchmarks/blenderbench_direct/README.md) with pinned inputs and post-generation scoring.
 
 ### Current publication status
 

@@ -264,7 +264,7 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", default="/tmp/voxel-video-mcp-trial")
     parser.add_argument("--condition", choices=["original", "enhanced", "both"], default="both")
-    parser.add_argument("--model", default="gpt-6-astra")
+    parser.add_argument("--model", required=True)
     parser.add_argument("--seconds", type=int, default=600)
     parser.add_argument("--output-bytes", type=int, default=2 * 1024 * 1024)
     parser.add_argument("--max-tools", type=int, default=80)

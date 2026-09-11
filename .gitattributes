@@ -1,0 +1,2 @@
+# Preserve the hash-verified upstream evaluator byte-for-byte.
+benchmarks/blenderbench_direct/ref_based_eval.py whitespace=-blank-at-eol
