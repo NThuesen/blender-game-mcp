@@ -138,7 +138,7 @@ class DirectCodexTests(unittest.TestCase):
             self.assertIn('incomplete checkpoint artifacts', proc.stderr)
             self.assertTrue((root / 'logs2' / 'run.jsonl').is_file())
 
-    def test_task_policy_supports_non_camera_and_rejects_forbidden(self):
+    def test_task_policy_is_ignored_but_noop_is_rejected(self):
         import copy
         m = self.load()
         self.assertTrue(hasattr(m, 'validate_edit'), 'task policy validator missing')
@@ -149,14 +149,13 @@ class DirectCodexTests(unittest.TestCase):
         policy = {'allowed_transforms': {'Cube': ['location']},
                   'location_bounds': {'Cube': [[-2, 2]] * 3}}
         m.validate_edit(before, after, policy)
-        for bad in (before, {**after, 'preserve': {'mesh': 'changed'}}):
-            with self.assertRaises(ValueError):
-                m.validate_edit(before, bad, policy)
-        after['objects']['Cube']['location'] = [3, 0, 0]
         with self.assertRaises(ValueError):
-            m.validate_edit(before, after, policy)
+            m.validate_edit(before, before, policy)
+        m.validate_edit(before, {**after, 'preserve': {'mesh': 'changed'}}, policy)
+        after['objects']['Cube']['location'] = [3, 0, 0]
+        m.validate_edit(before, after, policy)
 
-    def test_all_exact_property_families(self):
+    def test_all_property_families_and_geometry_are_editable(self):
         import copy
         m = self.load()
         before = {'objects': {'Cam': {'type': 'CAMERA', 'lens': 50},
@@ -170,8 +169,7 @@ class DirectCodexTests(unittest.TestCase):
             mutate(after)
             m.validate_edit(before, after, policy)
             after['preserve']['mesh'] = 'changed'
-            with self.assertRaises(ValueError):
-                m.validate_edit(before, after, policy)
+            m.validate_edit(before, after, policy)
         after = copy.deepcopy(before)
         after['objects']['Cam']['lens'] = float('nan')
         with self.assertRaises(ValueError):

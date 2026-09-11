@@ -1,4 +1,4 @@
-"""Saved delivery audits tolerate only evidenced orphan material removal."""
+"""Unrestricted saved edits; orphan cleanup alone is not a round."""
 import copy
 import sys
 import unittest
@@ -54,9 +54,13 @@ class SavedCleanupTests(unittest.TestCase):
             def invoke(args, config, evidence, label, prompt, target=None):
                 if label == 'run':
                     self.assertIn('previous saved checkpoint', prompt)
+                    self.assertIn('All scene properties may be edited', prompt)
+                    self.assertNotIn('unlisted', prompt)
+                    self.assertNotIn('allowed edit', prompt)
+                    self.assertIn('goal code', prompt)
                     raise GenerationReached()
                 return []
-            policy = {f: {} for f in suite.FIELDS}
+            policy = {}
             policy['task_description'] = 'test'
             with patch.object(suite, 'ROOT', root), \
                  patch.object(suite.runtime, 'initialize', initialize), \
@@ -73,47 +77,42 @@ class SavedCleanupTests(unittest.TestCase):
         direct.validate_edit(before, after, policy)
         self.assertEqual(before, original)
 
-    def test_used_material_change_or_loss_is_rejected(self):
+    def test_used_material_change_or_loss_is_accepted(self):
         for value in ('changed-hash', None):
             before, after, policy = self.fixture()
             if value is None:
                 del after['audit']['preserve']['materials']['used']
             else:
                 after['audit']['preserve']['materials']['used'] = value
-            with self.assertRaisesRegex(ValueError, 'forbidden scene edits'):
-                direct.validate_edit(before, after, policy)
+            direct.validate_edit(before, after, policy)
 
-    def test_missing_lifecycle_and_protected_orphans_fail_closed(self):
+    def test_material_edits_need_no_lifecycle_permission(self):
         for field, value in [('users', 1), ('use_fake_user', True),
                              ('use_extra_user', True), ('library', '//linked.blend'),
                              ('users', None)]:
             before, after, policy = self.fixture()
             before['material_lifecycle']['orphan'][field] = value
-            with self.assertRaisesRegex(ValueError, 'forbidden scene edits'):
-                direct.validate_edit(before, after, policy)
+            direct.validate_edit(before, after, policy)
         before, after, policy = self.fixture()
         del before['material_lifecycle']
-        with self.assertRaisesRegex(ValueError, 'forbidden scene edits'):
-            direct.validate_edit(before, after, policy)
+        direct.validate_edit(before, after, policy)
 
-    def test_geometry_lighting_and_material_additions_still_fail(self):
+    def test_geometry_lighting_and_material_additions_are_accepted(self):
         for collection, name in [('meshes', 'mesh'), ('scenes', 'Scene'), ('materials', 'new')]:
             before, after, policy = self.fixture()
             after['audit']['preserve'][collection][name] = 'changed'
-            with self.assertRaisesRegex(ValueError, 'forbidden scene edits'):
-                direct.validate_edit(before, after, policy)
+            direct.validate_edit(before, after, policy)
 
     def test_cleanup_alone_is_not_a_meaningful_round(self):
         before, after, policy = self.fixture()
         after['audit']['objects']['Camera']['lens'] = 50
-        with self.assertRaisesRegex(ValueError, 'no allowed scene change'):
+        with self.assertRaisesRegex(ValueError, 'no meaningful scene change'):
             direct.validate_edit(before, after, policy)
 
-    def test_present_orphan_content_remains_audited(self):
+    def test_present_orphan_content_may_change(self):
         before, after, policy = self.fixture()
         after['audit']['preserve']['materials']['orphan'] = 'changed'
-        with self.assertRaisesRegex(ValueError, 'forbidden scene edits'):
-            direct.validate_edit(before, after, policy)
+        direct.validate_edit(before, after, policy)
 
 
 if __name__ == '__main__':

@@ -54,13 +54,11 @@ def verify_preflight(events, nonce, python):
 
 
 def validate_edit(before, after, policy):
-    """Compare independent RNA audits, masking only exact task allowances."""
+    """Require finite, meaningful saved changes; local edit policy is ignored."""
     import math
     left = copy.deepcopy(before.get('audit', before))
     right = copy.deepcopy(after.get('audit', after))
-    # Only disappearance of an independently evidenced, local, zero-user
-    # material is normal save/reopen cleanup. Keep present material contents,
-    # all additions and every object/slot/geometry/light/camera audit exact.
+    # Evidenced orphan cleanup alone is not a meaningful editing round.
     materials = left.get('preserve', {}).get('materials', {})
     saved_materials = right.get('preserve', {}).get('materials', {})
     for name in set(materials) - set(saved_materials):
@@ -70,59 +68,17 @@ def validate_edit(before, after, policy):
                 and lifecycle.get('use_extra_user') is False
                 and 'library' in lifecycle and lifecycle['library'] is None):
             del materials[name]
-    changed = False
-    if policy.get('unsupported_blocker'):
-        raise ValueError('unsupported task policy')
+    def finite(value):
+        if isinstance(value, dict):
+            return all(finite(v) for v in value.values())
+        if isinstance(value, (list, tuple)):
+            return all(finite(v) for v in value)
+        return not isinstance(value, float) or math.isfinite(value)
 
-    def remove(a, b, field, width=None):
-        nonlocal changed
-        av, bv = a[field], b[field]
-        for value in (av, bv):
-            values = value if isinstance(value, list) else [value]
-            if width is not None and len(values) != width:
-                raise ValueError('invalid property dimensions')
-            if not all(type(v) in (int, float) and math.isfinite(v) for v in values):
-                raise ValueError('nonfinite or nonnumeric allowed property')
-        changed |= av != bv
-        del a[field]
-        del b[field]
-
-    try:
-        for name, fields in policy.get('allowed_transforms', {}).items():
-            if not fields or len(set(fields)) != len(fields) or set(fields) - {'location', 'rotation_euler', 'scale'}:
-                raise ValueError('forbidden transform policy')
-            for field in fields:
-                remove(left['objects'][name], right['objects'][name], field, 3)
-        for name, fields in policy.get('allowed_camera_data', {}).items():
-            if fields != ['lens']:
-                raise ValueError('forbidden camera data policy')
-            a, b = left['objects'][name], right['objects'][name]
-            if a['type'] != 'CAMERA' or b['type'] != 'CAMERA':
-                raise ValueError('lens allowance requires camera')
-            remove(a, b, 'lens', 1)
-        for name, fields in policy.get('allowed_light_data', {}).items():
-            if not fields or len(set(fields)) != len(fields) or set(fields) - {'energy', 'color'}:
-                raise ValueError('forbidden light policy')
-            a, b = left['objects'][name], right['objects'][name]
-            if a['type'] != 'LIGHT' or b['type'] != 'LIGHT':
-                raise ValueError('light allowance requires light')
-            for field in fields:
-                remove(a['light_data'], b['light_data'], field, 3 if field == 'color' else 1)
-        for name, fields in policy.get('allowed_shape_keys', {}).items():
-            if not fields or len(set(fields)) != len(fields):
-                raise ValueError('invalid shape key policy')
-            for field in fields:
-                remove(left['shape_keys'][name], right['shape_keys'][name], field, 1)
-        for name, bounds in policy.get('location_bounds', {}).items():
-            location = after.get('audit', after)['objects'][name]['location']
-            if len(location) != 3 or len(bounds) != 3 or any(not lo <= x <= hi for x, (lo, hi) in zip(location, bounds)):
-                raise ValueError('location outside bounds')
-    except (KeyError, TypeError) as exc:
-        raise ValueError('missing or malformed policy property') from exc
-    if left != right:
-        raise ValueError('forbidden scene edits outside task policy')
-    if not changed:
-        raise ValueError('no allowed scene change')
+    if not finite(left) or not finite(right):
+        raise ValueError('nonfinite scene property')
+    if left == right:
+        raise ValueError('no meaningful scene change')
 
 
 def verify_checkpoints(root, rounds, policy=None):

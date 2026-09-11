@@ -17,8 +17,7 @@ import direct_codex as direct
 import direct_runtime as runtime
 
 ROOT = Path('/home/mg/blenderbench-direct')
-FIELDS = ('allowed_transforms', 'allowed_camera_data', 'allowed_light_data',
-          'allowed_shape_keys', 'location_bounds')
+
 
 
 def task_plan(tasks, selected=None):
@@ -36,8 +35,7 @@ def run_task(task, policy, out, config, dataset):
     inp = ROOT / 'dataset' / task
     verification = dataset.verify(task, inp)
     policy = dict(policy, task=task, pin_verified=True, stop_file=str(out.parent / 'STOP'))
-    if any(field not in policy for field in FIELDS):
-        raise ValueError('missing exact task policy fields')
+
     out.mkdir(parents=True, exist_ok=False)
     (out / 'input-verification.json').write_text(json.dumps(verification, indent=2))
     events = out / 'events.jsonl'
@@ -47,8 +45,7 @@ def run_task(task, policy, out, config, dataset):
     blend = work / 'initial.blend'
     Path(initial['blend']).rename(blend)
     # Generation follows the initialized scene, without a separate reopen gate.
-    # Saved checkpoints are independently audited after generation against this
-    # full in-memory baseline; only evidenced orphan material loss is allowed.
+    # Saved checkpoints are independently reopened after generation for integrity.
     baseline = initial
     initial_hash = runtime.sha(blend)
     runtime.emit(events, 'native_admission_passed', task=task, source_sha256=initial_hash)
@@ -66,12 +63,11 @@ def run_task(task, policy, out, config, dataset):
     runtime.emit(events, 'preflight_passed', task=task)
     contract = ('Solve this BlenderBench task by direct use of the four Blender MCP tools.\n'
         + policy['task_description'] + '\nTarget image is attached. Initial scene: ' + str(blend)
-        + '\nExact mutable-property policy (all unlisted scene data must remain unchanged):\n'
-        + json.dumps({f: policy[f] for f in FIELDS}, indent=2)
+        + '\nAll scene properties may be edited, including objects, geometry, materials, lights and cameras.\n'
         + '\nPerform exactly 10 meaningful edit/render/visual-inspection rounds sequentially. '
         'Inspect initial scene and image, reason yourself about edits, render and inspect each checkpoint '
         'using view_image. Do not delegate reasoning to scripts/controllers. No CLIP/scoring, VLM judge, '
-        'oracle/goal .blend access, or score feedback. Do not read audit or evaluation files. '
+        'oracle/goal code or goal .blend access, or score feedback. Do not read audit or evaluation files. '
         'Use only execute_blender_code_for_cli, get_runtime_python_api_docs_for_cli, search_api_docs, '
         'get_python_api_docs for scene work; no shell scene operations. '
         'The backend code-call deadline remains 120 seconds; the MCP client deadline remains 86400 seconds. '
@@ -79,11 +75,10 @@ def run_task(task, policy, out, config, dataset):
         'unsaved memory does NOT persist across calls. Continue edits from the previous saved checkpoint '
         '(initial.blend only for the first edit); save intermediate work before a call returns. '
         'Within a call, edit the open scene continuously without unnecessary reloads. '
-        'Use CUDA rendering, enable CUDA devices only and disable CPU; retain engine, samples, resolution '
-        'and all other saved scene settings. Save scene BEFORE transient PNG output setting changes; '
+        'Use Cycles CUDA rendering, enable CUDA devices only and disable CPU. Save scene BEFORE transient PNG output setting changes; '
         'never save the render filepath/encoding overrides. Disable backup save_version. '
-        'Never alter initial.blend. Do not create/delete objects or alter unlisted properties. '
-        'Every round must be a distinct allowed edit, not inspection/no-op or a repeat of any earlier scene state. '
+        'Never alter initial.blend, source dataset files or target image. '
+        'Every round must be a distinct meaningful edit, not inspection/no-op or a repeat of any earlier scene state. '
         'Save absolute paths ' + str(work / 'iteration01.blend') + ' and '
         + str(work / 'iteration01.png') + ' through iteration10.blend and iteration10.png. '
         'Append rounds.jsonl in this work directory via MCP, one JSON object per completed round: '
@@ -95,6 +90,28 @@ def run_task(task, policy, out, config, dataset):
     direct.invoke(args, config, evidence, 'run', contract, inp / 'target.png')
     if runtime.sha(blend) != initial_hash:
         raise ValueError('Codex modified initial.blend')
+    dataset.verify(task, inp)
+    score_checkpoints(task, policy, work, out, baseline)
+
+
+def recover_task(task, policy, out, old, dataset):
+    """Score retained ten-round delivery in place; never regenerate or rewrite it."""
+    work = old / 'work'
+    baseline = json.loads((work / 'metadata.json').read_text())
+    if runtime.sha(work / 'initial.blend') != baseline['blend_sha256']:
+        raise ValueError('modified initial.blend in recovery')
+    verification = dataset.verify(task, ROOT / 'dataset' / task)
+    out.mkdir(parents=True, exist_ok=False)
+    (out / 'input-verification.json').write_text(json.dumps(verification, indent=2))
+    (out / 'recovery.json').write_text(json.dumps({'source': str(old), 'regenerated': False}))
+    policy = dict(policy, task=task, stop_file=str(out.parent / 'STOP'))
+    score_checkpoints(task, policy, work, out, baseline)
+
+
+def score_checkpoints(task, policy, work, out, baseline):
+    """Validate and score saved artifacts only after generation has ended."""
+    events = out / 'events.jsonl'
+    inp = ROOT / 'dataset' / task
     artifacts = direct.verify_checkpoints(work, 10, policy=policy)
     (out / 'artifact-check.json').write_text(json.dumps(artifacts, indent=2))
     runtime.emit(events, 'generation_finished', task=task)
@@ -109,7 +126,7 @@ def run_task(task, policy, out, config, dataset):
         direct.validate_edit(previous, audit, policy)
         state = json.dumps(audit['audit'], sort_keys=True)
         if state in seen:
-            raise ValueError('repeated allowed scene state')
+            raise ValueError('repeated scene state')
         seen.add(state)
         previous = audit
         score_dir = out / f'score{n:02}'
@@ -129,6 +146,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--tasks', nargs='+', help='explicit user-authorized fresh restart subset')
+    parser.add_argument('--recover-root', type=Path, help='reuse complete ledgers from a stopped predecessor')
     args = parser.parse_args()
     out = args.output.absolute()
     out.mkdir(parents=True, exist_ok=True)
@@ -181,7 +199,11 @@ def main():
                 continue
             status(task, 'running', output=str(task_out))
             try:
-                run_task(task, tasks[task], task_out, config, dataset)
+                old = args.recover_root / task.replace('/', '-') if args.recover_root else None
+                if old is not None and (old / 'work/rounds.jsonl').is_file():
+                    recover_task(task, tasks[task], task_out, old, dataset)
+                else:
+                    run_task(task, tasks[task], task_out, config, dataset)
             except Exception as exc:
                 status(task, 'failed', error=repr(exc), output=str(task_out))
             else:
