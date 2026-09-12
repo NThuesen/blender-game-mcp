@@ -71,6 +71,14 @@ When ``BLENDER_PATH`` is omitted, the server runs ``blender`` from ``PATH``.
 Python interpreter. On macOS this is commonly
 ``/Applications/Blender.app/Contents/MacOS/Blender``.
 
+Code is passed to Blender through a temporary UTF-8 Python file, avoiding
+Windows command-line length limits for runtime documentation and long scripts.
+The file is closed before launching Blender and removed after execution,
+including failures and timeouts. The child receives EOF on standard input
+instead of inheriting the MCP server's protocol pipe. This prevents background
+startup hangs observed on Windows; generated code cannot read interactive
+input from that pipe. User preferences and enabled add-ons are still loaded.
+
 You can inspect the selected Blender runtime with:
 
 .. code-block:: console
