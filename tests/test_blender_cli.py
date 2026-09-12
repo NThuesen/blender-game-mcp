@@ -262,27 +262,46 @@ class TestRunBlenderCLI(unittest.TestCase):
         self.assertFalse(os.path.exists(os.path.dirname(paths[0])))
 
     def test_temporary_script_is_removed_after_child_failures(self) -> None:
+        def assert_cleanup(failure: BaseException) -> None:
+            paths: list[str] = []
+
+            def fail(argv: list[str], **_kwargs: object) -> None:
+                paths.append(argv[4])
+                self.assertTrue(os.path.isfile(argv[4]))
+                raise failure
+
+            with (
+                mock.patch.dict(os.environ, {}, clear=True),
+                mock.patch.object(subprocess, "run", side_effect=fail),
+                self.assertRaises(RuntimeError),
+            ):
+                blender_cli.run_blender_cli("scene.blend", "result = {}", timeout=3)
+            self.assertEqual(len(paths), 1)
+            self.assertFalse(os.path.exists(os.path.dirname(paths[0])))
+
         failures = (
             subprocess.TimeoutExpired(cmd=["blender"], timeout=3),
             FileNotFoundError("missing executable"),
         )
         for failure in failures:
             with self.subTest(failure=type(failure).__name__):
-                paths: list[str] = []
+                assert_cleanup(failure)
 
-                def fail(argv: list[str], **_kwargs: object) -> None:
-                    paths.append(argv[4])
-                    self.assertTrue(os.path.isfile(argv[4]))
-                    raise failure
+    def test_temporary_script_setup_failure_is_not_reported_as_missing_blender(
+        self,
+    ) -> None:
+        with (
+            mock.patch.dict(os.environ, {}, clear=True),
+            mock.patch.object(
+                blender_cli.tempfile,
+                "TemporaryDirectory",
+                side_effect=FileNotFoundError("temporary directory unavailable"),
+            ),
+            self.assertRaisesRegex(RuntimeError, "temporary script") as raised,
+        ):
+            blender_cli.run_blender_cli("scene.blend", "result = {}")
 
-                with (
-                    mock.patch.dict(os.environ, {}, clear=True),
-                    mock.patch.object(subprocess, "run", side_effect=fail),
-                    self.assertRaises(RuntimeError),
-                ):
-                    blender_cli.run_blender_cli("scene.blend", "result = {}", timeout=3)
-                self.assertEqual(len(paths), 1)
-                self.assertFalse(os.path.exists(os.path.dirname(paths[0])))
+        self.assertNotIn("Blender executable not found", str(raised.exception))
 
     def test_temporary_script_is_removed_after_execution_error(self) -> None:
         with (

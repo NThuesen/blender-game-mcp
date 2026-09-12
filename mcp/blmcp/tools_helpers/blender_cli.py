@@ -216,22 +216,30 @@ def run_blender_cli(
                 script_path = os.path.join(temporary, "execute.py")
                 with open(script_path, "w", encoding="utf-8") as script:
                     script.write(wrapper)
-                proc = subprocess.run(
-                    [
-                        config.executable,
-                        "--background",
-                        blend_file,
-                        "--python",
-                        script_path,
-                    ],
-                    # The MCP server owns stdin; background Blender must not
-                    # inherit its open protocol pipe on Windows.
-                    stdin=subprocess.DEVNULL,
-                    capture_output=True,
-                    text=True,
-                    timeout=timeout,
-                    check=False,
-                )
+                try:
+                    proc = subprocess.run(
+                        [
+                            config.executable,
+                            "--background",
+                            blend_file,
+                            "--python",
+                            script_path,
+                        ],
+                        # The MCP server owns stdin; background Blender must not
+                        # inherit its open protocol pipe on Windows.
+                        stdin=subprocess.DEVNULL,
+                        capture_output=True,
+                        text=True,
+                        timeout=timeout,
+                        check=False,
+                    )
+                except FileNotFoundError as ex:
+                    raise RuntimeError(
+                        "Blender executable not found at '{:s}'. "
+                        "Set the BLENDER_PATH environment variable to the correct path.".format(
+                            config.executable
+                        )
+                    ) from ex
         else:
             request = {
                 "blend_file": blend_file,
@@ -270,9 +278,8 @@ def run_blender_cli(
                 )
             ) from ex
         raise RuntimeError(
-            "Blender executable not found at '{:s}'. "
-            "Set the BLENDER_PATH environment variable to the correct path.".format(
-                config.executable
+            "Could not prepare the temporary script for the Blender CLI backend: {:s}".format(
+                str(ex)
             )
         ) from ex
 
