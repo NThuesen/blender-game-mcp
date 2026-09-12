@@ -1040,7 +1040,7 @@ class TestGetRuntimePythonAPIDocsDispatch(unittest.TestCase):
         violations: list[tuple[str, int, str, str]] = []
         for root in _PRODUCTION_SOURCE_ROOTS:
             for path in _production_python_paths(root):
-                relative_path = os.path.relpath(path, _REPO_DIR)
+                relative_path = os.path.relpath(path, _REPO_DIR).replace(os.sep, "/")
                 with open(path, encoding="utf-8") as fh:
                     file_callsites, file_violations = _send_code_sandbox_audit(
                         fh.read(), relative_path

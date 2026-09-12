@@ -113,8 +113,10 @@ class TestRunBlenderCLI(unittest.TestCase):
         argv: list[str], **_kwargs: object
     ) -> subprocess.CompletedProcess[str]:
         stdout = io.StringIO()
+        with open(argv[4], encoding="utf-8") as script:
+            wrapper = script.read()
         with contextlib.redirect_stdout(stdout):
-            exec(argv[4], {})  # noqa: S102 - wrapper execution is under test.
+            exec(wrapper, {})  # noqa: S102 - wrapper execution is under test.
         return subprocess.CompletedProcess(
             args=argv,
             returncode=0,
@@ -192,10 +194,10 @@ class TestRunBlenderCLI(unittest.TestCase):
         argv = run.call_args.args[0]
         self.assertEqual(
             argv[:4],
-            ["/opt/blender", "--background", "scene.blend", "--python-expr"],
+            ["/opt/blender", "--background", "scene.blend", "--python"],
         )
-        self.assertIn("json.dumps(_result)", argv[4])
-        self.assertNotIn("default=repr", argv[4])
+        self.assertFalse(os.path.exists(argv[4]))
+        self.assertEqual(run.call_args.kwargs["stdin"], subprocess.DEVNULL)
 
     def test_default_strict_json_rejects_non_serializable_result_in_error_frame(
         self,
@@ -230,7 +232,85 @@ class TestRunBlenderCLI(unittest.TestCase):
         self.assertIsInstance(answer, str)
         assert isinstance(answer, str)
         self.assertIn("object object at", answer)
-        self.assertIn("default=repr", run.call_args.args[0][4])
+        self.assertFalse(os.path.exists(run.call_args.args[0][4]))
+
+    def test_long_unicode_code_runs_in_child_with_short_command_line(self) -> None:
+        original_run = subprocess.run
+        paths: list[str] = []
+
+        def run_script(argv: list[str], **kwargs: object) -> subprocess.CompletedProcess[str]:
+            paths.append(argv[4])
+            self.assertLess(len(subprocess.list2cmdline(argv)), 32767)
+            self.assertTrue(os.path.isfile(argv[4]))
+            self.assertEqual(kwargs["stdin"], subprocess.DEVNULL)
+            # A real child must be able to reopen the closed UTF-8 script on
+            # Windows. It needs only Python, keeping this regression portable.
+            return original_run([sys.executable, argv[4]], **kwargs)
+
+        code = (
+            "# " + ("x" * 70000)
+            + "\nimport sys\nresult = {'label': 'caf\u00e9 \U0001f3fa8', 'stdin': sys.stdin.read()}"
+        )
+        with (
+            mock.patch.dict(os.environ, {}, clear=True),
+            mock.patch.object(subprocess, "run", side_effect=run_script),
+        ):
+            result = blender_cli.run_blender_cli("scene with spaces.blend", code)
+
+        self.assertEqual(result, {"label": "caf\u00e9 \U0001f3fa8", "stdin": ""})
+        self.assertEqual(len(paths), 1)
+        self.assertFalse(os.path.exists(os.path.dirname(paths[0])))
+
+    def test_temporary_script_is_removed_after_child_failures(self) -> None:
+        def assert_cleanup(failure: BaseException) -> None:
+            paths: list[str] = []
+
+            def fail(argv: list[str], **_kwargs: object) -> None:
+                paths.append(argv[4])
+                self.assertTrue(os.path.isfile(argv[4]))
+                raise failure
+
+            with (
+                mock.patch.dict(os.environ, {}, clear=True),
+                mock.patch.object(subprocess, "run", side_effect=fail),
+                self.assertRaises(RuntimeError),
+            ):
+                blender_cli.run_blender_cli("scene.blend", "result = {}", timeout=3)
+            self.assertEqual(len(paths), 1)
+            self.assertFalse(os.path.exists(os.path.dirname(paths[0])))
+
+        failures = (
+            subprocess.TimeoutExpired(cmd=["blender"], timeout=3),
+            FileNotFoundError("missing executable"),
+        )
+        for failure in failures:
+            with self.subTest(failure=type(failure).__name__):
+                assert_cleanup(failure)
+
+    def test_temporary_script_setup_failure_is_not_reported_as_missing_blender(
+        self,
+    ) -> None:
+        with (
+            mock.patch.dict(os.environ, {}, clear=True),
+            mock.patch.object(
+                blender_cli.tempfile,
+                "TemporaryDirectory",
+                side_effect=FileNotFoundError("temporary directory unavailable"),
+            ),
+            self.assertRaisesRegex(RuntimeError, "temporary script") as raised,
+        ):
+            blender_cli.run_blender_cli("scene.blend", "result = {}")
+
+        self.assertNotIn("Blender executable not found", str(raised.exception))
+
+    def test_temporary_script_is_removed_after_execution_error(self) -> None:
+        with (
+            mock.patch.dict(os.environ, {}, clear=True),
+            mock.patch.object(subprocess, "run", side_effect=self._execute_cli_wrapper) as run,
+            self.assertRaisesRegex(RuntimeError, "Blender error: deliberate"),
+        ):
+            blender_cli.run_blender_cli("scene.blend", "raise ValueError('deliberate')")
+        self.assertFalse(os.path.exists(os.path.dirname(run.call_args.args[0][4])))
 
     def test_repr_fallback_is_only_enabled_for_arbitrary_code(self) -> None:
         arbitrary_wrapper = blender_cli._build_cli_wrapper(
