@@ -50,6 +50,36 @@ def main(params: Params) -> Result:
         return Result(status="error", message="orthographic_scale must be greater than zero")
 
     scene = bpy.context.scene
+
+    # Resolve every fallible camera precondition before changing render or frame
+    # settings. Invalid user input should fail without leaving a half-configured
+    # scene behind.
+    camera = None
+    if params.camera_name:
+        camera = bpy.data.objects.get(params.camera_name)
+        if camera is None:
+            return Result(status="error", message="camera_name was not found: " + params.camera_name)
+        if camera.type != "CAMERA":
+            return Result(status="error", message="camera_name does not refer to a CAMERA object: " + params.camera_name)
+    else:
+        camera = scene.camera
+
+    if camera is None and not params.create_camera_if_missing:
+        return Result(
+            status="error",
+            scene=scene.name,
+            message="No scene camera is assigned. Pass camera_name or allow camera creation.",
+        )
+
+    created = False
+    if camera is None:
+        camera_data = bpy.data.cameras.new("GameCamera")
+        camera = bpy.data.objects.new("GameCamera", camera_data)
+        scene.collection.objects.link(camera)
+        camera.location = (0.0, 0.0, 10.0)
+        camera.rotation_euler = (0.0, 0.0, 0.0)
+        created = True
+
     render = scene.render
     render.resolution_x = params.width
     render.resolution_y = params.height
@@ -63,40 +93,7 @@ def main(params: Params) -> Result:
     render.use_file_extension = True
     scene.frame_start = params.frame_start
     scene.frame_end = params.frame_end
-
-    camera = None
-    if params.camera_name:
-        camera = bpy.data.objects.get(params.camera_name)
-        if camera is None:
-            return Result(status="error", message="camera_name was not found: " + params.camera_name)
-        if camera.type != "CAMERA":
-            return Result(status="error", message="camera_name does not refer to a CAMERA object: " + params.camera_name)
-        scene.camera = camera
-    else:
-        camera = scene.camera
-
-    created = False
-    if camera is None and params.create_camera_if_missing:
-        camera_data = bpy.data.cameras.new("GameCamera")
-        camera = bpy.data.objects.new("GameCamera", camera_data)
-        scene.collection.objects.link(camera)
-        camera.location = (0.0, 0.0, 10.0)
-        camera.rotation_euler = (0.0, 0.0, 0.0)
-        scene.camera = camera
-        created = True
-
-    if camera is None:
-        return Result(
-            status="error",
-            scene=scene.name,
-            width=render.resolution_x,
-            height=render.resolution_y,
-            fps=render.fps,
-            frame_start=scene.frame_start,
-            frame_end=scene.frame_end,
-            transparent=render.film_transparent,
-            message="No scene camera is assigned. Pass camera_name or allow camera creation.",
-        )
+    scene.camera = camera
 
     camera.data.type = "ORTHO"
     camera.data.ortho_scale = params.orthographic_scale
