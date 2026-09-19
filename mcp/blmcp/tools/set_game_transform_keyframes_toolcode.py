@@ -68,6 +68,18 @@ def main(params: Params) -> Result:
     if obj is None:
         return Result(status="error", message="object was not found: " + params.object_name)
 
+    if params.data_path == "rotation_euler" and obj.rotation_mode in {"QUATERNION", "AXIS_ANGLE"}:
+        return Result(
+            status="error",
+            object_name=obj.name,
+            data_path=params.data_path,
+            message=(
+                "rotation_euler cannot drive an object whose rotation_mode is "
+                + str(obj.rotation_mode)
+                + "; change rotation mode deliberately before inserting Euler keys"
+            ),
+        )
+
     current_frame = scene.frame_current
     inserted = 0
     inserted_frames: list[int] = []
