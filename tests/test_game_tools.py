@@ -157,6 +157,30 @@ class TestGameSceneTools(unittest.TestCase):
         self.assertEqual(scene.frame_end, 250)
         self.assertIsNone(scene.camera)
 
+    def test_missing_named_camera_fails_before_render_mutation(self) -> None:
+        scene = _Scene()
+        fake_bpy = _fake_bpy(scene)
+        params = ConfigureParams(
+            width=512,
+            height=512,
+            fps=24,
+            frame_start=1,
+            frame_end=24,
+            transparent=True,
+            camera_name="MissingCamera",
+            create_camera_if_missing=True,
+            orthographic_scale=4.5,
+        )
+
+        with mock.patch.dict(sys.modules, {"bpy": fake_bpy}):
+            result = configure_main(params)
+
+        self.assertEqual(result.status, "error")
+        self.assertEqual(scene.render.resolution_x, 1920)
+        self.assertEqual(scene.render.resolution_y, 1080)
+        self.assertEqual(scene.render.image_settings.file_format, "JPEG")
+        self.assertIsNone(scene.camera)
+
     def test_inspect_reports_ready_after_configuration(self) -> None:
         scene = _Scene()
         fake_bpy = _fake_bpy(scene)
