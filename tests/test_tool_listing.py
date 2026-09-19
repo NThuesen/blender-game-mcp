@@ -780,6 +780,13 @@ def _list_tools() -> list[dict[str, object]]:
     return asyncio.run(_run())
 
 
+GAME_EXTENSION_TOOL_NAMES = {
+    "configure_game_scene",
+    "get_game_frame_as_image",
+    "inspect_game_scene",
+}
+
+
 class TestToolListing(unittest.TestCase):
     """
     Checks that the live tool listing matches the frozen snapshot.
@@ -793,9 +800,20 @@ class TestToolListing(unittest.TestCase):
 
     def test_tools_match_expected(self) -> None:
         """
-        Checks that the live tool listing exactly matches ``EXPECTED_TOOLS``.
+        Checks that the upstream tool listing stays frozen while this fork adds
+        separately-tested game extension tools.
         """
-        self.assertEqual(self._tools, EXPECTED_TOOLS)
+        base_tools = [
+            tool for tool in self._tools
+            if str(tool["name"]) not in GAME_EXTENSION_TOOL_NAMES
+        ]
+        self.assertEqual(base_tools, EXPECTED_TOOLS)
+
+    def test_game_extension_tools_are_registered_once(self) -> None:
+        """Checks that every Blender Game MCP v0.1 tool is discoverable once."""
+        names = [str(tool["name"]) for tool in self._tools]
+        for name in GAME_EXTENSION_TOOL_NAMES:
+            self.assertEqual(names.count(name), 1, name)
 
     def test_runtime_docs_tools_are_paired_once_and_static_docs_remain(self) -> None:
         """Checks the runtime-doc pair and existing static docs tools are listed once."""
