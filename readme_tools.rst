@@ -10,11 +10,19 @@ The tools exposed by the MCP server.
 
 .. BEGIN TOOL LISTING
 
+\
+``configure_game_scene``
+   Configure the active Blender scene for 2D game-asset rendering.
+
 ``execute_blender_code``
    Execute Python code in the connected Blender instance.
 
 ``execute_blender_code_for_cli``
    Execute Python code in a background Blender process.
+
+``get_game_frame_as_image``
+   Render a requested animation frame and return it as a PNG image for
+   visual QA while restoring the current frame and temporary render settings.
 
 ``get_blendfile_summary_datablocks``
    Return a summary of the blend file: data-block counts, active workspace,
@@ -81,6 +89,9 @@ The tools exposed by the MCP server.
 ``get_screenshot_of_window_as_json``
    Return a JSON description of the Blender window layout, areas, active
    object, and selection.
+
+``inspect_game_scene``
+   Return a compact readiness report for PNG/RGBA game-asset rendering.
 
 ``jump_to_tab_by_name``
    Switch the active workspace tab to *name*.

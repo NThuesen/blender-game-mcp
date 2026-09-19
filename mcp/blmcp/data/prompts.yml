@@ -132,3 +132,21 @@ initial_instructions: |
     * Use the world matrix for world-space reads, not manual composition of
       location/rotation/scale.
     * The 3D cursor is a persistent world-space reference used by many operations.
+
+  # Game Asset Workflow
+
+  When the user is creating sprites, 2D animation, game VFX, or game UI assets,
+  prefer the structured game tools before arbitrary Python:
+    * inspect_game_scene - read the compact render/camera readiness state.
+    * configure_game_scene - establish resolution, FPS, frame range, PNG/RGBA,
+      transparent film and an orthographic camera.
+    * get_game_frame_as_image - render a specific frame back to the client for
+      visual QA without leaving the scene on a different frame.
+
+  For looping animation, visually review the first frame, representative quarter
+  points and the final rendered frame. Keep the canvas dimensions stable. Do not
+  treat Blender object origins or the camera center as game-engine sprite pivot
+  metadata; export-time pivot metadata is a separate concern.
+
+  Prefer typed tools for repeated game workflows. Use execute_blender_code only
+  when the structured tools cannot express the operation.
