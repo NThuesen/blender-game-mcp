@@ -60,6 +60,7 @@ class _Object:
         self.type = "CAMERA"
         self.location = (0.0, 0.0, 0.0)
         self.rotation_euler = (0.0, 0.0, 0.0)
+        self.rotation_mode = "XYZ"
         self.scale = (1.0, 1.0, 1.0)
         self.keyed: list[tuple[str, int, str]] = []
 
@@ -271,6 +272,27 @@ class TestGameSceneTools(unittest.TestCase):
             result = keyframe_main(params)
 
         self.assertEqual(result.status, "error")
+        self.assertEqual(obj.keyed, [])
+
+    def test_euler_keyframes_reject_quaternion_rotation_mode(self) -> None:
+        scene = _Scene()
+        fake_bpy = _fake_bpy(scene)
+        obj = _Object("Hero", _CameraData("Unused"))
+        obj.type = "MESH"
+        obj.rotation_mode = "QUATERNION"
+        fake_bpy.data.objects.get = lambda name: obj if name == "Hero" else None
+        params = KeyframeParams(
+            object_name="Hero",
+            data_path="rotation_euler",
+            frames=[1, 24],
+            values=[[0.0, 0.0, 0.0], [0.0, 0.0, 1.0]],
+        )
+
+        with mock.patch.dict(sys.modules, {"bpy": fake_bpy}):
+            result = keyframe_main(params)
+
+        self.assertEqual(result.status, "error")
+        self.assertIn("rotation_mode is QUATERNION", result.message)
         self.assertEqual(obj.keyed, [])
 
     def test_transform_sampling_restores_current_frame(self) -> None:
