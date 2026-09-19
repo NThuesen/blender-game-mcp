@@ -33,7 +33,7 @@ def register(mcp: FastMCP) -> None:
         """
         Sample one object's evaluated transform at selected animation frames.
 
-        Returns location, Euler rotation and scale for each requested frame,
+        Returns location, rotation mode, Euler rotation and scale for each requested frame,
         then restores the user's current frame. Use this for loop-boundary and
         timing checks without inspecting Blender's internal Action structure.
         """
