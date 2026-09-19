@@ -61,6 +61,7 @@ def main(params: Params) -> Result:
                 {
                     "frame": frame,
                     "location": _vector(obj.location),
+                    "rotation_mode": str(obj.rotation_mode),
                     "rotation_euler": _vector(obj.rotation_euler),
                     "scale": _vector(obj.scale),
                 }
