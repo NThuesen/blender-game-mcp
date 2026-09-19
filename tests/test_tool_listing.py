@@ -815,6 +815,50 @@ class TestToolListing(unittest.TestCase):
         for name in GAME_EXTENSION_TOOL_NAMES:
             self.assertEqual(names.count(name), 1, name)
 
+    def test_game_extension_schemas_are_stable(self) -> None:
+        """Pins the public arguments of the v0.1 game tools."""
+        tools = {
+            str(tool["name"]): tool
+            for tool in self._tools
+            if str(tool["name"]) in GAME_EXTENSION_TOOL_NAMES
+        }
+        self.assertEqual(
+            tools["inspect_game_scene"]["inputSchema"],
+            {
+                "properties": {},
+                "title": "inspect_game_sceneArguments",
+                "type": "object",
+            },
+        )
+        self.assertEqual(
+            tools["get_game_frame_as_image"]["inputSchema"],
+            {
+                "properties": {
+                    "frame": {"title": "Frame", "type": "integer"},
+                    "max_dimension": {
+                        "default": 512,
+                        "title": "Max Dimension",
+                        "type": "integer",
+                    },
+                },
+                "required": ["frame"],
+                "title": "get_game_frame_as_imageArguments",
+                "type": "object",
+            },
+        )
+        configure_schema = tools["configure_game_scene"]["inputSchema"]
+        self.assertEqual(configure_schema["title"], "configure_game_sceneArguments")
+        properties = configure_schema["properties"]
+        self.assertEqual(properties["width"]["default"], 512)
+        self.assertEqual(properties["height"]["default"], 512)
+        self.assertEqual(properties["fps"]["default"], 24)
+        self.assertEqual(properties["frame_start"]["default"], 1)
+        self.assertEqual(properties["frame_end"]["default"], 24)
+        self.assertEqual(properties["transparent"]["default"], True)
+        self.assertEqual(properties["create_camera_if_missing"]["default"], True)
+        self.assertEqual(properties["orthographic_scale"]["default"], 5.0)
+        self.assertEqual(properties["camera_name"]["default"], None)
+
     def test_runtime_docs_tools_are_paired_once_and_static_docs_remain(self) -> None:
         """Checks the runtime-doc pair and existing static docs tools are listed once."""
         names = [str(tool["name"]) for tool in self._tools]
