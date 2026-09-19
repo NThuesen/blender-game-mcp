@@ -784,6 +784,8 @@ GAME_EXTENSION_TOOL_NAMES = {
     "configure_game_scene",
     "get_game_frame_as_image",
     "inspect_game_scene",
+    "inspect_game_transform_frames",
+    "set_game_transform_keyframes",
 }
 
 
