@@ -69,6 +69,8 @@ def main(params: Params) -> Result:
         return Result(status="error", message="object was not found: " + params.object_name)
 
     current_frame = scene.frame_current
+    inserted = 0
+    inserted_frames: list[int] = []
     try:
         for frame, value in zip(params.frames, params.values, strict=True):
             setattr(obj, params.data_path, tuple(float(component) for component in value))
@@ -82,8 +84,12 @@ def main(params: Params) -> Result:
                     status="error",
                     object_name=obj.name,
                     data_path=params.data_path,
+                    inserted=inserted,
+                    frames=inserted_frames,
                     message="Blender refused keyframe insertion at frame {:d}".format(frame),
                 )
+            inserted += 1
+            inserted_frames.append(frame)
     finally:
         scene.frame_set(current_frame)
 
@@ -91,6 +97,6 @@ def main(params: Params) -> Result:
         status="ok",
         object_name=obj.name,
         data_path=params.data_path,
-        inserted=len(params.frames),
-        frames=list(params.frames),
+        inserted=inserted,
+        frames=inserted_frames,
     )
