@@ -60,7 +60,10 @@ def main(params: Params) -> Result:
         if camera is None:
             return Result(status="error", message="camera_name was not found: " + params.camera_name)
         if camera.type != "CAMERA":
-            return Result(status="error", message="camera_name does not refer to a CAMERA object: " + params.camera_name)
+            return Result(
+                status="error",
+                message="camera_name does not refer to a CAMERA object: " + params.camera_name,
+            )
     else:
         camera = scene.camera
 
