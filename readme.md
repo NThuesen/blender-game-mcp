@@ -1,4 +1,20 @@
-# Blender MCP
+# Blender Game MCP
+
+## Game-asset fork
+
+This fork extends the Blender Lab / bpy.dev MCP workflow for agentic game-asset
+creation. The first game layer targets Blender 5.2 LTS and adds structured scene
+setup plus visual frame review while retaining the upstream live and headless
+execution model.
+
+Current v0.1 tools:
+
+- `configure_game_scene`
+- `inspect_game_scene`
+- `get_game_frame_as_image`
+
+See [GAME_MCP_ROADMAP.md](GAME_MCP_ROADMAP.md) and
+[docs/GAME_ASSETS.md](docs/GAME_ASSETS.md).
 
 ## Enhanced MCP developer preview
 
