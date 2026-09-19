@@ -13,10 +13,19 @@ game-asset workflow on top of Blender 5.2 LTS.
 - game-specific agent guidance
 - regression tests for the structured scene setup
 
-## v0.2 - animation tools
+## v0.2 - animation tools (in progress)
 
-- typed keyframe helpers for transform, shape keys and common 2D deformation
-- loop-boundary inspection
+Implemented on `game-mcp-v0.2-animation`:
+
+- `set_game_transform_keyframes` for bounded batch location, Euler rotation
+  and scale keys
+- `inspect_game_transform_frames` for evaluated loop/timing samples with
+  current-frame restoration
+
+Still planned:
+
+- shape-key helpers for squash/stretch and other 2D deformation
+- interpolation/easing controls validated against Blender 5.2
 - animation checkpoints before broad edits
 - Grease Pencil 5.2 helpers where they materially improve 2D workflows
 

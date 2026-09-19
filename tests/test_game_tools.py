@@ -20,6 +20,10 @@ if _MCP_DIR not in sys.path:
 from blmcp.tools.configure_game_scene_toolcode import Params as ConfigureParams
 from blmcp.tools.configure_game_scene_toolcode import main as configure_main
 from blmcp.tools.inspect_game_scene_toolcode import main as inspect_main
+from blmcp.tools.inspect_game_transform_frames_toolcode import Params as InspectFramesParams
+from blmcp.tools.inspect_game_transform_frames_toolcode import main as inspect_frames_main
+from blmcp.tools.set_game_transform_keyframes_toolcode import Params as KeyframeParams
+from blmcp.tools.set_game_transform_keyframes_toolcode import main as keyframe_main
 
 
 class _ImageSettings:
@@ -56,6 +60,13 @@ class _Object:
         self.type = "CAMERA"
         self.location = (0.0, 0.0, 0.0)
         self.rotation_euler = (0.0, 0.0, 0.0)
+        self.rotation_mode = "XYZ"
+        self.scale = (1.0, 1.0, 1.0)
+        self.keyed: list[tuple[str, int, str]] = []
+
+    def keyframe_insert(self, data_path: str, frame: int, group: str) -> bool:
+        self.keyed.append((data_path, frame, group))
+        return True
 
 
 class _ObjectCollection:
@@ -75,6 +86,9 @@ class _Scene:
         self.frame_current = 1
         self.camera = None
         self.collection = types.SimpleNamespace(objects=_ObjectCollection())
+
+    def frame_set(self, frame: int) -> None:
+        self.frame_current = frame
 
 
 def _fake_bpy(scene: _Scene) -> types.SimpleNamespace:
@@ -207,6 +221,97 @@ class TestGameSceneTools(unittest.TestCase):
         self.assertEqual(inspected.camera_type, "ORTHO")
         self.assertEqual(inspected.width, 256)
         self.assertEqual(inspected.fps, 12)
+
+    def test_transform_keyframes_are_batched_and_frame_is_restored(self) -> None:
+        scene = _Scene()
+        fake_bpy = _fake_bpy(scene)
+        obj = _Object("Hero", _CameraData("Unused"))
+        obj.type = "MESH"
+        fake_bpy.data.objects.get = lambda name: obj if name == "Hero" else None
+        scene.frame_current = 7
+        params = KeyframeParams(
+            object_name="Hero",
+            data_path="scale",
+            frames=[1, 12, 24],
+            values=[
+                [1.0, 1.0, 1.0],
+                [1.1, 0.9, 1.0],
+                [1.0, 1.0, 1.0],
+            ],
+        )
+
+        with mock.patch.dict(sys.modules, {"bpy": fake_bpy}):
+            result = keyframe_main(params)
+
+        self.assertEqual(result.status, "ok")
+        self.assertEqual(result.inserted, 3)
+        self.assertEqual(
+            obj.keyed,
+            [
+                ("scale", 1, "Game"),
+                ("scale", 12, "Game"),
+                ("scale", 24, "Game"),
+            ],
+        )
+        self.assertEqual(scene.frame_current, 7)
+
+    def test_transform_keyframes_reject_duplicates_before_writes(self) -> None:
+        scene = _Scene()
+        fake_bpy = _fake_bpy(scene)
+        obj = _Object("Hero", _CameraData("Unused"))
+        obj.type = "MESH"
+        fake_bpy.data.objects.get = lambda name: obj if name == "Hero" else None
+        params = KeyframeParams(
+            object_name="Hero",
+            data_path="location",
+            frames=[1, 1],
+            values=[[0.0, 0.0, 0.0], [1.0, 0.0, 0.0]],
+        )
+
+        with mock.patch.dict(sys.modules, {"bpy": fake_bpy}):
+            result = keyframe_main(params)
+
+        self.assertEqual(result.status, "error")
+        self.assertEqual(obj.keyed, [])
+
+    def test_euler_keyframes_reject_quaternion_rotation_mode(self) -> None:
+        scene = _Scene()
+        fake_bpy = _fake_bpy(scene)
+        obj = _Object("Hero", _CameraData("Unused"))
+        obj.type = "MESH"
+        obj.rotation_mode = "QUATERNION"
+        fake_bpy.data.objects.get = lambda name: obj if name == "Hero" else None
+        params = KeyframeParams(
+            object_name="Hero",
+            data_path="rotation_euler",
+            frames=[1, 24],
+            values=[[0.0, 0.0, 0.0], [0.0, 0.0, 1.0]],
+        )
+
+        with mock.patch.dict(sys.modules, {"bpy": fake_bpy}):
+            result = keyframe_main(params)
+
+        self.assertEqual(result.status, "error")
+        self.assertIn("rotation_mode is QUATERNION", result.message)
+        self.assertEqual(obj.keyed, [])
+
+    def test_transform_sampling_restores_current_frame(self) -> None:
+        scene = _Scene()
+        fake_bpy = _fake_bpy(scene)
+        obj = _Object("Hero", _CameraData("Unused"))
+        obj.type = "MESH"
+        fake_bpy.data.objects.get = lambda name: obj if name == "Hero" else None
+        scene.frame_current = 8
+
+        with mock.patch.dict(sys.modules, {"bpy": fake_bpy}):
+            result = inspect_frames_main(
+                InspectFramesParams(object_name="Hero", frames=[1, 12, 24])
+            )
+
+        self.assertEqual(result.status, "ok")
+        self.assertEqual([sample["frame"] for sample in result.samples], [1, 12, 24])
+        self.assertEqual(scene.frame_current, 8)
+        self.assertEqual(result.restored_frame, 8)
 
     def test_inspect_warns_for_default_non_game_settings(self) -> None:
         scene = _Scene()

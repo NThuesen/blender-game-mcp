@@ -784,6 +784,8 @@ GAME_EXTENSION_TOOL_NAMES = {
     "configure_game_scene",
     "get_game_frame_as_image",
     "inspect_game_scene",
+    "inspect_game_transform_frames",
+    "set_game_transform_keyframes",
 }
 
 
@@ -858,6 +860,30 @@ class TestToolListing(unittest.TestCase):
         self.assertEqual(properties["create_camera_if_missing"]["default"], True)
         self.assertEqual(properties["orthographic_scale"]["default"], 5.0)
         self.assertEqual(properties["camera_name"]["default"], None)
+
+        inspect_transform_schema = tools["inspect_game_transform_frames"]["inputSchema"]
+        self.assertEqual(
+            inspect_transform_schema["required"],
+            ["object_name", "frames"],
+        )
+        self.assertEqual(
+            inspect_transform_schema["properties"]["frames"]["items"]["type"],
+            "integer",
+        )
+
+        keyframe_schema = tools["set_game_transform_keyframes"]["inputSchema"]
+        self.assertEqual(
+            keyframe_schema["required"],
+            ["object_name", "data_path", "frames", "values"],
+        )
+        self.assertEqual(
+            keyframe_schema["properties"]["frames"]["items"]["type"],
+            "integer",
+        )
+        self.assertEqual(
+            keyframe_schema["properties"]["values"]["items"]["items"]["type"],
+            "number",
+        )
 
     def test_runtime_docs_tools_are_paired_once_and_static_docs_remain(self) -> None:
         """Checks the runtime-doc pair and existing static docs tools are listed once."""

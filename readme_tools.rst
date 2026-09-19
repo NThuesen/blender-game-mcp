@@ -93,6 +93,10 @@ The tools exposed by the MCP server.
 ``inspect_game_scene``
    Return a compact readiness report for PNG/RGBA game-asset rendering.
 
+``inspect_game_transform_frames``
+   Sample one object's evaluated transform at selected animation frames and
+   restore the current frame afterwards.
+
 ``jump_to_tab_by_name``
    Switch the active workspace tab to *name*.
 
@@ -111,6 +115,10 @@ The tools exposed by the MCP server.
 
 ``render_viewport_to_path``
    Render the current scene to *output_path* using current render settings.
+
+``set_game_transform_keyframes``
+   Insert bounded batches of location, Euler rotation or scale keyframes for
+   game animation.
 
 ``search_api_docs``
    Full-text search over the bundled Blender Python API reference.
