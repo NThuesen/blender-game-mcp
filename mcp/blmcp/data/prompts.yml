@@ -142,6 +142,10 @@ initial_instructions: |
       transparent film and an orthographic camera.
     * get_game_frame_as_image - render a specific frame back to the client for
       visual QA without leaving the scene on a different frame.
+    * set_game_transform_keyframes - batch location, rotation_euler, or scale
+      keyframes without arbitrary Python.
+    * inspect_game_transform_frames - sample evaluated transforms at selected
+      frames and restore the user's current frame.
 
   For looping animation, visually review the first frame, representative quarter
   points and the final rendered frame. Keep the canvas dimensions stable. Do not
