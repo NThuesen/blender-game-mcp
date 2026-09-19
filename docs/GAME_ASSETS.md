@@ -22,6 +22,17 @@ For 2D sprite-style output, default to:
 Do not infer that PNG alone contains alpha. Check `color_mode == "RGBA"` and
 `film_transparent == true`.
 
+## Structured transform animation
+
+For common sprite/cut-out motion, prefer `set_game_transform_keyframes` over
+arbitrary Python. The v0.2 tool intentionally supports only location,
+rotation_euler and scale and requires explicit frame/value batches.
+
+Use `inspect_game_transform_frames` after broad changes to sample the
+evaluated transforms at important frames while restoring the user's current
+frame. This avoids depending on Blender's internal Action representation just
+to verify timing and loop boundaries.
+
 ## Loop review
 
 For a looping animation, inspect at least:
