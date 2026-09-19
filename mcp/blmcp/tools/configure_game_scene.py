@@ -59,4 +59,4 @@ def register(mcp: FastMCP) -> None:
             orthographic_scale=orthographic_scale,
         )
         code = toolcode_format_call(_TOOL_CALL, p)
-        return send_code(code, strict_json=True, sandbox=False)
+        return send_code(code, strict_json=True)

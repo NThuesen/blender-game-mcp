@@ -142,6 +142,9 @@ initial_instructions: |
       transparent film and an orthographic camera.
     * get_game_frame_as_image - render a specific frame back to the client for
       visual QA without leaving the scene on a different frame.
+    * show_game_frame_preview - render a requested frame into the inline MCP Apps
+      viewer. Prefer this for requests such as "show frame 1", "preview frame 1",
+      "let me see the render", or visual inspection of an animation pose.
 
   For looping animation, visually review the first frame, representative quarter
   points and the final rendered frame. Keep the canvas dimensions stable. Do not

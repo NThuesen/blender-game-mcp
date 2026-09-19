@@ -34,4 +34,4 @@ def register(mcp: FastMCP) -> None:
         rendering or after broad edits instead of dumping the whole scene.
         """
         code = toolcode_format_call(_TOOL_CALL, None)
-        return send_code(code, strict_json=True, sandbox=False)
+        return send_code(code, strict_json=True)

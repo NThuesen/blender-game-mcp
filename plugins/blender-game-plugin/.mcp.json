@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "blender-game": {
+      "command": "C:\\Users\\nicho\\.local\\bin\\uv.exe",
+      "args": [
+        "--directory",
+        "C:\\Users\\nicho\\Documents\\blender-game-mcp\\mcp",
+        "run",
+        "blender-mcp"
+      ],
+      "cwd": "C:\\Users\\nicho\\Documents\\blender-game-mcp\\mcp"
+    }
+  }
+}

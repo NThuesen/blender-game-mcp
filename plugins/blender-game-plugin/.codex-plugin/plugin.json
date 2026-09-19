@@ -1,0 +1,23 @@
+{
+  "name": "blender-game-plugin",
+  "version": "0.1.0",
+  "description": "Local Blender game and sprite workflow tools for ChatGPT.",
+  "author": {
+    "name": "Local developer"
+  },
+  "skills": "./skills/",
+  "apps": "./.app.json",
+  "interface": {
+    "displayName": "Blender Game",
+    "shortDescription": "Inspect and configure Blender sprite scenes.",
+    "longDescription": "Connects normal ChatGPT chats on this desktop to the repository's local Blender MCP server for structured game-scene inspection, PNG/RGBA sprite setup, and visual frame QA.",
+    "developerName": "Local developer",
+    "category": "Developer Tools",
+    "capabilities": ["Interactive", "Write"],
+    "defaultPrompt": [
+      "Inspect my Blender game scene and summarize its current state.",
+      "Configure this scene for PNG/RGBA sprite rendering.",
+      "Render the current game frame and visually check it."
+    ]
+  }
+}

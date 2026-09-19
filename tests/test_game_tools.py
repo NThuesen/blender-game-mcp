@@ -19,6 +19,8 @@ if _MCP_DIR not in sys.path:
 
 from blmcp.tools.configure_game_scene_toolcode import Params as ConfigureParams
 from blmcp.tools.configure_game_scene_toolcode import main as configure_main
+from blmcp.tools.get_game_frame_as_image_toolcode import Params as FrameParams
+from blmcp.tools.get_game_frame_as_image_toolcode import main as render_frame_main
 from blmcp.tools.inspect_game_scene_toolcode import main as inspect_main
 
 
@@ -31,6 +33,7 @@ class _ImageSettings:
 
 class _Render:
     def __init__(self) -> None:
+        self.filepath = "//original.png"
         self.resolution_x = 1920
         self.resolution_y = 1080
         self.resolution_percentage = 50
@@ -76,6 +79,9 @@ class _Scene:
         self.camera = None
         self.collection = types.SimpleNamespace(objects=_ObjectCollection())
 
+    def frame_set(self, frame: int) -> None:
+        self.frame_current = frame
+
 
 def _fake_bpy(scene: _Scene) -> types.SimpleNamespace:
     objects_by_name: dict[str, _Object] = {}
@@ -92,15 +98,93 @@ def _fake_bpy(scene: _Scene) -> types.SimpleNamespace:
         context=types.SimpleNamespace(scene=scene),
         data=types.SimpleNamespace(
             cameras=types.SimpleNamespace(new=camera_new),
+            images={
+                "Render Result": types.SimpleNamespace(
+                    save_render=lambda *, filepath, scene: None,
+                ),
+            },
             objects=types.SimpleNamespace(
                 new=object_new,
                 get=objects_by_name.get,
             ),
         ),
+        ops=types.SimpleNamespace(
+            render=types.SimpleNamespace(render=lambda *, write_still: None),
+        ),
     )
 
 
 class TestGameSceneTools(unittest.TestCase):
+    def test_frame_render_restores_frame_and_render_settings(self) -> None:
+        scene = _Scene()
+        scene.frame_current = 17
+        fake_bpy = _fake_bpy(scene)
+        original = (
+            scene.frame_current,
+            scene.render.filepath,
+            scene.render.resolution_x,
+            scene.render.resolution_y,
+            scene.render.resolution_percentage,
+            scene.render.image_settings.file_format,
+            scene.render.image_settings.color_mode,
+            scene.render.image_settings.color_depth,
+            scene.render.use_file_extension,
+        )
+
+        with mock.patch.dict(sys.modules, {"bpy": fake_bpy}):
+            result = render_frame_main(FrameParams(frame=24, max_dimension=512, output_path="preview.png"))
+
+        self.assertEqual(result.status, "ok")
+        self.assertEqual((result.width, result.height), (512, 288))
+        restored = (
+            scene.frame_current,
+            scene.render.filepath,
+            scene.render.resolution_x,
+            scene.render.resolution_y,
+            scene.render.resolution_percentage,
+            scene.render.image_settings.file_format,
+            scene.render.image_settings.color_mode,
+            scene.render.image_settings.color_depth,
+            scene.render.use_file_extension,
+        )
+        self.assertEqual(restored, original)
+
+    def test_frame_render_rejects_out_of_range_frame_without_mutation(self) -> None:
+        scene = _Scene()
+        scene.frame_current = 9
+        fake_bpy = _fake_bpy(scene)
+
+        with mock.patch.dict(sys.modules, {"bpy": fake_bpy}):
+            result = render_frame_main(FrameParams(frame=251, max_dimension=512, output_path="preview.png"))
+
+        self.assertEqual(result.status, "error")
+        self.assertIn("outside the active scene frame range", str(result.message))
+        self.assertEqual(scene.frame_current, 9)
+        self.assertEqual(scene.render.filepath, "//original.png")
+        self.assertEqual(scene.render.resolution_percentage, 50)
+
+    def test_frame_render_restores_state_when_blender_render_fails(self) -> None:
+        scene = _Scene()
+        scene.frame_current = 11
+        fake_bpy = _fake_bpy(scene)
+
+        def fail_render(*, write_still: bool) -> None:
+            self.assertFalse(write_still)
+            raise RuntimeError("render failed")
+
+        fake_bpy.ops.render.render = fail_render
+        with mock.patch.dict(sys.modules, {"bpy": fake_bpy}):
+            with self.assertRaisesRegex(RuntimeError, "render failed"):
+                render_frame_main(FrameParams(frame=12, max_dimension=256, output_path="preview.png"))
+
+        self.assertEqual(scene.frame_current, 11)
+        self.assertEqual(scene.render.filepath, "//original.png")
+        self.assertEqual((scene.render.resolution_x, scene.render.resolution_y), (1920, 1080))
+        self.assertEqual(scene.render.resolution_percentage, 50)
+        self.assertEqual(scene.render.image_settings.file_format, "JPEG")
+        self.assertEqual(scene.render.image_settings.color_mode, "RGB")
+        self.assertFalse(scene.render.use_file_extension)
+
     def test_configure_creates_orthographic_game_camera(self) -> None:
         scene = _Scene()
         fake_bpy = _fake_bpy(scene)

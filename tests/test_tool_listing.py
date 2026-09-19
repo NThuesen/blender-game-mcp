@@ -784,6 +784,7 @@ GAME_EXTENSION_TOOL_NAMES = {
     "configure_game_scene",
     "get_game_frame_as_image",
     "inspect_game_scene",
+    "show_game_frame_preview",
 }
 
 
@@ -843,6 +844,22 @@ class TestToolListing(unittest.TestCase):
                 },
                 "required": ["frame"],
                 "title": "get_game_frame_as_imageArguments",
+                "type": "object",
+            },
+        )
+        self.assertEqual(
+            tools["show_game_frame_preview"]["inputSchema"],
+            {
+                "properties": {
+                    "frame": {"title": "Frame", "type": "integer"},
+                    "max_dimension": {
+                        "default": 512,
+                        "title": "Max Dimension",
+                        "type": "integer",
+                    },
+                },
+                "required": ["frame"],
+                "title": "show_game_frame_previewArguments",
                 "type": "object",
             },
         )

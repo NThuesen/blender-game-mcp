@@ -1,0 +1,8 @@
+﻿{
+  "apps": {
+    "blender-game": {
+      "id": "asdk_app_6aadf8a4958081918a7bb61afe6493c3",
+      "required": true
+    }
+  }
+}
